@@ -1,0 +1,165 @@
+<post date="2010-06-11" title="Benchmarking Zend Server CE with Joomla!" sub="Boost the performance of Joomla! with Zend Server" img="joomla.jpg">
+
+<p><strong>UPDATE:</strong> I implemented a new cache plugin for Joomla! 3 and Zend Server 6, you can check it out <a href="https://github.com/ezimuel/ZendServer_Joomla_Adapter">here</a>.</p>
+
+<p><a href="http://www.zend.com/en/products/server-ce/index" target="_blank">Zend Server CE</a> is the Community Edition of the PHP application server by <a href="http://www.zend.com" target="_blank">Zend Technologies</a>. It's a free environment that can be used to run PHP applications using additional features compared to the PHP.net version. Some of these features are:</p>
+
+<ul>
+	<li>Zend Optimizer+, a PHP byte code accelerator;</li>
+	<li>Zend Data Cache, a data caching system for PHP.</li>
+</ul>
+
+<p>Using the Zend Optimizer+ we can speed up the execution of a PHP application without any change on the code. Basically the Optimizer+ is a caching system for the bytecode generated from the PHP interpreter.
+The Zend Data Cache is a caching system for PHP and can be used to cache variables, objects, etc. This means that you have to modify your code to use this cache. However, the change of the PHP code is very simple and limited. For more info about the Zend Data Cache we suggest to read the White Paper "<a href="http://www.zend.com/topics/Zend-Server-Data-Caching-Whitepaper-0106-T-WP-R2-EN.pdf" target="_blank">A pratical guide to data caching with Zend Server</a>" by <i>Shahar Evron</i>, Product Manager of Zend Technologies.</p>
+
+<p>Basically using Zend Server CE we can speed up the execution of a PHP application but the question is how much faster? The answer depends on the PHP application and compared with what?</p>
+
+<p>In this post I run a benchmark of <a href="http://www.joomla.org/" target="_blank">Joomla!</a>, the famous CMS written in PHP, using Zend Server CE vs. APC and Memcached. To run this benchmark I worked together with Renato Salvatori of <a href="http://www.cost.it/" target="_blank">Cost</a>, an IT company specialized in Joomla!.</p>
+
+<p>In details, we run the benchmark into two phases:</p>
+
+<ol>
+	<li>using the Zend Optimizer+ of Zend Server CE vs. APC;</li>
+	<li>using the caching mechanism of Joomla! on the following backends: File, Memcached, APC and Zend Server CE (using File and Shared Memory).</li>
+</ol>
+
+<p>In order to use the Joomla! caching with Zend Server we used a plugin written by me and Renato Salvatori, <a href="#plugin">you can download it below in the post</a>.</p>
+
+<h2>Benchmark methodology</h2>
+
+<p>We used the default installation of Joomla! 1.5.17 using the example data for the content of the site. We tested the home page of Joomla! using Apache Benchmark (ab) with 100 requestes and 10 concurrency users (-n 100 -c 10). We run each experiment 6 times and we took the average of the results. We measured the <em>time per request</em> (mean across all the concurrent requests in ms) and the <em>transfer rate</em> (Kbyte/sec).</p>
+
+<p>All the experiments reported in this post have been executed using a CPU Intel Core 2 at 2.10 Ghz with 2 GB of RAM running Gnu/Linux OS with kernel 2.6.28 . We used the following software configuration: Zend Server 5 CE, Apache 2.2.11, PHP 5.3.2, Joomla! 1.5.17, Memcached 1.4.5, APC 3.1.3p1, MySQL 5.0.45.</p>
+
+<h2>APC vs Zend Optimizer+</h2>
+
+<p>In the first step of the experiment we run the benchmark with the caching of Joomla! disabled. We tested the response time of the home page with and without the bytecode accelerator of Zend Optimizer+ and APC. We reported the results in Table 1.</p>
+
+<table border="1" width="100%">
+<tbody>
+<tr>
+<td width="50%"></td>
+<td width="25%" align="right" valign="bottom"><strong><small>time per request, mean across all concurrent requests (ms)</small></strong></td>
+<td width="25%" align="right" valign="bottom"><strong><small>transfer rate (Kbyte/sec)</small></strong></td>
+</tr>
+<tr>
+<td>No Cache, No Optimizer+, No APC</td>
+<td align="right">114,017</td>
+<td align="right">286,87</td>
+</tr>
+<tr>
+<td>No Cache, APC</td>
+<td align="right">80,135</td>
+<td align="right">408,27</td>
+</tr>
+<tr>
+<td>No Cache, Optimizer+</td>
+<td align="right">71,019</td>
+<td align="right">460,70</td>
+</tr>
+</tbody></table>
+<p align="center"><b>Table 1</b>: Response times of Joomla! using PHP accelerators</p>
+
+
+<p>The results show that Zend Optimizer+ is the faster one. Using Zend Server 5 CE Joomla! runs 60% faster of the PHP.net (with no accelerator) and 13% faster of APC. We reported the transfer rate  of the results in Figure 1 (high value means better performance).</p>
+
+<p align="center"><img src="/img/post/joomla_benchmark.jpg" alt="Figure1" title="Figure 1"/><br /><b>Figure 1</b>: Transfer rate (Kbyte/sec)</p>
+
+<h2>Data cache experiment</h2>
+
+<p>In the second step of the experiment we run the benchmark using the caching plugins of Joomla! on the following caching systems: File, APC, Memcached, Zend Server CE (file), Zend Server CE (shared memory). We split the experiment into two steps: the first using the APC byte code accelerator, and the second using the Zend Optimizer+ code accelerator. Below we reported the results of this experiment (Table 2 and 3).</p>
+
+<table border="1" width="100%">
+<tbody>
+<tr>
+<td width="50%"></td>
+<td width="25%" align="right" valign="bottom"><b><small>time per request, mean across all concurrent requests (ms)</small></b></td>
+<td width="25%" align="right" valign="bottom"><b><small>transfer rate (Kbyte/sec)</small></b></td>
+</tr>
+<tr>
+<td>Cache: File</td>
+<td align="right">53,383</td>
+<td align="right">612,91</td>
+</tr>
+<tr>
+<td>Cache: APC</td>
+<td align="right">49,275</td>
+<td align="right">664,23</td>
+</tr>
+<tr>
+<td>Cache: Memcached</td>
+<td align="right">50,507</td>
+<td align="right">647,73</td>
+</tr>
+<tr>
+<td>Cache: ZendServer file</td>
+<td align="right">51,541</td>
+<td align="right">634,51</td>
+</tr>
+<tr>
+<td>Cache: ZendServer shm</td>
+<td align="right">46,527</td>
+<td align="right">703,50</td>
+</tr>
+</tbody>
+</table>
+<p align="center"><b>Table 2:</b> Results with APC enabled, and Zend Optimizer+ disabled</p>
+
+<p>As you can see the best result, in term of performance, comes with the usage of Zend Server CE (with shared memory caching system, shm). Zend Server CE is 14% faster than File, 9% faster than Memcached, and 6% faster than APC.</p>
+
+<table border="1" width="100%">
+<tbody>
+<tr>
+<td width="50%"></td>
+<td width="25%" align="right" valign="bottom"><b><small>time per request, mean across all concurrent requests (ms)</small></b></td>
+<td width="25%" align="right" valign="bottom"><b><small>transfer rate (Kbyte/sec)</small></b></td>
+</tr>
+<tr>
+<td>Cache: File</td>
+<td align="right">40,716</td>
+<td align="right">803,54</td>
+</tr>
+<tr>
+<td>Cache: APC</td>
+<td align="right">38,898</td>
+<td align="right">841,13</td>
+</tr>
+<tr>
+<td>Cache: Memcached</td>
+<td align="right">39,058</td>
+<td align="right">837,90</td>
+</tr>
+<tr>
+<td>Cache: ZendServer file</td>
+<td align="right">39,102</td>
+<td align="right">836,95</td>
+</tr>
+<tr>
+<td>Cache: ZendServer shm</td>
+<td align="right">36,531</td>
+<td align="right">895,79</td>
+</tr>
+</tbody>
+</table>
+<p align="center"><b>Table 3:</b> Results with APC disabled, Zend Optimizer+ enabled</p>
+
+<p>The same results comes with Zend Optimizer+ enabled and APC disabled. The faster caching system is Zend Server CE with shared memory. Zend Server CE is 11% faster than File, 7% faster than Memcached, and 6% faster than APC.
+If we compare the data cache results using APC or Zend Optimizer+ we discover that the best results comes with Zend Optimizer+, the data caching system of Joomla! runs faster of 35% compared with APC (Figure 2, high value means better performance).</p>
+
+<p align="center"><img src="/img/post/joomla_benchmark2.jpg" alt="Figure 2" /><br /><strong>Figure 2</strong>: Transfer rate (Kbyte/sec)</p>
+
+<p>Summarizing, using the Zend Optimizer+ and the Data Cache of Zend Server CE you can speed up the execution of Joomla! from 60% to 300% compared with PHP.net (with no accelerator) and from 13% to 35% compared with APC.</p>
+
+<h2>The Joomla! caching plugin for Zend Server CE</h2>
+
+<p>In order to use the data caching of Zend Server CE with Joomla! you have to install the plugin <b>joomla_zendserver.zip</b>. <a href="https://github.com/ezimuel/ZS_Cache_Adapter_Joomla15">You can download it here.</a>
+The installation of this new plugin is easy, you have only to unpack the <strong>zendserver.tar.gz</strong> file and copy the files <strong>zendserver_disk.php</strong> and <strong>zendserver_shm.php</strong> in the folder libraries/joomla/cache/storage/ of Joomla!.
+After that you can choose the cache handler Zendserver_disk and Zendserver_shm from the System tab of the Global Configuration menu of the Administration interface of Joomla!.</p>
+
+<h2>Conclusion</h2>
+
+<p>In this post we showed that Zend Server CE is the faster PHP stack to run Joomla! applications. The benefits, in term of performance, are great: up to <b>35% faster of APC</b> and up to <b>300% of PHP.net (with no accelerators)</b>.
+If you are interested in other benchmarks of Zend Server CE you can read the White Paper "<a href="http://www.zend.com/topics/Optimizing-Drupal-Performance-Zend-Acquia-Whitepaper-Feb2010v2.pdf" target="_blank">Optimizing Drupal Performance</a>" by Acquia and Zend Technologies.
+In the future, I would like to run more benchmarks on Zend Server CE using other PHP open source softwares. If you have any proposals please add a comment, thanks.</p>
+
+</post>

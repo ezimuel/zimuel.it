@@ -1,0 +1,199 @@
+<post date="2016-10-31" img="authenticated-encryption.jpg" title="Authenticated Encryption in PHP 7.1" sub="How to use of the GCM and CCM modes of OpenSSL">
+
+<p>One of the missing feature of the <a href="http://php.net/manual/en/book.openssl.php">OpenSSL</a> extension for PHP was the support for <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">Authenticated Encryption</a>. If you are wondering why the authentication is important for encryption, I suggest to have a look at <a href="http://www.zimuel.it/slides/zendcon2016/encrypt">this presentation</a>.</p>
+<p>The issue with OpenSSL was related to the API design of the functions <a href="http://php.net/manual/en/function.openssl-encrypt.php">openssl_encrypt</a> and <a href="http://php.net/manual/en/function.openssl-decrypt.php">openssl_decrypt</a> that didn't return the <i>authentication hash</i> of the encrypted data.</p>
+
+<pre><code class="php">string openssl_encrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = &quot;&quot; ]
+)
+
+string openssl_decrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = &quot;&quot; ]
+)
+</code></pre>
+
+<p>The output of <i>openssl_encrypt</i> is the encrypted data, without the authentication hash. This hash is required to decrypt a message, because the algorithm needs to authenticate the data before proceed with decryption.</p>
+
+<p>This issue will be solved from PHP 7.1 thanks to <a href="https://wiki.php.net/rfc/openssl_aead">RFC openssl_aead</a> proposed by Jakub Zelenka. The idea is to add some optional parameters to the previous OpenSSL functions. The new API is reported below:</p>
+
+<pre><code class="php">string openssl_encrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = &quot;&quot; ],
+    [ string &amp;$tag = NULL ],
+    [ string $aad = &quot;&quot; ],
+    [ int $tag_length = 16 ]
+)
+
+string openssl_decrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = &quot;&quot; ],
+    [ string $tag = &quot;&quot; ],
+    [ string $aad = &quot;&quot; ]
+)
+</code></pre>
+
+<p>The <strong>authentication hash</strong> is stored in the <strong>$tag</strong> variable. This value is filled by the <i>openssl_encrypt</i> function and returned as reference.</p>
+
+<p>The other optional parameter <strong>$aad</strong> represents <strong>additional authentication data</strong> that you could use to protect the message against alterations, without the encryption part. For instance, if you need to encrypt an email leaving the header information in plaintext, like the sender and the receiver, you can pass the header in <i>$aad</i>.</p>
+
+<p>The last optional parameter <strong>$tag_length</strong> is the length in bytes of the hash value, that is 16 by default. This value is related to the encryption algorithm used. I will give some details on it later.</p>
+
+<p>To decrypt an authenticated message, you need to pass the <i>$tag</i> value to <i>openssl_decrypt</i> and optionally the additional authenticated data (<i>$aad</i>).</p>
+
+<p>Until PHP 7.1 will not be available, you can test this new feature using a Release Candidate version of PHP 7.1, for instance <a href="http://php.net/archive/2016.php#id2016-10-27-1">7.1.0RC05</a>.</p>
+
+<p>The OpenSSL extension provides the support for two authenticated encryption algorithm: <a href="https://en.wikipedia.org/wiki/Galois/Counter_Mode">GCM</a> and <a href="https://en.wikipedia.org/wiki/CCM_mode">CCM</a>. I will show how to use it in the next sections.</p>
+
+<h2>Galois/Counter Mode (GCM)</h2>
+
+<p>The <strong>Galois/Counter Mode</strong> (GCM) is a mode of operation for symmetric key cryptographic block ciphers that provides encryption and authentication. If you are interested in the details of this algorithm you can read the <a href="https://en.wikipedia.org/wiki/Galois/Counter_Mode">Wikipedia page</a>.
+This is an algorithm used in many applications like IPsec, SSH and TLS 1.2. Used together with AES (AES-GCM) is included in the <a href="https://en.wikipedia.org/wiki/NSA_Suite_B_Cryptography">NSA Suite B Cryptography</a> .
+This algorithm is very fast because the execution can be parallelized. Moreover, the algorithm does not any patents and can be used without restrictions.</p>
+
+<p>You can check if your OpenSSL extension supports the GCM mode using the <a href="http://php.net/manual/en/function.openssl-get-cipher-methods.php">openssl_get_cipher_methods</a> function. If you see "-gcm" or "-GCM" at the end of a cipher name you can use the Galois/Counter Mode. You need to have at least <u>OpenSSL 1.1</u> to support this algorithm.</p>
+
+<p>Below is reported an example using <strong>aes-256-gcm</strong> algorithm (i.e. <a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a> block cipher with 256 bit key):</p>
+
+<pre><code class="php">$algo = 'aes-256-gcm';
+$iv   = random_bytes(openssl_cipher_iv_length($algo));
+$key  = random_bytes(32); // 256 bit
+$data = random_bytes(1024); // 1 Kb of random data
+$ciphertext = openssl_encrypt(
+    $data,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag
+);
+// Change 1 bit in ciphertext
+// $i = rand(0, mb_strlen($ciphertext, '8bit') - 1);
+// $ciphertext[$i] = $ciphertext[$i] ^ chr(1);
+$decrypt = openssl_decrypt(
+    $ciphertext,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag
+);
+if (false === $decrypt) {
+    throw new Exception(sprintf(
+        &quot;OpenSSL error: %s&quot;, openssl_error_string()
+    ));
+}
+printf (&quot;Decryption %s\n&quot;, $data === $decrypt ? 'Ok' : 'Failed');
+</code></pre>
+
+<p>If you need to store the encrypted value somewhere you need to store <i>$tag</i> and <i>$iv</i> values concatenated with <i>$ciphertext</i>. This because you need to pass these data again to decrypt the ciphertext. If you store the $tag value you need to remember also the size of this value. I suggest to use the default value of 16 bytes to simplify the usage. The tag length for the GCM mode can be between 4 and 16 bytes.</p>
+
+<p>During the decryption part, we can check for errors if the <i>$decrypt</i> value is <i>false</i>. For instance, if someone has altered the encrypted message we can recognize it because the authentication will fail. You can uncomment the lines 13 and 14 from the previous example to simulate a change in the $ciphertext. Unfortunately, in the case of authentication error the <a href="http://php.net/manual/en/function.openssl-error-string.php">openssl_error_string</a> function returns an empty string. I just opened this <a href="https://bugs.php.net/bug.php?id=73432">report</a> at bugs.php.net.</p>
+
+<p>If you want to use additional authenticated data you can pass the string to be authenticated in the $aad parameter, as reported in the following example:</p>
+
+<pre><code class="php">$algo  = 'aes-256-gcm';
+$iv    = random_bytes(openssl_cipher_iv_length($algo));
+$key   = random_bytes(32); // 256 bit
+$email = 'This is the secret message!';
+$aad   = 'From: foo@domain.com, To: bar@domain.com';
+$ciphertext = openssl_encrypt(
+    $email,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag,
+    $aad
+);
+// Change 1 bit in additional authenticated data
+// $i = rand(0, mb_strlen($aad, '8bit') - 1);
+// $aad[$i] = $aad[$i] ^ chr(1);
+$decrypt = openssl_decrypt(
+    $ciphertext,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag,
+    $aad
+);
+if (false === $decrypt) {
+    throw new Exception(sprintf(
+        &quot;OpenSSL error: %s&quot;, openssl_error_string()
+    ));
+}
+printf (&quot;Decryption %s\n&quot;, $email === $decrypt ? 'Ok' : 'Failed');
+</code></pre>
+
+<p>In this case, if you uncomment the lines that change 1 bit in the authenticated data, you will have an authentication error regarding the $aad part.</p>
+<p>The encrypted message in this case is composed by <i>$tag . $iv . $aad . $ciphertext</i>. Basically, you need to store also the $aad in plaintext to be able to perform the authentication, during the decryption of the message.</p>
+
+<h2>Counter with CBC-MAC (CCM)</h2>
+
+<p>Counter with CBC-MAC (CCM) is another authenticated encryption mode for symmetric block ciphers. The CCM mode is also used in many applications like IPsec and TLS 1.2 and is part of the <a href="https://en.wikipedia.org/wiki/IEEE_802.11i-2004">IEEE 802.11i</a> standard. CCM is an alternative implementations of the <a href="https://en.wikipedia.org/wiki/OCB_mode">OCB mode</a>, that was originally covered by patents. The CCM can be used without any restriction.
+I will not show the details of the CCM algorithm, if you are interested you can read the <a href="https://en.wikipedia.org/wiki/CCM_mode">Wikipedia page</a>.
+This encryption mode can be used in PHP 7.1 if your OpenSSL extension support the "-ccm" or "-CCM" in the name of the algorithm.</p>
+
+<p>The previous example code works also in the case of CCM, you need only to replace the first line with :</p>
+
+<pre><code class="php">$algo  = 'aes-256-ccm';
+</code></pre>
+
+<p>The only difference with GCM, related to the OpenSSL usage, is the size of $tag. CCM has no limits of tag's length and also the resulted tag is different for each length.</p>
+
+<a id="#benchmark-gcm-ccm"></a>
+<h2>Benchmark GCM vs. CCM</h2>
+
+<p>I provided a very simple benchmark script to test the performance of encryption and decryption using GCM and CCM mode. The result is that <strong>GCM is 3x faster than CCM</strong>. This results is as expected due to the differences between the two algorithms. That said, my suggestion is to <strong>use GCM in your code!</strong></p>
+
+<p>This is the script that I used for the benchmark:</p>
+
+<pre><code class="php">$key = random_bytes(32);
+$data = random_bytes(1024 * 1024 * 10); // 10 Mb
+$iv = random_bytes(openssl_cipher_iv_length('aes-256-gcm'));
+
+$start = microtime(true);
+$ciphertext = openssl_encrypt($data, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+$gcmTimeEnc = microtime(true) - $start;
+
+$start = microtime(true);
+$decrypt = openssl_decrypt($ciphertext, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+$gcmTimeDec = microtime(true) - $start;
+if ($decrypt !== $data) {
+  throw new Exception(&quot;Decryption failed for GCM&quot;);
+}
+
+$iv = random_bytes(openssl_cipher_iv_length('aes-256-ccm'));
+$start = microtime(true);
+$ciphertext = openssl_encrypt($data, 'aes-256-ccm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+$ccmTimeEnc = microtime(true) - $start;
+
+$start = microtime(true);
+$decrypt = openssl_decrypt($ciphertext, 'aes-256-ccm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+$ccmTimeDec = microtime(true) - $start;
+if ($decrypt !== $data) {
+  throw new Exception(&quot;Decryption failed for CCM&quot;);
+}
+
+printf(&quot;GCM (enc): %.4f, GCM (dec): %.4f\n&quot;, $gcmTimeEnc, $gcmTimeDec);
+printf(&quot;CCM (enc): %.4f, CCM (dec): %.4f\n&quot;, $ccmTimeEnc, $ccmTimeDec);
+</code></pre>
+
+<p>I executed this script using PHP7.1RC5, CPU Intel Core i7, 8 GB RAM, 256 GB SSD, Ubuntu 16.04.</p>
+
+<p><strong>Note:</strong> all the PHP scripts used in this post are available <a href="https://gist.github.com/ezimuel/485eb4745b58b30a2435bd92bdffb19f">here</a>.</p>
+</post>

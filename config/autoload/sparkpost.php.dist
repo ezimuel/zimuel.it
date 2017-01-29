@@ -1,0 +1,7 @@
+<?php
+
+return [
+    'sparkpost' => [
+        'key' => 'insert the API key here'
+    ]
+];

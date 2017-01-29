@@ -1,0 +1,59 @@
+<post date="2016-03-14" title="Sign and verify using OpenSSL" sub="How to sign a file with OpenSSL" img="sign_openssl.jpg">
+
+<p>If you need to sign and verify a file you can use the <a href="https://www.openssl.org/docs/manmaster/apps/openssl.html">OpenSSL</a> command line tool. OpenSSL is a common library used by many operating systems (I tested the code using Ubuntu Linux).</p>
+
+<p>I was working on a prototype to sign the source code of open source projects in order to release it including the signature. More or less the same idea implemented in Git to <a href="https://git-scm.com/book/it/v2/Git-Tools-Signing-Your-Work">sign tag or a commit</a>. Git uses <a href="https://www.gnupg.org/">GnuPG</a>, I wanted to do the same using OpenSSL to be more general.</p>
+
+<h2>Sign a file</h2>
+
+<p>To sign a file using OpenSSL you need to use a private key. If you don't have an OpenSSL key pair you can create it using the following commands:</p>
+
+<pre><code class="bash">openssl genrsa -aes128 -passout pass:&lt;phrase&gt; -out private.pem 4096
+openssl rsa -in private.pem -passin pass:&lt;phrase&gt; -pubout -out public.pem
+</code></pre>
+
+<p>where <i>&lt;phrase&gt;</i> is the passphrase used to encrypt the private key stored in private.pem file. The private key is stored in <i>private.pem</i> file and the public key in the <i>public.pem</i> file.</p>
+
+<p>For security reason, I suggest to use <strong>4096 bits</strong> for the keys, you can read the reason in this <a href="http://danielpocock.com/rsa-key-sizes-2048-or-4096-bits">blog post</a>.</p>
+
+<p>When you have the private and public key you can use OpenSSL to sign the file. The default output format of the OpenSSL signature is binary. If you need to share the signature over internet you cannot use a binary format. You can use for instance <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> format for file exchange.</p>
+
+<p>You can use the following commands to generate the signature of a file and convert it in Base64 format:</p>
+
+<pre><code class="bash">openssl dgst -sha256 -sign &lt;private-key&gt; -out /tmp/sign.sha256 &lt;file&gt;
+openssl base64 -in /tmp/sign.sha256 -out &lt;signature&gt;
+</code></pre>
+
+<p>where <i>&lt;private-key&gt;</i> is the file containing the private key, <i>&lt;file&gt;</i> is the file to sign and <i>&lt;signature&gt;</i> is the file name for the digital signature in Base64 format.
+I used the temporary folder (/tmp) to store the binary format of the digital signature. Remember, when you sign a file using the private key, OpenSSL will ask for the passphrase.</p>
+
+<p>The <i>&lt;signature&gt;</i> file can now be shared over internet without encoding issue.</p>
+
+<h2>Verify the signature</h2>
+
+<p>To verify the signature you need to convert the signature in binary and after apply the verification process of OpenSSL. You can achieve this using the following commands:</p>
+
+<pre><code class="bash">openssl base64 -d -in &lt;signature&gt; -out /tmp/sign.sha256
+openssl dgst -sha256 -verify &lt;pub-key&gt; -signature /tmp/sign.sha256 &lt;file&gt;
+</code></pre>
+
+<p>where <i>&lt;signature&gt;</i> is the file containing the signature in Base64, <i>&lt;pub-key&gt;</i> is the file containing the public key, and <i>&lt;file&gt;</i> is the file to verify.</p>
+
+<p>If the verification is successful, the OpenSSL command will print <i>"Verified OK"</i> message, otherwise it will print <i>"Verification Failure"</i>.</p>
+
+<p>I created a <a href="https://gist.github.com/ezimuel/3cb601853db6ebc4ee49">gist</a> containing two bash scripts to facilitate the signature and verification tasks.
+The <strong>sign.sh</strong> script is able to generate the signature of a file using the following command syntax:</p>
+
+<pre><code class="bash">sign.sh &lt;file&gt; &lt;private_key&gt;
+</code></pre>
+
+<p>where <i>&lt;file&gt;</i> is the file to sign and <i>&lt;private_key&gt;</i> is the file containing the private key to use for the signature. The signature will be stored in the <strong>signature.sha256</strong> file using the Base64 format.</p>
+
+<p>To verify a signature you can use the <strong>verify.sh</strong> script with the following syntax:</p>
+
+<pre><code class="bash">verify.sh &lt;file&gt; &lt;signature&gt; &lt;public_key&gt;
+</code></pre>
+
+<p>where <i>&lt;file&gt;</i> is the file to verify, <i>&lt;signature&gt;</i> is the file containing the signature (in Base64), and <i>&lt;public_key&gt;</i> is the file containing the public key to be used to verify the digital signature.</p>
+
+</post>

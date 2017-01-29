@@ -1,0 +1,184 @@
+<post date="2011-03-03" title="XML to JSON in PHP" sub="The story of an odyssey" img="xml_to_json.jpg">
+
+<p>Last friday, in occasion of the <a href="http://devzone.zend.com/article/14073-Announcing-the-April-2011-Zend-Framework-Bug-Hunt" target="_blank">April Zend Framework Bug-Hunt</a>, I started to look at this bug: <a href="http://framework.zend.com/issues/browse/ZF-3257" target="_blank">ZF-3257</a>. This is an issue related to the <strong>Zend_Json</strong> class that occurs during the conversion from XML to JSON for some specific XML documents, like this one:</p>
+
+<pre><code lang="php">$xml = '&lt;a&gt;&lt;strong id=&quot;foo&quot;&gt;&lt;/strong&gt;bar&lt;/a&gt;';
+</code></pre>
+
+<p>The result using <strong>Zend_Json::fromXml($xml, <em>false</em>) </strong>, where <em>false</em> indicated the usage of XML attributes, was:</p>
+
+<pre><code class="json">{&quot;a&quot;:{&quot;b&quot;:{&quot;@attributes&quot;:{&quot;id&quot;:&quot;foo&quot;}}}}
+</code></pre>
+
+<p>As you can see the bar value, of the <strong>a</strong> element, is not represented in JSON. This issue comes also with other XML documents, and in general when an XML node has a single character data child, any attributes are lost.</p>
+
+<p>For instance, the following code:</p>
+
+<pre><code lang="php">$xml = '&lt;a&gt;&lt;strong id=&quot;foo&quot;&gt;bar&lt;/strong&gt;&lt;/a&gt;';
+echo Zend_Json::fromXml($xml, false);
+</code></pre>
+
+<p>Produced the output:</p>
+
+<pre><code class="json">{&quot;a&quot;:{&quot;b&quot;:&quot;bar&quot;}}
+</code></pre>
+
+<p>in this case the attribute <em>id</em> and the value <em>foo</em> are lost.</p>
+
+<p>After my first investigation, I discovered that the problem was not so straightforward. First of all, there is not a common standard to translate XML document in JSON. Recently IBM proposed the JSONx standard but is still a proposal (<a href="http://tools.ietf.org/html/draft-rsalz-jsonx-00" target="_blank">you can read it here</a>).</p>
+
+<p>Regarding the <strong>Zend_Json</strong> implementation, the bug <em>"seems"</em> to be related to the <strong>SimpleXML</strong> extension of PHP. I used the term <em>"seems"</em> because I will show you that is possible to implement a valid conversion from XML to JSON using SimpleXML, so for me it's quite ambigous if the problem is related to SimpleXML, anyway let's continue with the discussion.</p>
+
+<p>If you try to use SimpleXML to load the following XML:</p>
+
+<pre><code lang="php">$xml = '&lt;a&gt;&lt;strong id=&quot;foo&quot;&gt;&lt;/strong&gt;bar&lt;/a&gt;';
+$simpleXml = simplexml_load_string($xml);
+var_dump($simpleXml);
+</code></pre>
+
+<p>You will get the following var dump:</p>
+
+<pre><code lang="php">
+object(SimpleXMLElement)#1 (1) {
+  [&quot;b&quot;]=&amp;gt;
+  object(SimpleXMLElement)#2 (1) {
+    [&quot;@attributes&quot;]=&amp;gt;
+    array(1) {
+      [&quot;id&quot;]=&amp;gt;
+      string(3) &quot;foo&quot;
+    }
+  }
+}
+</code></pre>
+
+<p>Where is the <strong>bar</strong> value? Seems that SimpleXMLElement doesn't contains this value, but if you try to cast the value of a SimpleXMLElement element using:</p>
+
+<pre><code lang="php">$bar = (string) $simpleXML;
+</code></pre>
+
+<p>or</p>
+
+<pre><code lang="php">$bar = strval($simpleXML);
+</code></pre>
+
+<p>you will get the value. That means <strong>bar</strong> value is inside the SimpleXMLElement object. Coming back to the previous question, the bug <a href="http://framework.zend.com/issues/browse/ZF-3257" target="_blank">ZF-3257</a> depends on a problem of SimpleXML? I would say yes and no. Yes because the bar value is not represented in a correct format inside the dump of the object and I would say No because the bar value is, anyway, stored in the object.</p>
+
+<p>Regarding this Hamlet-like question I opened a bug in the PHP.net web site: <a href="http://bugs.php.net/bug.php?id=54632">Bug #54632</a>.</p>
+
+<p>I also discovered that other PHP implementations, that use SimpleXML to convert data from XML to JSON, are affected by this problem. For instance, the one proposed by IBM in the article <a href="http://www.ibm.com/developerworks/xml/library/x-xml2jsonphp/" target="_blank">Convert XML to JSON in PHP</a> written by <em>S.Nathan</em>, <em>Edward J Pring</em>, and <em>John Morar</em> contains the same problem.</p>
+
+<p>I decided to fix the bug <a href="http://framework.zend.com/issues/browse/ZF-3257" target="_blank">ZF-3257</a> proposing a new converstion algorithm from XML to JSON in PHP. My solution uses a special key value (<strong>@text</strong>) to store the text value of an XML element, only if this element contains attributes or sub-elements (as in the previous examples). If you need to convert a simple XML element with only text values, like <a>foo</a> the JSON is <strong>{"a":"foo"}</strong> that is quite intuitive.</p>
+
+<p>Using this algorithm the translation of the following XML:</p>
+
+<pre><code lang="xml">
+&lt;a&gt;&lt;strong id=&quot;foo&quot;&gt;bar&lt;/strong&gt;&lt;/a&gt;
+</code></pre>
+
+<p>in JSON, will be:</p>
+
+<pre><code lang="json">
+{&quot;a&quot;:{&quot;b&quot;:{&quot;@attributes&quot;:{&quot;id&quot;:&quot;foo&quot;}},&quot;@text&quot;:&quot;bar&quot;}}
+</code></pre>
+
+<p>You can find the correct implementation of the conversion of XML to JSON in the Zend_Json class of Zend Framework starting from the version 1.11.6, that should be released shortly. Below I reported the source code of the changes of the Zend_Json class for the conversion algorithm from XML to JSON. In particular, I rewrote the _processXml static method and I created the new _getXmlValue to manage Zend_Json_Expr in text and attributes values of XML.</p>
+
+<pre><code class="php">/**
+ * Return the value of an XML attribute text or the text between
+ * the XML tags
+ *
+ * In order to allow Zend_Json_Expr from xml, we check if the node
+ * matchs the pattern that try to detect if it is a new Zend_Json_Expr
+ * if it matches, we return a new Zend_Json_Expr instead of a text node
+ *
+ * @param SimpleXMLElement $simpleXmlElementObject
+ * @return Zend_Json_Expr|string
+ */
+protected static function _getXmlValue($simpleXmlElementObject)
+{
+    $pattern = '/^[s]*new Zend_Json_Expr[s]*([s]*[&quot;']{1}(.*)[&quot;']{1}[s]*)[s]*$/';
+    $matchings = array();
+    $match = preg_match ($pattern, $simpleXmlElementObject, $matchings);
+    if ($match) {
+        return new Zend_Json_Expr($matchings[1]);
+    } else {
+        return (trim(strval($simpleXmlElementObject)));
+    }
+ }
+/**
+ * _processXml - Contains the logic for xml2json
+ *
+ * The logic in this function is a recursive one.
+ *
+ * The main caller of this function (i.e. fromXml) needs to provide
+ * only the first two parameters i.e. the SimpleXMLElement object and
+ * the flag for ignoring or not ignoring XML attributes. The third parameter
+ * will be used internally within this function during the recursive calls.
+ *
+ * This function converts the SimpleXMLElement object into a PHP array by
+ * calling a recursive (protected static) function in this class. Once all
+ * the XML elements are stored in the PHP array, it is returned to the caller.
+ *
+ * Throws a Zend_Json_Exception if the XML tree is deeper than the allowed limit.
+ *
+ * @param SimpleXMLElement $simpleXmlElementObject
+ * @param boolean $ignoreXmlAttributes
+ * @param integer $recursionDepth
+ * @return array
+ */
+protected static function _processXml ($simpleXmlElementObject, $ignoreXmlAttributes, $recursionDepth=0)
+{
+    // Keep an eye on how deeply we are involved in recursion.
+    if ($recursionDepth &gt; self::$maxRecursionDepthAllowed) {
+        // XML tree is too deep. Exit now by throwing an exception.
+        require_once 'Zend/Json/Exception.php';
+        throw new Zend_Json_Exception(
+            &quot;Function _processXml exceeded the allowed recursion depth of &quot; .
+            self::$maxRecursionDepthAllowed);
+    } // End of if ($recursionDepth &gt; self::$maxRecursionDepthAllowed)
+    $childrens= $simpleXmlElementObject-&gt;children();
+    $name= $simpleXmlElementObject-&gt;getName();
+    $value= self::_getXmlValue($simpleXmlElementObject);
+    $attributes= (array) $simpleXmlElementObject-&gt;attributes();
+    if (count($childrens)==0) {
+        if (!empty($attributes) &amp;&amp; !$ignoreXmlAttributes) {
+            foreach ($attributes['@attributes'] as $k =&gt; $v) {
+                $attributes['@attributes'][$k]= self::_getXmlValue($v);
+            }
+            if (!empty($value)) {
+                $attributes['@text']= $value;
+            }
+            return array($name =&gt; $attributes);
+        } else {
+           return array($name =&gt; $value);
+        }
+    } else {
+        $childArray= array();
+        foreach ($childrens as $child) {
+            $childname= $child-&gt;getName();
+            $element= self::_processXml($child,$ignoreXmlAttributes,$recursionDepth+1);
+            if (array_key_exists($childname, $childArray)) {
+                if (empty($subChild[$childname])) {
+                    $childArray[$childname]=array($childArray[$childname]);
+                    $subChild[$childname]=true;
+                }
+                $childArray[$childname][]= $element[$childname];
+            } else {
+                $childArray[$childname]= $element[$childname];
+            }
+        }
+        if (!empty($attributes) &amp;&amp; !$ignoreXmlAttributes) {
+            foreach ($attributes['@attributes'] as $k =&gt; $v) {
+                $attributes['@attributes'][$k]= self::_getXmlValue($v);
+            }
+            $childArray['@attributes']= $attributes['@attributes'];
+        }
+        if (!empty($value)) {
+            $childArray['@text']= $value;
+        }
+        return array($name =&gt; $childArray);
+    }
+}
+</code></pre>
+
+</post>

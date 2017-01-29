@@ -1,0 +1,52 @@
+<?php $this->layout('layout::default') ?>
+
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="site-heading">
+                    <h1>Enrico Zimuel</h1>
+                    <hr class="small">
+                    <span class="subheading">Software developer since 1996, speaker, author</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-2 col-md-8 col-md-offset-1">
+        <p>Last posts from the blog:</p>
+        <?php foreach ($posts as $id => $post): ?>
+            <div class="post-preview">
+                <a href="/blog/<?php echo urlencode($id) ?>">
+                    <h2 class="post-title">
+                        <?php echo $post['title'] ?>
+                    </h2>
+                    <h3 class="post-subtitle">
+                        <?php echo $post['sub'] ?>
+                    </h3>
+                </a>
+                <p class="post-meta">Posted by <a href="/">Enrico Zimuel</a> on <?php echo date("F d, Y", strtotime($post['date'])) ?></p>
+            </div>
+        <?php endforeach; ?>
+        <ul class="pager">
+            <li class="next" style="float:left">
+                <a href="/blog"><i class="fa fa-chevron-right" aria-hidden="true"></i> Other posts</a>
+            </li>
+        </ul>
+        <hr>
+    </div>
+    <div class="col-lg-2 col-md-2">
+        <?php if (!empty($events)) : ?>
+            <h3>Next events:</h3>
+            <?php foreach ($events as $event) : ?>
+              <p><i class="fa fa-chevron-right" aria-hidden="true"></i> <?php echo $event; ?></p>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        <div class="row"></div>
+        <h3>Latest Book:</h3>
+        <p><?php echo $book ?></p>
+        <p><i class="fa fa-chevron-right" aria-hidden="true"></i> <a href="/books">Other books</a></p>
+    </div>
+</div>

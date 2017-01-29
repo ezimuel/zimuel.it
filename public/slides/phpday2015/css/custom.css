@@ -1,0 +1,73 @@
+.reveal h1 {
+  margin-top: 2em;
+}
+
+.reveal .center {
+    text-align: center;
+}
+
+.reveal pre code {
+    font-size: 1.2em;
+    line-height: 1.3em;
+    max-height: 500px;
+}
+
+body {
+    background-image: url("/img/zend-logo-mark-color-64x64.jpg");
+    background-attachment: fixed;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+}
+
+.reveal section img.noborder {
+    border: none;
+}
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    text-transform: capitalize;
+}
+
+.reveal h1.nocaps, .reveal h2.nocaps, .reveal h3.nocaps, .reveal h4.nocaps {
+    text-transform: none;
+}
+
+.reveal h1.nooffset {
+    margin-top: 0;
+}
+
+.reveal h3.multi {
+    margin-top: 0.5em;
+}
+
+.reveal section .footnote {
+    display: block;
+    position: absolute;
+    bottom: -100px;
+    left: 15%;
+    width: 70%;
+    font-size: 0.7em;
+}
+
+.reveal section kbd {
+    background-color: #FDF6E3;
+    font-size: 0.8em;
+}
+
+/*
+aside.outline {
+    position: absolute;
+    right: -100px;
+    top: 0;
+    width: 100px;
+}
+
+aside.outline li {
+    font-size: 0.5em;
+    color: #CCC;
+}
+
+aside.outline li.active {
+    color: #000;
+    font-weight: strong;
+}
+*/

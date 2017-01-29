@@ -1,0 +1,56 @@
+<post date="2010-01-30" title="Convert a spool file to PDF using PHP on i5/OS" sub="A simple PHP class to export a spool file in PDF" img="spoolfile.jpg">
+
+<p>Recently, I started to develop on IBM i5 systems using PHP. PHP is becoming a very popular languages in the <a href="http://www-03.ibm.com/systems/i/software/php/index.html">IBM i5 community</a> to produce web applications and to modernize “green screen” applications. If you want to know how to use PHP on IBM i5 systems you have to look at the <a href="http://www.zend.com/en/solutions/modernize-ibm-i">Zend Core for i5</a>, the PHP distribution of Zend Technologies.</p>
+
+<p>Zend Core for i5/OS provides the i5 Toolkit for PHP, an API system to call i5 functionalities from PHP. One of the function of this API is <strong>i5_spool</strong> that is able to manage spool files for specific i5 users. In this post I present a class to convert a spool file in PDF using the Zend_Pdf class of the Zend Framework.</p>
+
+<p>The class is the i5Spool and you can download it <a href="/media/i5Spool.zip">here</a>. You can easly convert a spool file in PDF choosing the page format, the page margins, the font type, the font size, the interline, etc.</p>
+
+<p>Here an example of usage:</p>
+
+<pre><code lang="php">require_once 'i5Spool.php';
+$spool= new i5Spool('host','username','password');
+$sp = array (
+    'JOBNAME' => 'QPADEV0012',
+    'SPLFNAME' => 'QPJOBLOG',
+    'SPLFNBR' => 3,
+    'USERNAME' => 'ENRICO',
+    'JOBNBR' => '697478'
+);
+header("Content-Disposition: inline; filename=spool.pdf");
+header("Content-type: application/x-pdf");
+echo $spool->toPdf($sp);
+</code></pre>
+
+<p>In this example, we create an i5Spool object passing the host, username and password to connect to the i5 system. In order to export a spool to PDF we use the toPdf method.</p>
+<p>We have to pass the information related to the spool file: job name (JOBNAME), job number (JOBNBR), user (USERNAME), spool name (SPLFNAME) and spool number (SPLFNBR).</p>
+<p>The <strong>toPdf</strong> function returns a string contains the PDF so you have to print it if you want to pass to the browser.</p>
+<p>The <strong>toPdf</strong> method has a second optional parameter, an array contains the format of the PDF page.</p>
+
+<p>The format of a PDF page is composed by (the default values are reported in parenthesis):</p>
+
+<ul>
+    <li>page format (Zend_Pdf_Page::SIZE_A4_LANDSCAPE);</li>
+    <li>font type (Zend_Pdf_Font::fontWithName(Zend_Pdf_Font::FONT_COURIER));</li>
+    <li>font size (9);</li>
+    <li>interline (9);</li>
+    <li>margin-left (20);</li>
+    <li>margin-top (20);</li>
+    <li>margin-bottom (20);</li>
+    <li>encoding (utf-8);</li>
+</ul>
+
+<p><img src="/img/post/page_pdf.gif"></p>
+
+<p>For instance if you want to change the font size, the margins and the interline you can use the follow array as second parameter of <strong>toPdf</strong> method:</p>
+
+<pre><code class="php">$format = array (
+    'font-size'     => 10,
+    'interline'     => 11,
+    'margin-left'   => 30,
+    'margin-top'    => 30,
+    'margin-bottom' => 30
+);
+</code></pre>
+
+</post>

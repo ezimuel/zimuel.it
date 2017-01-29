@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Build middleware applications with Zend Framework 3</title>
+
+		<meta name="description" content="Build middleware applications with Zend Framework 3. Talk by Enrico Zimuel at PHPDay 2016">
+		<meta name="author" content="Enrico Zimuel" >
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('img/background.jpg'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<p><a href="http://2016.phpday.it"><img style="border-style:none" src="img/phpday.png"></a></p>
+					<h2>Build middleware applications with Zend Framework 3</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a> / <a href="http://twitter.com/ezimuel">@ezimuel</a><br /><br />
+						<i>Senior Software Engineer</i><br /><a href="http://www.zend.com">Zend Technologies</a>, a Rogue Wave Company</small>
+					</p>
+					<p><a href="http://www.zend.com"><img style="border-style:none;background:white" src="img/logo-zend.png"></a></p>
+				</section>
+
+				<section>
+					<h2>About me</h2>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="img/enrico.png">
+							</td>
+							<td>
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Senior Software Engineer at <a href="http://www.zend.com" target="_blank">Zend</a>, a Rogue Wave Company</li>
+									<li>Core team of <a href="http://apigility.org">Apigility</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li>Co-author of the Italian books <a href="http://www.phpbestpractices.it">PHP Best Practices</a> and <a href="http://www.jsbestpractices.it/">Javascript Best Practices</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy) and mentor at <a href="https://phpmentoring.org/">phpmentoring.org</a></li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<h2>Zend Framework 3</h2>
+					<ul>
+						<li class="fragment">50+ separate components on <a href="https://github.com/zendframework">github</a></li>
+						<li class="fragment">Support <a href="http://www.php-fig.org/psr/psr-7/">PSR-7</a> standard</li>
+						<li class="fragment">Middleware and MVC patterns</li>
+						<li class="fragment">Performance improvement: 4x faster than ZF2!</li>
+						<li class="fragment">Optimized for <a href="http://php.net/manual/en/migration70.new-features.php">PHP 7</a>, but supporting PHP 5.5 onwards</li>
+						<li class="fragment">Stats: 10,269 stars, 8,167 forks, 124 repos, 699 contributors</li>
+						<aside class="notes">
+							tested against PHP 7<br />
+							in many cases, tested with the coercive STH patch to find and eliminate type issues where encountered
+						</aside>
+					</ul>
+				</section>
+
+				<section>
+					<h2>ZF3 roadmap</h2>
+					<p class="fragment">We almost done, working on docs and the new web site.</p>
+					<p class="fragment">The plan is to release the full ZF3 packages on <strong>June 2016</strong>.</p>
+				</section>
+
+				<section>
+					<h2>Middleware</h2>
+					<p>A function that gets a request and generates a response</p>
+<pre><code data-trim>
+function ($request, $response) {
+    // manipulate $request to generate a $response
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>The Middleware onion</h2>
+					<img src="img/middleware.png" style="border-style:none">
+				</section>
+
+				<section>
+					<h2>PSR-7</h2>
+					<h3>Shared HTTP Message Interfaces</h3>
+					<a href="http://www.php-fig.org/psr/psr-7/"><img src="img/phpfig.jpg"></a>
+				</section>
+
+				<section>
+					<h2>HTTP Request</h2>
+
+					<pre><code class="lang-php" data-trim>
+// $request instanceOf Psr\Http\Message\RequestInterface
+$method     = $request->getMethod();
+$accept     = $request->getHeader('Accept');
+$path       = $request->getUri()->getPath();
+$controller = $request->getAttribute('controller');
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>HTTP Response</h2>
+
+					<pre><code class="lang-php" data-trim>
+// $response instanceOf Psr\Http\Message\ResponseInterface
+$response->getBody()->write('Hello world!');
+$response = $response->withStatus(200, 'OK')
+                     ->withHeader('Content-Type', 'text/plain');
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>A PSR-7 Middleware Class</h2>
+					<p>Use an additional callable during the invoke ($next)</p>
+<pre><code data-trim>
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
+class Middleware
+{
+    public function __invoke(
+        Request $request,
+        Response $response,
+        callable $next = null
+    ){
+        // do something before
+        if ($next) {
+            $next($request, $response);
+        }
+        // do something after
+    }
+}
+</code></pre>
+<aside class="notes">
+	In Connect and ExpressJS they use $next.
+	For PHP: Slim.
+</aside>
+				</section>
+
+
+				<section>
+					<h2>Zend-expressive</h2>
+					<ul>
+						<li class="fragment">PSR-7 support (using <a href="https://github.com/zendframework/zend-diactoros">zend-diactoros</a>)</li>
+						<li class="fragment">Middleware using a callable ($next):
+<pre><code data-trim>
+function ($request, $response, $next)
+</code></pre></li>
+						<li class="fragment">Piping workflow (using <a href="https://github.com/zendframework/zend-stratigility">zend-stratigility</a>)</li>
+						<li class="fragment">Features: routing, container-interop, templating, error handling</li>
+						<li class="fragment">Stable version 1.0 (28 Jan 2016)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Components layer</h2>
+					<img src="img/expressive_stack.png" style="border-style:none">
+				</section>
+
+				<section>
+					<h2>Flow overview</h2>
+					<img src="img/expressive.png" style="border-style:none;background:white">
+				</section>
+
+				<section>
+					<h2>Basic example</h2>
+<pre><code class="lang-php" data-trim>
+use Zend\Expressive\AppFactory;
+
+chdir(dirname(__DIR__));
+require 'vendor/autoload.php';
+
+$app = AppFactory::create();
+
+$app->get('/', function ($request, $response, $next) {
+    $response->getBody()->write('Hello, world!');
+    return $response;
+});
+
+$app->pipeRoutingMiddleware();
+$app->pipeDispatchMiddleware();
+$app->run();
+</code></pre>
+<aside class="notes">
+Expressive's Application class provides two separate middlewares, one for routing, and one for dispatching middleware matched by routing.
+This allows to slip in validations between the two activities if desired.
+They are not automatically piped to the application, however, to allow exactly that situation, which means they must be piped manually.
+</aside>
+				</section>
+
+				<section>
+					<h2>Piping Middleware</h2>
+<pre><code class="lang-php" data-trim>
+// $app is an instance of Zend\Expressive\Application
+
+// Executed in all the requests
+$app->pipe($apiMiddleware);
+$app->pipe('middleware service name');
+
+// Pipe to a specific URL
+$app->pipe('/api', $apiMiddleware);
+$app->pipe('/api', 'middleware service name');
+
+// Error handler
+$app->pipeErrorHandler('error handler service name');
+$app->pipeErrorHandler('/api', 'error handler service name');
+</code></pre>
+<aside class="notes">
+A middleware is pipe into a queue (FIFO), and dequeued in order until a middleware returns a response instance
+If none returns a response instance, execution is delegated to a "final handler", an error handler.
+Pipe will only match literal paths.
+Middleware may be specified by service name, and zend-expressive will lazy-load the service only when the middleware is invoked.
+</aside>
+				</section>
+
+				<section>
+					<h2>Using a Service Container</h2>
+<pre><code class="lang-php" data-trim>
+use Zend\Expressive\AppFactory;
+use Zend\ServiceManager\ServiceManager;
+
+$container = new ServiceManager();
+
+$container->setFactory('HelloWorld', function ($container) {
+    return function ($req, $res, $next) {
+        $res->write('Hello, world!');
+        return $res;
+    };
+});
+
+$app = AppFactory::create($container);
+$app->get('/', 'HelloWorld');
+</code></pre>
+<p><small>We support <a href="https://github.com/container-interop/container-interop">container-interop</a></small></p>
+<aside class="notes">
+Expressive encourages the use of Dependency Injection, and defines its Application class to compose a container-interop ContainerInterface instance.
+The container is used to lazy-load middleware, whether it is piped (Stratigility interface) or routed (Expressive)
+</aside>
+				</section>
+
+				<section>
+					<h2>Routing</h2>
+					<ul>
+						<li><a href="https://github.com/zendframework/zend-expressive-router">zend-expressive-router</a> component</li>
+						<li>Dynamic routing capabilities using your favorite libraries</li>
+						<li>Adapters: <a href="https://github.com/zendframework/zend-expressive-aurarouter">Aura.router</a>, <a href="https://github.com/zendframework/zend-expressive-fastroute">FastRoute</a>, <a href="https://github.com/zendframework/zend-expressive-zendrouter">Zend-Mvc</a> router</li>
+					</ul>
+<pre><code class="lang-php" data-trim>
+namespace Zend\Expressive\Router;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+interface RouterInterface
+{
+    public function addRoute(Route $route);
+    public function match(Request $request);
+    public function generateUri($name, array $substitutions = []);
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Templating</h2>
+					<ul>
+						<li>While Expressive does not assume templating is being used, it provides a templating abstraction.</li>
+						<li>Default adapters: <a href="https://github.com/zendframework/zend-expressive-platesrenderer">Plates</a>, <a href="https://github.com/zendframework/zend-expressive-twigrenderer">Twig</a>, <a href="https://github.com/zendframework/zend-expressive-zendviewrenderer">Zend-View</a></li>
+					</ul>
+<pre><code class="lang-php" data-trim>
+namespace Zend\Expressive\Template;
+
+interface TemplateRendererInterface
+{
+    public function render($name, $params = []);
+    public function addPath($path, $namespace = null);
+    public function getPaths();
+    public function addDefaultParam($templateName, $param, $value);
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Error Handling</h2>
+					<ul>
+						<li>Expressive provides error handling out of the box, via zend-stratigility's <a href="https://github.com/zendframework/zend-stratigility/blob/master/src/FinalHandler.php">FinalHandler</a></li>
+						<li>The FinalHandler is executed if:
+							<ul>
+								<li>the middleware stack is exhausted, and no middleware has returned a response</li>
+								<li>an error has been passed via $next(), but not handled by any middleware</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Templated Errors</h2>
+<pre><code class="lang-php" data-trim>
+use Zend\Expressive\Application;
+use Zend\Expressive\Plates\PlatesRenderer;
+use Zend\Expressive\TemplatedErrorHandler;
+
+$plates = new PlatesRenderer();
+$plates->addPath(__DIR__ . '/templates/error', 'error');
+$final = new TemplatedErrorHandler($plates, 'error::404', 'error::500');
+
+$app = new Application($router, $container, $final);
+</code></pre>
+				</section>
+
+								<section>
+									<h2>Skeleton application</h2>
+									<ul>
+										<li>We provide a skeleton app for start with zend-expressive:<br />
+										<a href="https://github.com/zendframework/zend-expressive-skeleton">github.com/zendframework/zend-expressive-skeleton</a></li>
+									</ul>
+								</section>
+
+								<section>
+									<h2>Getting started</h2>
+<pre><code data-trim>
+$ composer create-project zendframework/zend-expressive-skeleton &lt;path&gt;
+</code></pre>
+									<img src="img/steps.png" style="border-style:none">
+								</section>
+
+								<section>
+									<h2>Run the skeleton app</h2>
+<pre><code data-trim>
+$ composer serve
+</code></pre>
+									<p>Open your browser at <a href="http://localhost:8080">http://localhost:8080</a></p>
+									<img src="img/zend-expressive.png" style="border-style:none">
+								</section>
+
+								<section>
+									<h2>Skeleton tree</h2>
+<pre>
+├── config
+│   └── autoload
+├── data
+│   └── cache
+├── public
+├── src
+│   └── App
+│       └── Action
+├── templates
+│   ├── app
+│   ├── error
+│   └── layout
+└── test
+
+</pre>
+								</section>
+
+								<section>
+									<h2>Config</h2>
+									<p>The application configuration files, including:</p>
+									<ul>
+										<li>the registered services;</li>
+										<li>the middleware pipeline;</li>
+										<li>the routes;</li>
+										<li>the template file paths;</li>
+										<li>the error handler;</li>
+									</ul>
+                </section>
+
+								<section>
+									<h2>Example of route config</h2>
+									<p>autoload/routes.global.php</p>
+<pre><code class="lang-php" data-trim>
+return [
+    'dependencies' => [
+        'factories' => [
+            App\Action\FooAction::class => App\Action\FooFactory::class,
+        ],
+    ],
+
+    'routes' => [
+        [
+            'name' => 'home',
+            'path' => '/',
+            'middleware' => App\Action\FooAction::class,
+            'allowed_methods' => ['GET'],
+        ]
+    ],
+];
+</code></pre>
+								</section>
+
+								<section>
+									<h2>Front controller</h2>
+									<p>public/index.php</p>
+<pre><code class="lang-php" data-trim>
+// Delegate static file requests back to the PHP built-in webserver
+if (php_sapi_name() === 'cli-server'
+    && is_file(__DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH))
+) {
+    return false;
+}
+
+chdir(dirname(__DIR__));
+require 'vendor/autoload.php';
+
+/** @var \Interop\Container\ContainerInterface $container */
+$container = require 'config/container.php';
+
+/** @var \Zend\Expressive\Application $app */
+$app = $container->get(\Zend\Expressive\Application::class);
+$app->run();
+</code></pre>
+								</section>
+
+								<section>
+									<h2>Service container</h2>
+									<p>config/container.php</p>
+<pre><code class="lang-php" data-trim>
+use Zend\ServiceManager\Config;
+use Zend\ServiceManager\ServiceManager;
+
+// Load configuration
+$config = require __DIR__ . '/config.php';
+
+// Build container
+$container = new ServiceManager();
+(new Config($config['dependencies']))->configureServiceManager($container);
+
+// Inject config
+$container->setService('config', $config);
+
+return $container;
+</code></pre>
+								</section>
+
+
+								<section>
+									<h2>A Middleware Action Factory</h2>
+									<p>src/App/Action/FooFactory.php</p>
+<pre><code class="lang-php" data-trim>
+namespace App\Action;
+
+use Interop\Container\ContainerInterface;
+use Zend\Expressive\Template\TemplateRendererInterface;
+
+class FooFactory
+{
+  public function __invoke(ContainerInterface $container)
+  {
+    $template = ($container->has(TemplateRendererInterface::class))
+                ? $container->get(TemplateRendererInterface::class)
+                : null;
+    return new FooAction($template);
+  }
+}
+</code></pre>
+								</section>
+
+								<section>
+									<h2>A Middleware Action</h2>
+									<p>src/App/Action/FooAction.php</p>
+<pre><code class="lang-php" data-trim>
+namespace App\Action;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response\HtmlResponse;
+use Zend\Expressive\Template\TemplateRendererInterface;
+
+class FooAction
+{
+  protected $template;
+
+  public function __construct(TemplateRendererInterface $template = null)
+  {
+    $this->template = $template;
+  }
+
+  public function __invoke(
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    callable $next = null
+  ) {
+    $data = [];
+    // get the data to print in the template
+    return new HtmlResponse($this->template->render('app::foo', $data));
+  }
+}
+</code></pre>
+								</section>
+
+					<section>
+						<h2>Thanks!</h2>
+						<p>Rate this talk at <a href="https://joind.in/talk/31a66">joind.in/talk/31a66</a></p>
+						<p>More info: <a href="https://zendframework.github.io/zend-expressive/">zendframework.github.io/zend-expressive</a></p>
+						<br />
+						<p>Contact me: enrico [at] zend.com</p>
+						<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+                    <p><small><br /><br />
+                    <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="img/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+                </section>
+				</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

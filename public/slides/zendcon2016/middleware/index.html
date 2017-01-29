@@ -1,0 +1,592 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Building middleware applications with Zend Framework 3</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body style="background-image: url('img/background.png'); background-color: white;">
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h3>Building middleware applications with Zend Framework 3</h3>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a> / <a href="http://twitter.com/ezimuel">@ezimuel</a><br />
+						<i>Senior Software Engineer</i><br /><a href="http://www.zend.com">Zend Technologies</a>, a <a href="http://www.roguewave.com/">Rogue Wave Company</a></small>
+					</p>
+					<p>
+						<br /><small>Oct 18, ZendCon 2016, Las Vegas</small>
+					</p>
+					<p><img src="img/zend.png" style="border-style:none;margin-right:50px"> <img src="img/roguewave.png" style="border-style:none;margin-left:50px"></p>
+				</section>
+
+
+				<section>
+				<h3>About me</h3>
+				<table>
+					<tr>
+						<td width="35%" style="padding-right:0;vertical-align: top">
+							<img src="img/enrico.png">
+						</td>
+						<td>
+							<ul>
+								<li>Developer since 1996</li>
+								<li>Senior Software Engineer at <a href="http://www.zend.com" target="_blank">Zend</a>, a Rogue Wave Company</li>
+								<li>Core team of <a href="http://apigility.org">Apigility</a> and <a href="http://framework.zend.com" target="_blank">ZF</a></li>
+								<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+								<li>Research Programmer at <a href="http://ivi.uva.nl/">Amsterdam University</a></li>
+								<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+							</ul>
+						</td>
+					</tr>
+				</table>
+			</section>
+
+				<section>
+				          <h2>HTTP is the foundation<br />of the web</h2>
+
+				          <ul>
+				            <li class="fragment">A client sends a <em>request</em></li>
+				            <li class="fragment">A server returns a <em>response</em></li>
+				          </ul>
+				        </section>
+
+				        <section>
+				          <h2>HTTP messages</h2>
+
+				          <div class="fragment">
+				            <h4>Request</h4>
+
+				            <pre><code class="lang-http" data-trim>
+GET /path HTTP/1.1
+Host: example.com
+Accept: application/json
+				            </code></pre>
+				          </div>
+
+				          <div class="fragment">
+				            <h4>Response</h4>
+
+				            <pre><code class="lang-http" data-trim>
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"foo":"bar"}
+				            </code></pre>
+				          </div>
+				        </section>
+
+				        <section>
+				          <h2>Frameworks model messages</h2>
+
+				          <p>But every framework does it differently.</p>
+
+				          <pre><code class="php" data-trim>
+$method = $request->getMethod();
+$method = $request->getRequestMethod();
+$method = $request->method;
+				          </code></pre>
+				        </section>
+
+				        <section>
+				          <h2>PSR-7</h2>
+				          <h3>Shared HTTP Message Interfaces</h3>
+				          <img src="img/phpfig.jpg">
+				        </section>
+
+				        <section>
+				          <h2>Request</h2>
+
+				          <pre><code class="lang-php" data-trim>
+$method     = $request->getMethod();
+$accept     = $request->getHeader('Accept');
+$path       = $request->getUri()->getPath();
+$controller = $request->getAttribute('controller');
+				          </code></pre>
+				        </section>
+
+				        <section>
+				          <h2>Response</h2>
+
+				          <pre><code class="lang-php" data-trim>
+$response->getBody()->write('Hello world!');
+$response = $response->withStatus(200, 'OK')
+            ->withHeader('Content-Type', 'text/plain');
+				          </code></pre>
+				        </section>
+
+			<section>
+					<h2>Middleware</h2>
+					<p>A function that gets a request and generates a response</p>
+<pre><code data-trim class="php">
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+function (Request $request, Response $response) {
+  // manipulate $request to generate a $response
+  return $response;
+}
+</code></pre>
+			</section>
+
+			<section>
+					<h2>Web application</h2>
+					<p><img src="img/webapp.png" style="border-style:none"></p>
+			</section>
+
+			<section>
+					<h2>Middleware app</h2>
+					<p><img src="img/middleware_app.png" style="border-style:none"></p>
+			</section>
+
+			<section>
+					<h2>Middleware in zend-expressive</h2>
+					<p>Use an additional callable during the invoke ($next)</p>
+<pre><code data-trim class="php">
+class Middleware
+{
+  public function __invoke(
+    \Psr\Http\Message\ServerRequestInterface $request,
+    \Psr\Http\Message\ResponseInterface $response,
+    callable $next = null
+  ) {
+    // do something before
+    if ($next) {
+        $next($request, $response);
+    }
+    // do something after
+    return $response;
+  }
+}
+</code></pre>
+<aside class="notes">
+	In Connect and ExpressJS they use $next.
+	For PHP: Slim.
+</aside>
+				</section>
+
+				<section>
+									<h2>Zend-expressive</h2>
+									<ul>
+										<li class="fragment">PSR-7 support (using <a href="https://github.com/zendframework/zend-diactoros">zend-diactoros</a>)</li>
+										<li class="fragment">Middleware using a callable ($next):
+<pre><code data-trim>
+function ($request, $response, $next)
+</code></pre></li>
+										<li class="fragment">Piping workflow (using <a href="https://github.com/zendframework/zend-stratigility">zend-stratigility</a>)</li>
+										<li class="fragment">Features: routing, container-interop, templating, error handling</li>
+										<li class="fragment">Stable version 1.0 (28 Jan 2016)</li>
+									</ul>
+								</section>
+
+								<section>
+									<h2>Components layer</h2>
+									<img src="img/expressive_stack.png" style="border-style:none">
+								</section>
+
+								<section>
+									<h2>Flow overview</h2>
+									<img src="img/expressive.png" style="border-style:none;background:white">
+								</section>
+
+								<section>
+									<h2>Basic example</h2>
+<pre><code class="lang-php" data-trim>
+use Zend\Expressive\AppFactory;
+
+chdir(dirname(__DIR__));
+require 'vendor/autoload.php';
+
+$app = AppFactory::create();
+$app->get('/', function ($request, $response, $next) {
+  $response->getBody()->write('Hello, world!');
+  return $response;
+});
+
+$app->pipeRoutingMiddleware();
+$app->pipeDispatchMiddleware();
+$app->run();
+</code></pre>
+				<aside class="notes">
+				Expressive's Application class provides two separate middlewares, one for routing, and one for dispatching middleware matched by routing.
+				This allows to slip in validations between the two activities if desired.
+				They are not automatically piped to the application, however, to allow exactly that situation, which means they must be piped manually.
+				</aside>
+								</section>
+
+				        <section>
+									<h2>Routing</h2>
+									<ul>
+										<li><a href="https://github.com/zendframework/zend-expressive-router">zend-expressive-router</a> component</li>
+										<li>Dynamic routing capabilities using your favorite libraries</li>
+										<li>Adapters: <a href="https://github.com/zendframework/zend-expressive-aurarouter">Aura.router</a>, <a href="https://github.com/zendframework/zend-expressive-fastroute">FastRoute</a>, <a href="https://github.com/zendframework/zend-expressive-zendrouter">Zend-Mvc</a> router</li>
+									</ul>
+<pre><code class="lang-php" data-trim>
+namespace Zend\Expressive\Router;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+interface RouterInterface
+{
+  public function addRoute(Route $route);
+  public function match(Request $request);
+  public function generateUri($name, array $substitutions = []);
+}
+</code></pre>
+								</section>
+
+								<section>
+										<h2>Routing example</h2>
+<pre><code class="lang-php" data-trim>
+// $app is an instance of Zend\Expressive\AppFactory
+
+$app->get('/', function ($request, $response, $next) {
+  $response->getBody()->write('Hello, world!');
+  return $response;
+});
+</code></pre>
+								</section>
+
+								<section>
+									<h2>Piping Middleware</h2>
+<pre><code class="lang-php" data-trim>
+// $app is an instance of Zend\Expressive\AppFactory
+
+// Executed in all the requests
+$app->pipe($apiMiddleware);
+$app->pipe('middleware service name');
+
+// Pipe to a specific URL
+$app->pipe('/api', $apiMiddleware);
+$app->pipe('/api', 'middleware service name');
+
+// Error handler
+$app->pipeErrorHandler('error handler service name');
+$app->pipeErrorHandler('/api', 'error handler service name');
+</code></pre>
+				<aside class="notes">
+				A middleware is pipe into a queue (FIFO), and dequeued in order until a middleware returns a response instance
+				If none returns a response instance, execution is delegated to a "final handler", an error handler.
+				Pipe will only match literal paths.
+				Middleware may be specified by service name, and zend-expressive will lazy-load the service only when the middleware is invoked.
+				</aside>
+								</section>
+
+								<section>
+									<h2>Using a Service Container</h2>
+<pre><code class="lang-php" data-trim>
+use Zend\Expressive\AppFactory;
+use Zend\ServiceManager\ServiceManager;
+
+$container = new ServiceManager();
+$container->setFactory('HelloWorld', function ($container) {
+  return function ($request, $response, $next) {
+    $response->write('Hello, world!');
+    return $response;
+  };
+});
+
+$app = AppFactory::create($container);
+$app->get('/', 'HelloWorld');
+</code></pre>
+				<p><small>We support <a href="https://github.com/container-interop/container-interop">container-interop</a></small></p>
+				<aside class="notes">
+				Expressive encourages the use of Dependency Injection, and defines its Application class to compose a container-interop ContainerInterface instance.
+				The container is used to lazy-load middleware, whether it is piped (Stratigility interface) or routed (Expressive)
+				</aside>
+								</section>
+
+								<section>
+									<h2>Templating</h2>
+									<ul>
+										<li>While Expressive does not assume templating is being used, it provides a templating abstraction.</li>
+										<li>Default adapters: <a href="https://github.com/zendframework/zend-expressive-platesrenderer">Plates</a>, <a href="https://github.com/zendframework/zend-expressive-twigrenderer">Twig</a>, <a href="https://github.com/zendframework/zend-expressive-zendviewrenderer">Zend-View</a></li>
+									</ul>
+<pre><code class="lang-php" data-trim>
+namespace Zend\Expressive\Template;
+
+interface TemplateRendererInterface
+{
+  public function render($name, $params = []);
+  public function addPath($path, $namespace = null);
+  public function getPaths();
+  public function addDefaultParam($templateName, $param, $value);
+}
+</code></pre>
+								</section>
+
+								<section>
+									<h2>Error Handling</h2>
+									<ul>
+										<li>Expressive provides error handling out of the box, via zend-stratigility's <a href="https://github.com/zendframework/zend-stratigility/blob/master/src/FinalHandler.php">FinalHandler</a></li>
+										<li>This pseudo-middleware is executed in the following conditions:
+											<ul>
+												<li>If the middleware stack is exhausted, and no middleware has returned a response</li>
+												<li>If an error has been passed via $next(), but not handled by any error middleware</li>
+											</ul>
+										</li>
+									</ul>
+								</section>
+
+								<section>
+									<h2>Templated Errors</h2>
+<pre><code class="lang-php" data-trim>
+use Zend\Expressive\Application;
+use Zend\Expressive\Plates\PlatesRenderer;
+use Zend\Expressive\TemplatedErrorHandler as TErrHandler;
+
+$plates = new PlatesRenderer();
+$plates->addPath(__DIR__ . '/templates/error', 'error');
+$final = new TErrHandler($plates, 'error::404', 'error::500');
+
+$app = new Application($router, $container, $final);
+</code></pre>
+								</section>
+
+								<section>
+									<h2>Using Whoops</h2>
+										<ul>
+											<li><a href="http://filp.github.io/whoops/">whoops</a> is a library for providing a more usable UI around exceptions and PHP errors</li>
+											<li>We provide integration with this library through <a href="https://github.com/zendframework/zend-expressive/blob/master/src/WhoopsErrorHandler.php">Zend\Express\WhoopsErrorHandler</a></li>
+										</ul>
+								</section>
+
+			<section>
+				<h1>Hands-on</h1>
+			</section>
+
+			<section>
+				<h2>Setup</h2>
+				<p>Use Vagrant to set up the environment.</p>
+				<p>Clone the repository <a href="https://github.com/ezimuel/zend-expressive-workshop">ezimuel/zend-expressive-workshop</a></p>
+<pre><code data-trim class="bash">
+git clone https://github.com/ezimuel/zend-expressive-workshop
+</code></pre>
+				<p>Run composer:</p>
+<pre><code data-trim class="bash">
+cd zend-expressive-workshop
+composer install
+</code></pre>
+				<p>Turn on Vagrant:</p>
+<pre><code data-trim class="bash">
+vagrant up
+</code></pre>
+			</section>
+
+			<section>
+				<p>The PHP server runs at <a href="http://localhost:8080">localhost:8080</a></p>
+				<p><img src="img/expressive-home.png" style="border-style:none"></p>
+			</section>
+
+			<section>
+												<h2>Application tree</h2>
+<pre>
+├── config
+│   └── autoload
+├── data
+│   └── cache
+├── public
+├── src
+│   └── App
+│       └── Action
+├── templates
+│   ├── app
+│   ├── error
+│   └── layout
+└── test
+</pre>
+											</section>
+
+											<section>
+												<h2>Config</h2>
+												<p>The application configuration files, including:</p>
+												<ul>
+													<li>the registered services (middleware, db, etc);</li>
+													<li>the template file paths;</li>
+													<li>the error handler;</li>
+												</ul>
+											</section>
+
+											<section>
+												<h2>Front Controller</h2>
+												<p>public/index.php <small>(programmatic version)</small></p>
+<pre><code class="lang-php" data-trim>
+$container = require 'config/container.php';
+$app = $container->get(Application::class);
+
+// Pipeline
+$app->pipe(Helper\ServerUrlMiddleware::class);
+// here add custom middleware ...
+$app->pipeRoutingMiddleware();
+$app->pipe(Helper\UrlHelperMiddleware::class);
+$app->pipeDispatchMiddleware();
+
+// Routes
+$app->get('/', Action\HomePageAction::class, 'home');
+$app->get('/api/ping', Action\PingAction::class, 'api.ping');
+$app->run();
+</code></pre>
+											</section>
+
+											<section>
+												<h2>Middleware Factory</h2>
+												<p>src/App/Action/HomePageFactory.php</p>
+<pre><code class="lang-php" data-trim>
+class HomePageFactory
+{
+  public function __invoke(ContainerInterface $container)
+  {
+    $router   = $container->get(RouterInterface::class);
+    $template = ($container->has(TemplateRendererInterface::class))
+      ? $container->get(TemplateRendererInterface::class)
+      : null;
+
+    return new HomePageAction($router, $template);
+  }
+}
+</code></pre>
+											</section>
+
+											<section>
+												<h2>Middleware Action</h2>
+												<p>src/App/Action/HomePageAction.php</p>
+<pre><code class="lang-php" data-trim>
+class HomePageAction
+{
+  private $router;
+  private $template;
+
+  public function __construct(
+    Router\RouterInterface $router,
+    Template\TemplateRendererInterface $template = null
+  ){
+    $this->router   = $router;
+    $this->template = $template;
+  }
+
+  public function __invoke(
+    ServerRequestInterface $request,
+    ResponseInterface $response,
+    callable $next = null
+  ){
+    $data = [];
+    // insert value into $data
+    return new HtmlResponse($this->template->render(
+      'app::home-page',
+      $data
+    ));
+  }
+}
+</code></pre>
+			</section>
+
+				<section>
+					<h2>Build a conference website</h2>
+					<ul>
+						<li>Publish 3 web pages: speakers, talks, and schedule</li>
+						<li>The data are stored in <i>data/db.sqlite3</i></li>
+						<li>We want to have the following URLs:</li>
+						<ul>
+							<li>/speaker[/{id:}]</li>
+							<li>/talk[/{id:}]</li>
+							<li>/schedule</li>
+						</ul>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Exercise 1</h2>
+					<ul>
+						<li>Add routes for speakers, talks, and schedule</li>
+						<li>Add links to navbar in <i>templates\layout\default.phtml</i></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Solution 1</h2>
+					<p>You can check out a solution in <i>exercise1</i> branch:</p>
+<pre><code data-trim class="bash">
+git checkout exercise1
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Model Layer</h2>
+					<p>We use a Model layer to interact with the database</p>
+					<p>We built a Speaker and Talk classes in <i>src/App/Model</i></p>
+				</section>
+
+				<section>
+					<h2>Exercise 2</h2>
+					<ul>
+						<li>Build the Talk Action and Factory</li>
+						<li>Build the pages to resolve <i>/talk</i> and <i>talk[/{id:\d+}]</i> URLs</li>
+						<li><small>Note: have a look at the SpeakerAction and templates</small></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Solution 2</h2>
+					<p>You can check out a solution in <i>exercise2</i> branch:</p>
+<pre><code data-trim class="bash">
+git checkout exercise2
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Exercise 3</h2>
+					<ul>
+						<li>Build the Schedule page</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Solution 3</h2>
+					<p>You can check out a solution in <i>exercise3</i> branch:</p>
+	<pre><code data-trim class="bash">
+	git checkout exercise3
+	</code></pre>
+				</section>
+
+				<section>
+					<h2>Thanks!</h2>
+					<p>Please rate this workshop at:<br><a href="https://legacy.joind.in/19407">https://legacy.joind.in/19407</a></p>
+					<p><img src="img/zend.png" style="border-style:none;margin-right:50px"> <img src="img/roguewave.png" style="border-style:none;margin-left:50px"></p>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>

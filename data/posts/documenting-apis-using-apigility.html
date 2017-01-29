@@ -1,0 +1,77 @@
+<post date="2014-03-31" title="Documenting APIs with Apigility" sub="Taking advantages of auto-documentation in Apigility" img="apigility_doc.jpg">
+
+<p>One of the cool feature of <a href="http://www.apigility.org">Apigility</a> is the ability to generate API documentation using a simple UI. The documentation is generated in HTML format, and optionally in <a href="https://helloreverb.com/developers/swagger">Swagger</a> format. The API documentation is reported in Apigility in the top bar, under the menu "API Docs".</p>
+
+<p align="center"><img src="/img/post/apigility_doc_1.png" alt="API documentation" /></p>
+
+<p>In order to generate the API documentation you need to insert some desciptions before. All the information to edit are reported in the <strong>Documentation tab</strong> on each REST or RPC service.</p>
+
+<p align="center"><img src="/img/post/apigility_doc_2.png" alt="REST API documentation" /></p>
+
+<p>For each service and for each HTTP method, you can specify a description of the action. In case of RESTful services you can also specify different information for an Entity and a Collection. An interesting feature of the API documentation is the ability to generate the <strong>Response Body</strong> specification from the configuration, using the "generate from configuration" button.</p>
+
+<p align="center"><img src="/img/post/apigility_doc_3.png" alt="Generate from documentation" /></p>
+
+<p>This button read the configuration of the API and propose a JSON response based on the fields specified (the fields are documented under the <strong>Fields</strong> tab of each REST and RPC service). Of course, you can edit the response body changing the output, if you need.</p>
+
+<p>Once you have added some API descriptions, you can go to the "API Docs" menu and show the API documentation (in our case version 1).</p>
+
+<p align="center"><img src="/img/post/apigility_doc_4.png" alt="API documentation in HTML format" /></p>
+
+<p>You will see all the API documentation in HTML format, using the <a href="http://getbootstrap.com/">Bootstrap 3</a> template.
+You can expand and collapse the information on each HTTP method clicking on the name. All the API documentation are exposed in the <strong>/apigility/documentation</strong> base URL.</p>
+
+<h2>How to install the Swagger adapter</h2>
+
+<p>To activate the <a href="https://helloreverb.com/developers/swagger">Swagger</a> adapter for the API documentation, you need to add the following dependency in the composer.json file (in the <i>require</i> field):</p>
+
+<pre><code class="json">"zfcampus/zf-apigility-documentation-swagger": "~1.0-dev"
+</code></pre>
+
+<p>and execute the <strong>composer update</strong> commmand.</p>
+
+<p>After the installation of <strong>zf-apigility-documentation-swagger</strong> you need to enable this module in the <strong>config/application.config.php</strong> file. You have to edit this configuration file and add the following line after the <i>'ZF\Apigility\Documentation'</i>:</p>
+
+<pre><code class="php">'ZF\Apigility\Documentation\Swagger',
+</code></pre>
+
+<p>Now you can go to the Swagger documentation from the welcome screen, clicking on the <i>Swagger API documentation</i> button, or going directly to the  <strong>/apigility/swagger</strong> URL.
+To show the Swagger UI render you have to select the API service version and you will see a web page like the one reported in Figure 5 (using <a href="https://github.com/wordnik/swagger-ui">Swagger UI</a>).</p>
+
+<p align="center"><img src="/img/post/apigility_doc_5.png" alt="API documentation in Swagger format" /></p>
+
+
+<h2>Customizing the API documentation module</h2>
+
+<p>The API documentation feature is offered by Apigility using the <a href="https://github.com/zfcampus/zf-apigility-documentation">zf-apigility-documentation</a>  module, written in <a href="http://framework.zend.com">Zend Framework 2</a>. This module provide an object model of all captured documentation information, including:</p>
+
+<ul>
+	<li>All APIs available</li>
+    <li>All Services available in each API</li>
+    <li>All Operations available in each API</li>
+    <li>All required/expected Accept and Content-Type request headers, and expected Content-Type response header, for each available API Service Operation.</li>
+    <li>All configured fields for each service</li>
+</ul>
+
+<p>Moreover, it provides a configurable MVC endpoint for returning documentation:</p>
+
+<ul>
+	<li>documentation will be delivered in a serialized JSON structure by default</li>
+	<li>end-users may configure alternate/additional formats via content-negotiation</li>
+</ul>
+
+<p>If you want to customize the format of your API documentation you can have a look at the source code of the <a href="https://github.com/zfcampus/zf-apigility-documentation-swagger">zf-apigility-documentation-swagger</a> module. Basically, you need to create a custom route for your format (see the Swagger <a href="https://github.com/zfcampus/zf-apigility-documentation-swagger/blob/master/config/module.config.php">module.config.php</a>) and use the <a href="https://github.com/zfcampus/zf-apigility-documentation/blob/master/src/ApiFactory.php">ZF\Apigility\Documentation\ApiFactory</a> to access the data for the API documentation services. The view model to implement needs to manage a <a href="https://github.com/zfcampus/zf-apigility-documentation-swagger/blob/master/view/zf-apigility-documentation-swagger/list.phtml">list</a> view and a <a href="https://github.com/zfcampus/zf-apigility-documentation-swagger/blob/master/view/zf-apigility-documentation-swagger/show.phtml">show</a> view, that's it.</p>
+
+<p>All the API documentation formats are driven by <strong>content negotiation</strong> (using the <a href="https://github.com/zfcampus/zf-content-negotiation">zf-content-negotiation</a> module). For instance, to get the API documentation data in Swagger format you can use the content negotiation "application/vnd.swagger+json".</p>
+
+<p>For example, if you want to retrieve the API documentation data in JSON format you can use the following request (using <a href="https://httpie.org/">HTTPie</a>):</p>
+
+<pre><code class="bash">http GET http://localhost:8888/apigility/documentation[/api]/[service] 'Accept:application/json'
+</code></pre>
+
+<p>where <strong>[api]</strong> is the name of the API and <strong>[service]</strong> is the name of the REST or RPC service. To get the same result in Swagger format you can use the following request:</p>
+
+<pre><code class="bash">http GET http://localhost:8888/apigility/documentation/[api]/[service] 'Accept:application/vnd.swagger+json'
+</code></pre>
+
+</post>

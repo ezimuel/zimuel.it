@@ -1,0 +1,179 @@
+<post date="2012-05-30" title="Cryptography with Zend Framework 2" sub="Simplify the usage of cryptography for PHP" img="cryptography_zf2.jpg">
+
+<p>Recently we released the new <strong>Zend\Crypt</strong> component in the 2.0.0beta4 version of the <a href="http://framework.zend.com/zf2">Zend Framework</a> project (<a href="http://framework.zend.com/zf2/blog/entry/Zend-Framework-2-0-0beta4-Released" target="_blank">the release notes of beta4 can be found here</a>).
+The aim of this component is to offer cryptographic tools for security needs, like encryption and decryption of sensitive data, how to safely store of user�s passwords, generation of cryptographic keys based on user's password, etc.</p>
+
+<p><strong>Zend\Crypt</strong> contains the following components:</p>
+<ul>
+<li> <strong>Zend\Crypt\Password</strong>, for the management of passwords (secure storage, compatibility with other systems);</li>
+<li> <strong>Zend\Crypt\Key\Derivation</strong>, for the generation of cruptographic keys based on a user's passwords;</li>
+<li> <strong>Zend\Crypt\Symmetric</strong>, implementation of symmetric ciphers (based on the Mcrypt extension);</li>
+<li> <strong>Zend\Crypt\PublicKey</strong>, implementation of public key ciphers like the RSA and the  Diffie-Hellman key exchange algorithm (based on the OpenSSL extension);</li>
+<li> <strong>Zend\Crypt\BlockCipher</strong>, a friendly encryption/decryption schema using a block cipher in CBC mode + HMAC authentication;</li>
+<li> <strong>Zend\Crypt\Hash</strong>, implementation of the hash algorihtms available in the Hash extension (included in the standard distribution of PHP 5.3);</li>
+<li> <strong>Zend\Crypt\Hmac</strong>, implementation of the HMAC algorithms available in the Mhash extension (included in the standard distribution of PHP 5.3).</li>
+</ul>
+
+<p>Moreover the <strong>ZF 2.0.0beta4</strong> includes a new <strong>Zend\Math</strong> namespace shipped with a more robust pseudo-random number generator.</p>
+
+<p>In this post I would like to present some of the new capabilities of the Zend\Crypt component. Let's start with the main course: how to encrypt and decrypt data using strong cryptography standards.</p>
+
+<h2>Encrypt and decrypt data</h2>
+
+<p>In order to simplify the usage of cryptography in PHP we released the <strong>Zend\Crypt\BlockCipher</strong> class that can be used to encrypt and decrypt sensitive data (string) with a very simple API.
+This class is able to encrypt a string using a block cipher providing also authentication using the <a href="http://en.wikipedia.org/wiki/HMAC" target="_blank">HMAC</a> algorithm. The encryption+authentication schema is implemented using the <strong>encrypt-then-authenticate</strong> methodology. The default encryption mode is <a href="http://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Cipher-block_chaining_.28CBC.29" target="_blank">CBC</a> and the default HMAC algorithm is <a href="http://en.wikipedia.org/wiki/SHA-2" target="_blank">SHA256</a>.
+We know that there are special <a href="http://en.wikipedia.org/wiki/Authenticated_encryption" target="_blank">Authenticated Encryption</a> algorithms like <a href="http://en.wikipedia.org/wiki/OCB_mode" target="_blank">OCB</a>, <a href="http://en.wikipedia.org/wiki/EAX_mode" target="_blank">EAX</a>, <a href="http://en.wikipedia.org/wiki/CCM_mode" target="_blank">CCM</a>, <a href="http://en.wikipedia.org/wiki/Galois/Counter_Mode" target="_blank">GCM</a> that can guarantee a better security but for general use cases CBC+HMAC is considered secure. Anyway, in the future, we would like to add the support of such advanced algorithms in Zend Framework.</p>
+
+<p>The usage of <strong>Zend\Crypt\BlockCipher</strong> is very simple, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\BlockCipher;
+
+$cipher = BlockCipher::factory('mcrypt', array('algorithm' =&gt; 'aes'));
+$cipher-&gt;setKey('this is the encryption key');
+$text      = 'This is the message to encrypt';
+$encrypted = $cipher-&gt;encrypt($text);
+
+printf(&quot;Encrypted text: %sn&quot;, $encrypted);
+</code></pre>
+
+<p>We used the <a href="http://en.wikipedia.org/wiki/Advanced_Encryption_Standard" target="_blank">AES</a> encryption algorithm implemented by the mcrypt adapter (Zend\Crypt\Symmetric\Mcrypt). The Zend\Crypt\BlockCipher try to use always the maximum key size for the encryption algorithm (in the case of AES that size is 256 bits). The encryption key is generated using the <a href="http://en.wikipedia.org/wiki/PBKDF2" target="_blank">PBKDF2</a> algorithm starting from the user's key. PBKDF2 is also used to generate the authenticatin key used by HMAC. The default <a href="http://en.wikipedia.org/wiki/Padding_%28cryptography%29" target="_blank">padding schema</a> for the block cipher is PKCS7 (<a href="http://tools.ietf.org/html/rfc5652#section-6.3" target="_blank">RFC 5652</a>).
+The output of the previous snippest code is something like that:</p>
+
+<pre><code>
+Encrypted text: c093e6d72510c6ac14a075638b7ee6725abd599413a3562aaa51b9e71c941045kHwdIDRC7kOZeKGKTib115X5rMN/VM0vYQ13HkyPUaSo0S9reCUEpyp+T3oW9+wh
+</code></pre>
+
+<p>The encrypted text is encoded in <a href="http://en.wikipedia.org/wiki/Base64">Base64</a>. The output is the concatenation of the HMAC value, followed by the random <a href="http://en.wikipedia.org/wiki/Initialization_vector" target="_blank">Initialization Vector (IV)</a> and finally by the encrypted text. Because we use a random IV we guarantee that each output is different, even using the same encryption key and the same plaintext.</p>
+
+<p>The array passed to the mcrypt adapter, using the factory, is the array of options. You can specify the following parameters:</p>
+<ul>
+<li><strong>algorithm (or algo)</strong>, the name of the block cipher to use (the supported algorithms are: aes (rijndael-128), rijndael-192, rijndael-256, blowfish, twofish, des, 3des, cast-128, cast-256, saferplus, serpent);</li>
+<li><strong>mode</strong>, the encryption mode of the block cipher (the supported modes are: cbc, cfb, ctr, ofb, nofb, ncfb);</li>
+<li><strong>key</strong>, the encryption key;</li>
+<li><strong>IV (or salt)</strong>, the <i>Initialization Vector (IV)</i> also known as <i>salt</i>;</li>
+<li><strong>padding</strong>, the padding mode (right now we support only the PKCS7 standard);</li>
+</ul>
+
+<p>The default values are: AES cipher, random IV, PKCS7 padding.</p>
+
+<p>In order to decrypt a ciphertext we can use the decrypt() method of BlockCipher, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\BlockCipher;
+
+$cipher = BlockCipher::factory('mcrypt', array('algorithm' =&gt; 'aes'));
+$cipher-&gt;setKey('this is the encryption key');
+$ciphertext = 'c093e6d72510c6ac14a075638b7ee6725abd599413a3562aaa51b9e71c941045kHwdIDRC7kOZeKGKTib115X5rMN/VM0vYQ13HkyPUaSo0S9reCUEpyp+T3oW9+wh';
+$encrypted  = $cipher-&gt;decrypt($text);
+
+printf(&quot;Decrypted text: %sn&quot;, $encrypted);
+</code></pre>
+
+<p>The output of the previous example should be <i>"Decrypted text: This is the message to encrypt"</i>.</p>
+
+<h2>Store a user's password</h2>
+
+<p>In the past we usually stored user's password using the <a href="">MD5</a> value of the password + a random salt (for instance, <a href="/build-a-secure-login-with-zend-framework/">see my post of some years ago</a>). Unfortunately, this technique is not secure anymore because the modern CPU are very fast and they are able to provide dictionary attacks in a small amount of time (think also to the power of cloud computing, read this article <i><a href="http://codahale.com/how-to-safely-store-a-password/">How To Safely Store A Password</a></i> for more info).
+The best alternative is to use a special algorithm like <a href="http://en.wikipedia.org/wiki/Bcrypt" target="_blank">bcrypt</a>, that can guarantee a secure hash value of a user's password. Bcrypt is considered secure because it's very slow, the computational time of a single hash can be of some seconds. That means a brute force or a dictionary attack needs huge amount of time to be completed.</p>
+
+<p>The bcrypt algorithm is implemented by the <strong>Zend\Crypt\Password\Bcrypt</strong> class (using the <a href="http://php.net/manual/en/function.crypt.php" target="_blank">crypt()</a> function of PHP). The usage is very simple, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\Password\Bcrypt;
+
+$bcrypt   = new Bcrypt();
+$password = $bcrypt-&gt;create('password');
+printf (&quot;Password: %sn&quot;, $password);
+</code></pre>
+
+<p>The output of the <strong>create()</strong> method of Bcrypt is a string of 60 characters, like that:</p>
+
+<pre><code>
+$2a$14$yuD/3v/IdbdOZ0pfIjUyJ.a0Q4Ue0UTAoES2BIgK0Op1Z6IF9.aTS
+</code></pre>
+
+<p>If we try to execute the example code two times we will obtain different outputs. That because if we don't provide a salt value the Bcrypt class will generate a random salt each time. If you want to assign a salt value you can use the <strong>setSalt()</strong> method (the salt must be a string of at least 16 bytes).</p>
+
+<p>The <strong>bcrypt</strong> algorithm needs a special <i>cost</i> parameter. This parameter specify the amount of work (cycles) to do in order to elaborate the hash value. More cycles means more computational time and consequently more security. The <i>cost</i> parameter is an integer value from 4 to 31. The default value is 14, that is equivalent to 1 second of computation using an Intel Core i5 CPU at 3.3 Ghz. You can specify a different cost value using the <strong>setCost()</strong> method, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\Password\Bcrypt;
+
+$bcrypt = new Bcrypt();
+$bcrypt-&gt;setSalt(15);
+
+$start    = microtime(true);
+$password = $bcrypt-&gt;create('password');
+$end      = microtime(true);
+
+printf (&quot;Password  : %sn&quot;, $password);
+printf (&quot;Exec. time: %.2fn&quot;, $end-$start);
+</code></pre>
+
+<p>Try to execute this snippet code on your server and you will see how many seconds you need to get the hash value. For a security reason, I suggest to use a cost value that guarantee at least <strong>1 second</strong> of computation.</p>
+
+<p>The salt and cost parameters can also be specified, using an array, during the constructor of <strong>Zend\Crypt\Password\Bcrypt</strong>, as follow:</p>
+
+<pre><code class="php">use Zend\Crypt\Password\Bcrypt;
+
+$bcrypt = new Bcrypt(array(
+	'salt' =&gt; '1234567890123456',
+	'cost' =&gt; 16
+));
+</code></pre>
+
+<p>If we want to check if a password is valid against an hash value we can use the <strong>verify($password, $hash)</strong> method, where <i>$password</i> is the value to check and <i>$hash</i> is the hash value generated using bcrypt. This method returns <i>true</i> if the password is valid and <i>false</i> otherwise.</p>
+
+<h2>Generate a cryptography key from a user's password</h2>
+
+<p>You should never use a user's password as cryptographic key, for instance to encrypt some data, this is a well known security principle. User's passwords are bad for two reasons:</p>
+<ol>
+<li>they are not random, at all;</li>
+<li>they generate a small space of keys (low entropy).</li>
+</ol>
+<p>For the first reason, think about your personal passwords and you will easy understand why they are not random. For the second reason, imagine that we have a user's password of 8 characters, the key space should be, in theory, <strong>256^8</strong> (because each ASCII character has 256 possibile values) but if you use only letters, numbers and a couple of other symbols we have a space key of about <strong>65^8</strong>, less than a quarter of the previous one (in practice, the key space is even smaller because they are not random).</p>
+
+<p>That said, if you want to use a user's password, in your cryptogtaphic schema, you should always use a key derivation function (or KDF). KDF are special algorithms that generate cryptographic keys, of any size, from a user's password. One of the most used KDF is the <a href="http://en.wikipedia.org/wiki/PBKDF2" target="_blank">PBKDF2</a> algorithm (specified in <a href="http://tools.ietf.org/html/rfc2898" target="_blank">RFC 2898</a>).</p>
+<blockquote>
+PBKDF2 applies a pseudorandom function, such as a cryptographic hash, cipher, or HMAC to the input password or passphrase along with a salt value and repeats the process many times to produce a derived key, which can then be used as a cryptographic key in subsequent operations. The added computational work makes password cracking much more difficult, and is known as key stretching.
+</blockquote>
+<p>The PBKDF2 is implemented in <strong>Zend\Crypt\Key\Derivation\Pbkdf2</strong>. The usage is very simple, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\Key\Derivation\Pbkdf2,
+    Zend\Math\Math;
+
+$salt = Math::randBytes(32);
+$pass = 'this is the password of the user';
+$hash = Pbkdf2::calc('sha256', $pass, $salt, 10000, 32);
+</code></pre>
+
+<p>The first parameter of the Pbkdf2 is the hash algorithm to use, <i>sha256</i> in our example, the second parameter is the user's password, the third parameter is the salt value, that in our example is a random set of bytes (generated using <strong>Zend\Math\Math</strong>), the fourth parameter is the number of iterations to use in the algorithm and the last parameter is the size of key to be generated, in bytes.</p>
+
+<p>Regarding the number of iterations, this parameter is related with the CPU speed. It's not so easy to identify the minimum number of iteration, that can guarantee a good security, for the Pbkdf2 algorithm (you can read <a href="http://security.stackexchange.com/questions/3959/recommended-of-iterations-when-using-pkbdf2-sha256" target="_blank">this interesting discussion</a> on stackexchange). We used a value of 10'000 but this number must be evaluated on your system. For instance, if you want to have a computation time of about 1 second using an Intel Core i5 CPU at 3.3Ghz you need at least 100'000 iterations.</p>
+
+<p>The output of the Pbkdf2::calc() function is in binary format.</p>
+
+<h2>Random number generator</h2>
+
+<p>In the beta4 of ZF2 we have refactored the <strong>Zend\Crypt\Math</strong> component in the new <strong>Zend\Math</strong> component. That because we are going to support additional mathematical functions in the future of ZF2 that are not related to cryptography.
+We added a couple of static methods in the Zend\Math\Math class that can be used to generated a random set of bytes or random numbers. These functions are:</p>
+
+<ul>
+<li>Zend\Math\Math::randBytes($length, $strong = false)</li>
+<li>Zend\Math\Math::rand($min, $max, $strong = false)</li>
+</ul>
+
+<p>The first method <strong>randBytes()</strong> can be used to generate a random set of bytes with size <i>$length</i>. The optional parameter $strong indicates that we want use a strong random number generator, for cryptographic purposes. This feature is provided using the <strong>openssl_random_pseudo_bytes()</strong> function of the OpenSSL extension. If the OpenSSL extension is not installed it tries to use the the <strong>mcrypt_create_iv()</strong> function of the Mcrypt extension. And finally, if Mcrypt is not installed it uses the <strong>mt_rand()</strong> function of PHP (that is not secure for cryptographic purposes). If $strong is set to true and you try to generate random values in a PHP environment without the OpenSSL and the Mcrypt extensions you will get an Exception.</p>
+
+<p>The second method <strong>rand()</strong> is able to generate a random integer value between the range $min, $max.</p>
+
+<h2>Future works</h2>
+
+<p>We are going to extend the features of Zend\Crypt and in particular adding more key derivation algorithms (we just commited the SaltedS2k in the <a href="https://github.com/zendframework/zf2" target="_blank">ZF2 github repository</a>), more padding methods for the block ciphers, more password algorithms (we would like to offer adapters for specific systems) and a better support for the public key encryption algorithms.</p>
+
+<p>Moreover, we have already some proposals in place to improve the random number generator of Zend\Math using the <a href="http://tools.ietf.org/html/rfc4086" target="_blank">RFC 4086</a> recommendations (for more information you can read <a href="http://framework.zend.com/wiki/display/ZFDEV2/RFC+-+Random+number+generator" target="_blank">here</a> the proposal of Denis Portnov).</p>
+
+<p>We hope that the new <strong>Zend\Crypt</strong> class of Zend Framework 2 will help developers to use, or start to use, cryptography in their PHP projects.</p>
+
+<h2>Thanks</h2>
+
+<p>I would like to thanks <a href="http://blog.ircmaxell.com/" target="_blank">Anthony Ferrara</a>, the author of the <a href="https://github.com/ircmaxell/PHP-CryptLib" target="_blank">PHP-CryptLib</a> project for the inspiration that his project gave me, during the implementation of <strong>Zend\Crypt</strong>. The PHP-CryptLib is an awesome project for the implementation of cryptographic algorithms in pure PHP. The Zend\Crypt don't want to be an alternative to PHP-CryptLib, the scopes are different. Zend\Crypt offers a basic crypto component for ZF2 users. PHP-CryptLib is a full cryptography libraries for advanced use cases.</p>
+
+</post>

@@ -1,0 +1,55 @@
+<post date="2010-04-15" title="PHP session sharing using Zend Server and MS SQL Server" sub="How to scale a PHP application on Windows" img="session-sharing.jpg">
+
+<p>If you have a PHP application that use session data and you want to scale using multiple servers or build a reliable architecture you have to share the session data between all the servers in some ways. One of the easy way to do that is to use a load balancer to distribute the traffic between multiple servers and use a database to share the session data.</p>
+
+<p>In the open source community there are many examples on how to share session data using database but i didn’t found an example using MS SQL Server with the new Microsoft SQL Server Driver for PHP so I decided to write a new session handler from scratch. I used the last version 1.1 of the Microsoft SQL Server Driver. I tested the session handler using two Windows Server 2003 running IIS6 and Zend Server 5 CE. I used a SQL Server 2005 database to share the PHP session between the two servers (see diagram below).</p>
+
+<p align="center"><img src="/img/post/share_session.jpg"></p>
+
+<h2>The custom session handler</h2>
+
+<p>I built a PHP class named <a href="/media/SQLSrv_Session.zip">SQLSrv_Session</a> with the following static methods: open, close, read, write, destroy, and gc (garbage collector). Basically these are the methods that you have to provide to built a custom PHP session handler (see the <a href="http://us3.php.net/manual/en/function.session-set-save-handler.php">session_set_save_handler</a> function of PHP for more info). For security reasons I provided a method (sqlsrv_escape) to escape the session data to write in the MS SQL Server. After the definition of the class I used the register_shutdown_function of PHP to call the session_write_close. This is a fix for a issue of the PHP session manager as of PHP 5.0.5 (see the comments on the pgp.net page of session_set_save_handler). Finally, in order to change the default session handler to the SQLSrv_Session I used the session_set_save_handler as follow:</p>
+
+<pre><code class="php">ini_set('session.save_handler', 'user');
+session_set_save_handler(array('SQLSrv_Session', 'open'),
+                         array('SQLSrv_Session', 'close'),
+                         array('SQLSrv_Session', 'read'),
+                         array('SQLSrv_Session', 'write'),
+                         array('SQLSrv_Session', 'destroy'),
+                         array('SQLSrv_Session', 'gc'));
+</code></pre>
+
+<p>In this way we configure PHP to use a custom session handler (user) and choose the new methods of the session manager.</p>
+<p>If you want to use the SQLSrv_Session handler you have to include the SQLSrv_Session.php in of all of your scripts (i suggest to use require_once “SQLSrv_Session.php”; at the beginning of your PHP scripts).</p>
+
+<p>After that you can use the PHP session as usual using the $_SESSION global variable. The PHP session manager will use the SQLSrv_Session class to manage the session data instead of the default one.</p>
+
+<h2>Installation</h2>
+
+<p>In order to use this custom session handler you have to enable the sqlsrv extension from the Zend Server web interface (or in the php.ini if you are a fan of the old school). To manage PHP extensions using Zend Server is very simple, you can do everything using the web interface, under the menu Server Setup > Extensions. You can Turn on the extension with a click and restart the PHP environment with another click on the button Restart PHP, located at the bottom of the page.
+To use the sqlsrv extension ver. 1.1 you must have installed the Microsoft SQL Server 2008 Native Client. You can check the system requirements of the SQL Server Driver for PHP <a href="https://msdn.microsoft.com/en-US/library/cc296170(v=SQL.90).aspx">here</a>.</p>
+
+<p>After that, to start to use the custom session handler you have to create a database in your MS SQL Server to store the session data.
+This database will contain one table with the following structure:</p>
+
+<pre><code class="sql">session_id VARCHAR(32) as primary key
+session_value VARCHAR(MAX) NULL
+updated_on DATETIME not NULL
+</code></pre>
+
+<p>To configure the <a href="/media/SQLSrv_Session.zip">SQLSrv_Session</a> class to use the table created in the previous step you have to use the following constants: DB_HOST, DB_USER, DB_PASS, DB_NAME, and DB_SESSION_TABLE. After that you will be able to use the custom session handler.</p>
+
+<h2>Testing</h2>
+
+<p>In <a href="/media/SQLSrv_Session.zip">SQLSrv_Session</a> packages you can find a simple PHP script to test the custom session handler. This script basically try to use the session handler storing some random values into the $_SESSION. You can check the data stored in your SQL Server database to see if all is working good. To test the destroy method of the custom session handler you have to call the test.php?destroy (passing the destroy parameter in the URL).
+Please let me be clear on this point, I provided only some test on this class and I used it only in a simple PHP scenario. If you are planning to use this code on a production environment you have to provide a complete test on your application. However I will be happy to help you if you will find issue using this class, so please comment this post.</p>
+
+<h2>Performance consideration</h2>
+
+<p>The solution provided in this post is very simple, easy to install and manage, these are its advantages. If your PHP application is used in an high traffic scenario and you need performance this solution is not good enough. It’s a well known fact that share session data using a database is not so fast, there are better ways to do that. For instance, using Memcached to share data in memory or using the Session Cluster of Zend Server 5, especially for business critical scenarios. However, if you are looking for an easy and cheapest solution to share PHP session between multiples IIS servers, using MS SQL Server, this can be actually a good solution for you.</p>
+
+<h2>Special thanks</h2>
+
+<p>I would like to thanks <a href="https://www.linkedin.com/in/gobal-deva-0337253">Gobal Deva</a> to helping me to test the SQLSrv_Session class.</p>
+
+</post>

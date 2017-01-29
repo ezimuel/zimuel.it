@@ -1,0 +1,112 @@
+<post date="2013-01-18" title="ZFTool" sub="A command line tool for Zend Framework 2" img="zftool.jpg">
+
+<p><strong>ZFTool</strong> is a command line tool to manage applications written in Zend Framework 2. This tool is still in development and we just released an early version that you can start to use. With this version of the tool you can:</p>
+
+<ul>
+<li>create a ZF2 project, installing a skeleton application;</li>
+<li>create a new module inside an existing application;</li>
+<li>get the list of all the modules installed inside an application;</li>
+<li>get the configuration file of a ZF2 application;</li>
+<li>install the ZF2 library choosing a specific version.</li>
+</ul>
+
+<p>You can install ZFTool using <a href="http://getcomposer.org">composer</a> or <a href="https://github.com/zendframework/ZFTool">github</a>. Moreover, we compiled it in a PHAR file. You can download the <strong>zftool.phar</strong> from this address <a href="https://packages.zendframework.com/zftool.phar">https://packages.zendframework.com/zftool.phar</a>. If you want to use the <i>zftool.phar</i> I suggest to add it in your PATH environment. In this way you can execute the <i>zftool.phar</i> script wherever you are.</p>
+
+<p>To install using composer you have to execute the following command in a shell environment:</p>
+
+<pre><code class="bash">composer require zendframework/zftool:dev-master
+</code></pre>
+
+<p>You can also install manually using github, following the next steps:</p>
+
+<ol>
+<li>clone using <i>"git clone https://github.com/zendframework/ZFTool.git"</i> or <a href="https://github.com/zendframework/ZFTool/archive/master.zip">download zipball</a>;</li>
+<li>extract to <i>"vendor/ZFTool"</i> in your ZF2 application;</li>
+<li>edit your <i>"config/application.config.php"</i> and add "ZFTool" to modules array key.</li>
+</ol>
+
+<p>After the installation you can execute the <strong>zf.php</strong> file inside the root folder of ZFTool or you can use the <strong>zftool.phar</strong> (if you have installed ZFTool using composer or github you need to compile the zftool.phar executing the script <i>"bin/create-phar"</i>).</p>
+
+<h1>Create a new ZF2 project</h1>
+
+<p>You can create a new ZF2 project using the following command:</p>
+
+<pre><code class="bash">zf.php create project &lt;path&gt;
+# or
+zftool.phar create project &lt;path&gt;
+</code></pre>
+
+<p>This command will install the <a href="https://github.com/zendframework/ZendSkeletonApplication">Zend Skeleton Application</a> inside the specified <i>path</i>.</p>
+
+<h1>Create a new module</h1>
+
+<p>Imagine that you want to create a new module "Test" on a local ZF2 application, you can execute the following command:</p>
+
+<pre><code class="bash">zf.php create module Test
+# or
+zftool.phar create module Test
+</code></pre>
+
+<p>If you want to create a new module inside an application installed in a different path, you can add the path as last parameter:</p>
+
+<pre><code class="bash">zf.php create module Test &lt;path&gt;
+# or
+zftool.phar create module Test &lt;path&gt;
+</code></pre>
+
+<h1>Get the list of installed modules</h1>
+
+<p>You can get the list of all the modules installed in a ZF2 project using the following command:</p>
+
+<pre><code class="bash">zf.php modules &lt;path&gt;
+# or
+zftool.phar modules &lt;path&gt;
+</code></pre>
+
+<p>This command must be executed from the root folder of a ZF2 application.</p>
+
+<h1>Get the configuration file of a ZF2 application</h1>
+
+<p>You can read the configuration file (application.config.php) of a ZF2 application using the command:</p>
+
+<pre><code class="bash">zf.php config &lt;path&gt;
+# or
+zftool.phar config &lt;path&gt;
+</code></pre>
+
+<p>The output configuration is reported using the <i>print_r</i> function of PHP.</p>
+
+<h1>Install the ZF2 library</h1>
+
+<p>Using ZFTool you can install the Zend Fraemework 2 library choosing a specific version.
+For instance, you can install the latest version of ZF in a specific path using the following command:</p>
+
+<pre><code class="bash">zf.php install zf &lt;path&gt;
+# or
+zftool.phar install zf &lt;path&gt;
+</code></pre>
+
+<p>If you want to install a specific version, you need to specify the version as last parameter.
+For instance, you can install the 2.0.4 version of ZF using the following command:</p>
+
+<pre><code class="bash">zf.php install zf &lt;path&gt; 2.0.4
+# or
+zftool.phar install zf &lt;path&gt; 2.0.4
+</code></pre>
+
+<p>Basically, you can install all the <strong>tag</strong> version specified in the <a href="https://github.com/zendframework/zf2">ZF2 github repository</a>
+(the name used for the version is obtained removing the <i>"release-"</i> string from the tag name; for instance, the tag <i>"release-2.0.0"</i> is equivalent to the version number <i>"2.0.0"</i>).</p>
+
+<h1>Compile the zftool.phar</h1>
+
+<p>You can compile the zftool.phar file executing the following command:</p>
+
+<pre><code class="bash">
+bin/create-phar
+</code></pre>
+
+<p>This command will compile the ZFTool project in the <i>zftool.phar</i> file under the <i>bin</i> folder.</p>
+
+<p>For more information about ZFTool you can read the <a href="https://github.com/zendframework/ZFTool/blob/master/README.md">README.md</a> in github.</p>
+
+</post>

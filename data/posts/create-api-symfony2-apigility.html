@@ -1,0 +1,225 @@
+<post date="2013-12-04" title="APIs with Apigility and Symfony 2" sub="How to use Apigility with Symfony framework" img="apigility_symfony.jpg">
+
+<p><a href="http://www.apigility.org">Apigility</a> is an open source project to simplify the implementation of HTTP API for PHP applications. The project has been implemented in <a href="http://framework.zend.com">Zend Framework 2</a> but it can be used to create API for any PHP application. To prove this aspect, I show in this post how to use Apigility to create a RESTful API for an existing <a href="http://symfony.com">Symfony2</a> project.</p>
+
+<p>This use case is an extension of the proof of concept example that has been presented at the <a href="http://www.afup.org/pages/forumphp2013/">PHP Forum 2013</a> in Paris, during the talk <a href="https://speakerdeck.com/ezimuel/symfony2-and-zend-framework-2-the-perfect-team">"Symfony2 and Zend Framework 2: the perfect team"</a> of <a href="http://www.stefankoopmanschap.com/">Stefan Koopmanschap</a> and myself.</p>
+
+<p>I would like to thanks <a href="http://odino.org/">Alessandro Nadalin</a> for the suggestion about the bootstrap part of Symfony2.</p>
+
+<h2>Installation</h2>
+
+<p>You can install the Symfony2 application and the API implementation at the following github repository <a href="https://github.com/ezimuel/apigility-symfony2-use-case">https://github.com/ezimuel/apigility-symfony2-use-case</a>. This repository includes the Symfony2 application in the folder <a href="https://github.com/ezimuel/apigility-symfony2-use-case/tree/master/symfony2app">symfony2app</a> and the Apigility API in the folder <a href="https://github.com/ezimuel/apigility-symfony2-use-case/tree/master/apigilityapi">apigilityapi</a>.</p>
+
+<p>You need to install the Symfony2 application before to start using Apigility. To install the Symfony2 application follow the steps reported in this <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/symfony2app/README.md">README.md</a> file.</p>
+
+<p>After this installation, please verify that you can execute the web application in a browser, if you are using PHP 5.4+ you can execute it using the following command line, from the symfony2app folder:</p>
+
+<pre><code class="bash">php app/console server:run
+</code></pre>
+
+<p>This command executes the internal PHP web server on localhost with default port 8000. You can check if the application is working correctly pointing your browser to <a href="http://localhost:8000/post">http://localhost:8000/post</a>. Try to add some post using the web interface in order to populate the database with some data.</p>
+
+<p>If everything is working fine you can now install the API implementation provided by Apigility. You need to follow the instructions reported in this <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/README.md">README.md</a> file.</p>
+
+<p>After this step you are ready to execute the RESTful API using a web server! If you are using PHP 5.4.8+ you can use the internal PHP web server using the following command, from the apigilityapi folder:</p>
+
+<pre><code class="bash">php -S 0:8080 -t public/ public/index.php
+</code></pre>
+
+<h2>Consuming the RESTful API</h2>
+
+<p>The CRUD operations offered by the Symfony2 web application are now exposed as RESTful API, thanks to Apigility. You can access it using the following HTTP actions:</p>
+
+<pre><code>
+GET    /post        get the entire list of posts
+GET    /post[/:id]  get the post specified by id
+POST   /post        create a new post
+PUT    /post[/:id]  update a post
+PATCH  /post[/:id]  partial update a post
+DELETE /post[/:id]  delete the post specified by id
+</code></pre>
+
+<p>For instance, you can get the lists of all the posts from the command line using the following <a href="http://httpie.org/">HTTPie</a> instruction:</p>
+
+<pre><code class="bash">http GET http://localhost:8080/post
+</code></pre>
+
+<p>You should retrieve a result like that:</p>
+
+<pre><code class="json">HTTP/1.1 200 OK
+Connection: close
+Content-Type: application/hal+json
+Host: localhost:8080
+
+{
+    &quot;_embedded&quot;: {
+        &quot;post&quot;: [
+            {
+                &quot;_links&quot;: {
+                    &quot;self&quot;: {
+                        &quot;href&quot;: &quot;http://localhost:8080/post/1&quot;
+                    }
+                },
+                &quot;content&quot;: &quot;test&quot;,
+                &quot;id&quot;: 1,
+                &quot;publish_date&quot;: {
+                    &quot;date&quot;: &quot;2013-11-29 15:40:00&quot;,
+                    &quot;timezone&quot;: &quot;Europe/Berlin&quot;,
+                    &quot;timezone_type&quot;: 3
+                },
+                &quot;title&quot;: &quot;test&quot;
+            },
+			...
+		]
+    },
+    &quot;_links&quot;: {
+        &quot;self&quot;: {
+            &quot;href&quot;: &quot;http://localhost:8080/post&quot;
+        }
+    }
+}
+</code></pre>
+
+<p>As you can see the body response is represented in <a href="http://tools.ietf.org/html/draft-kelly-json-hal-06">JSON HAL</a> format, the default format of Apigility.</p>
+
+<p>One of the cool feature of Apigility is the error management, for instance if you try to execute a POST on the /post resource without the JSON data reported in the body, you will get the following error message:</p>
+
+<pre><code class="json">http POST http://localhost:8080/post
+
+HTTP/1.1 400 Bad Request
+Connection: close
+Content-Type: application/api-problem+json
+Host: localhost:8080
+
+{
+    &quot;detail&quot;: &quot;You need a title and a content at least&quot;,
+    &quot;httpStatus&quot;: 400,
+    &quot;problemType&quot;: &quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html&quot;,
+    &quot;title&quot;: &quot;Bad Request&quot;
+}
+</code></pre>
+
+<p>This error is managed directly by Apigility and you don't need to do nothing in the source code of your API.</p>
+
+<p>If you want to add a valid post you need to specify the title and the content as JSON parameter. Using <a href="http://httpie.org/">HTTPie</a> you can execute the following command:</p>
+
+<pre><code class="bash">http --json POST http://localhost:8080/post title=Foo content=Bar
+</code></pre>
+
+<p>The HTTP response will be something like that:</p>
+
+<pre><code class="json">HTTP/1.1 201 Created
+Connection: close
+Content-Type: application/hal+json
+Host: localhost:8080
+Location: http://localhost:8080/post/4
+
+{
+    &quot;_links&quot;: {
+        &quot;self&quot;: {
+            &quot;href&quot;: &quot;http://localhost:8080/post/4&quot;
+        }
+    },
+    &quot;content&quot;: &quot;Bar&quot;,
+    &quot;id&quot;: 4,
+    &quot;publish_date&quot;: {
+        &quot;date&quot;: &quot;2013-12-04 16:00:03&quot;,
+        &quot;timezone&quot;: &quot;Europe/Berlin&quot;,
+        &quot;timezone_type&quot;: 3
+    },
+    &quot;title&quot;: &quot;Foo&quot;
+}
+</code></pre>
+
+<p>Basically, using Apigility we exposed the <b>model part</b> of the Symfony2 project reusing the original code of the application. This use case can be interesting for existing Symfony2 projects where you want to have a RESTful API with versioning, error handling, authentication, etc ready in minutes using Apigility.</p>
+
+<p>In the next section I explain the procedure that we used to create this API.</p>
+
+<h2>How to use Apigility</h2>
+
+<p>Apigility can be used to create API using a simple web user interface (built with AngularJS). In order to execute this UI you need to enable the development mode of Apigility executing the following command, inside the root folder of the <a href="https://github.com/zfcampus/zf-apigility-skeleton">apigility skeleton application</a>:</p>
+
+<pre><code class="bash">php public/index.php development enable
+</code></pre>
+
+<p>After that, you can execute Apigility configuring your web server to point to the public folder of the project. If you are using PHP 5.4.8+ you can use the internal web server of PHP using the following command:</p>
+
+<pre><code class="bash">php -S 0:8080 -t public/ public/index.php
+</code></pre>
+
+<p>If you point your browser to <a href="http://localhost:8080">http://localhost:8080</a>, you should see the welcome page of Apigility.</p>
+
+<p>To create a new API you can click on New API button. In our case, we created a new <b>ApiBlog</b> API.
+Now you can choose the ApiBlog API and create a new Service, choose the <b>REST Service</b> option. Because we want to build API for an existing Symfony2 project, we need to choose a <b>Code-Connected</b> service, we choosed the Post name for this service.</p>
+
+<p>To create a REST service you need to insert some information, like the <b>Route to match</b>, the <b>HTTP methods allowed for ENTITIES</b> and for <b>COLLECTIONS</b>, the <b>Identifier name</b>, etc. In our case we choosed the following set:</p>
+
+<ul>
+	<li><b>Route to match:</b> /post[/:id]</li>
+	<li><b>Identifier name:</b> id</li>
+	<li><b>Collection name:</b> post</li>
+</ul>
+
+<p>We used the default values for the other parameters.</p>
+
+<p>After this step we need to customize the Apigility configuration to use the <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/symfony2app/src/Blog/ExampleBundle/Entity/Post.php">Post</a> entity provided by the Symfony2 project. The idea is to expose the Post entity, coming from the Symfony2 application, as RESTful resource.</p>
+
+<p>The <strong>first step</strong> is to add to the <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/composer.json">composer.json</a> of Apigility all the dependencies used by the <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/symfony2app/composer.json">composer.json</a> of the Symfony2 application. In this way, we can reuse all the existing classes of the Symfony2 project in Apigility.</p>
+
+<p>The <strong>second step</strong> is to edit the <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/module/ApiBlog/config/module.config.php">config/module.config.php</a> file included in the ApiBlog that we just created (all the API produced by Apigility are shipped as ZF2 module in the /module folder).</p>
+
+<p>You need to change the <i>zf-rest['entity-class']</i> value to the Symfony2 entity <b>'Blog\\ExampleBundle\\Entity\\Post'</b> (<a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/module/ApiBlog/config/module.config.php#L45">line 45</a> of our module.config.php) and the <i>zf-hal['metadata_map']</i> value of 'ApiBlog\\V1\\Rest\\PostEntity' to <b>'Blog\\ExampleBundle\\Entity\\Post'</b>. You need also to add the value <b>'hydrator' => 'ClassMethods'</b> to this Post entity (<a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/module/ApiBlog/config/module.config.php#L72">line 72</a> of our module.config.php).</p>
+
+<p>The <strong>third and last step</strong> is to edit the <b>PostResource</b> class of Apigility to add all the specific RESTful actions for each HTTP methods. If we want to expose all the CRUD operations of the Symfony2 application we need to fill the following methods:</p>
+
+<ul>
+	<li><b>create($data)</b>, POST /post</li>
+	<li><b>delete($id)</b>, DELETE /post[/:id]</li>
+	<li><b>fetch($id)</b>, GET /post[/:id]</li>
+	<li><b>fetchAll($params)</b>, GET /post</li>
+	<li><b>patch($id, $data)</b>, PATCH /post[/:id]</li>
+	<li><b>update($id, $data)</b>, PUT /post[/:id]</li>
+</ul>
+
+<p>The idea is to bootstrap the Symfony2 application (without the HTTP request management) in the constructor of the <b>PostResource</b> class and store the specific service that we need in a protected variable, in order to be used in the specific methods to retrieve data from the businees logic of the Symfony2 application.</p>
+
+<p>In our case, the code that we used to bootstrap the Symfony2 application is reported below:</p>
+
+<pre><code class="php">public function __construct()
+{
+    $symfonyApp = '/path/to/your/symfony2app';
+    require_once $symfonyApp . '/app/AppKernel.php';
+
+    $kernel = new \AppKernel('prod', true);
+    $kernel-&gt;loadClassCache();
+    $kernel-&gt;boot();
+
+    $this-&gt;doctrine = $kernel-&gt;getContainer()
+                             -&gt;get('doctrine')
+                             -&gt;getManager();
+}
+</code></pre>
+
+<p>The usage of the AppKernel class of Symfony2 is very similar to the code used in the <a href="https://github.com/symfony/symfony-standard/blob/master/web/app.php">web/app.php</a> file of the Symfony Standard Edition distribution.</p>
+
+<p>In our case, we used the <b>doctrine manager service</b> because our Symfony2 application used a simple entity of <a href="http://www.doctrine-project.org/">Doctrine</a> as model. According to your Symfony2 application, you can get the specific service/object that you need to consume in the API from the Container of your application ($kernel->getContainer()).</p>
+
+<p>Using the $this->doctrine object we can reuse the Post Entity of the Symfony2 application in all the API methods. You can see how we implemented our PostResource class, <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/module/ApiBlog/src/ApiBlog/V1/Rest/Post/PostResource.php">here</a>.</p>
+
+<p>Note that we can return the post entity object as result in all the API methods because we specified the usage of <b>ClassMethods</b> hydrator in our configuration file <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/apigilityapi/module/ApiBlog/config/module.config.php#L72">config/module.config.php</a>.</p>
+
+<h2>Conclusion</h2>
+
+<p>In our use case we showed how to reuse an existing Symfony2 application and consume the Model part to build a RESTful API. We decided to bootstrap the Symfony2 application because in this way we are really reusing existing code, especially if the Model part of your application uses different service and not only Doctrine entities.</p>
+
+<p>Regarding the performance of this approach I can say that they are related to the specific implementations of the Symfony2 application. Generally speaking, the performance of the Symfony2 bootstrap part are good thanks to the lazy loading mechanism of the framework. Of course, you can reduce the bootstrap part for the API removing the services and components that are not necessary for the Model part.</p>
+
+<p>If you are interested in that optimization I suggest to have a look at the <a href="https://github.com/ezimuel/apigility-symfony2-use-case/blob/master/symfony2app/app/AppKernel.php">app/AppKernel.php</a> and the <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpKernel/Kernel.php">Symfony\Component\HttpKernel\Kernel</a> component of Symfony2.</p>
+
+<p>In the case that your Symfony2 application uses only Doctrine as Model you can also use directly the ZF2 module of Doctrine2 to create the API, instead of bootstrap the Symfony2 application. Recently, <a href="https://twitter.com/tom_h_anderson">Tom Anderson</a> developed a tool to create an Apigility API from Doctrine entities in scope, you can find this project <a href="https://github.com/etreedb/etreedb-api">here</a>.</p>
+
+<p>The use case presented in this post can be considered a first approach to the usage of Apigility to create API for Symfony2, I'm sure we will see more examples in the next future.</p>
+
+<p>To have more info about Apigility and to follow the future implementations of the project you can visit the web page <a href="http://apigility.org">apigility.org</a>.</p>
+
+</post>

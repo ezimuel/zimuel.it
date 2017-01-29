@@ -1,0 +1,187 @@
+<post date="2012-03-08" img="agilezen.jpg" title="AgileZen with ZF2" sub="How to integrate Project Management in PHP">
+
+<p>Recently the Zend Framework team has started to use the Kanban system of <a href="http://www.agilezen.com/" target="_blank">AgileZen</a> to manage the <a href="http://framework.zend.com/zf2">ZF2 project</a>. In order to communicate, in real time, all the development phases of Zend Framework 2, we built a <a href="http://framework.zend.com/zf2/board">dev board page</a>, in the Zend Framework web site, that reads the content of the AgileZen board using the <a href="http://dev.agilezen.com/" target="_blank">REST API</a> of that service.</p>
+<p>We implemented a service component, <strong>ZendServiceAgileZen</strong> to facilitate the usage of the AgileZen's API.</p>
+<p>In this post I would like to introduce the usage of the ZendServiceAgileZen component to understand how to use the API of AgileZen in PHP.</p>
+
+<h2>What's AgileZen?</h2>
+
+<p><a href="http://www.agilezen.com/" target="_blank">AgileZen</a> is an on-line project management tool. AgileZen organizes your project visually, letting you see the big picture, while the project management tool keeps you focused on the tasks at hand. Whether you're on a team or flying solo, AgileZen helps your project management become more organized and efficient by employing strategies from lean, agile, and kanban methodologies. AgileZen helps you understand how well you're doing with agile project management, and can be customized as you find better ways to work.</p>
+
+<h2>ZendServiceAgileZen</h2>
+
+<p>We released the ZendServiceAgileZen component in the beta3 version of Zend Framework 2, you can find it here: <a href="">http://packages.zendframework.com/</a>.
+In order to use this component you have two options:</p>
+
+<ol>
+<li>download the entire Zend Framework 2.0.0beta3 library;</li>
+<li>use <a href="http://pear.php.net/manual/en/pyrus.php">pyrus</a> to install only the ZendServiceAgileZen component (with all the dependencies).</li>
+</ol>
+
+<p>The first option is straightforward, so we are going to discuss how to use the second one. I assume that you are using a GNU/Linux box (if not, you have to translate only the os commands, the pyrus syntax is multi-platform).<br /> In order to use pyrus we have to install it. You can download <a href="http://packages.zendframework.com/pyrus.phar">here</a> the pyrus.phar package from the ZF website. You can use wget to download the package from the command line:</p>
+
+<pre><code class="bash">$ mkdir AgileZen
+$ cd AgileZen
+$ wget http://packages.zendframework.com/pyrus.phar
+$ chmod +x pyrus.phar
+</code></pre>
+
+<p>Now we can add the Zend Framework repository using the following command:</p>
+
+<pre><code class="bash">$ ./pyrus.phar . channel-discover packages.zendframework.com
+</code></pre>
+
+<p>Finally we can install the ZendServiceAgileZen component with the command:</p>
+
+<pre><code class="bash">$ ./pyrus.phar . install zf2/Zend_Service_AgileZen-beta
+</code></pre>
+
+<p>Pyrus will install the ZendServiceAgileZen component in the php subfolder. In that folder you will find also other components used by the AgileZen service (the dependency classes).</p>
+
+<h2>The architecture of ZendServiceAgileZen</h2>
+
+<p>The AgileZen component of Zend Framework 2 is an object oriented implementation of the AgileZen's API. That means we have the following classes:</p>
+
+<ul>
+<li>ZendService\AgileZen\Resources\Attachment</li>
+<li>ZendService\AgileZen\Resources\Comment</li>
+<li>ZendService\AgileZen\Resources\Invite</li>
+<li>ZendService\AgileZen\Resources\Phase</li>
+<li>ZendService\AgileZen\Resources\Project</li>
+<li>ZendService\AgileZen\Resources\Role</li>
+<li>ZendService\AgileZen\Resources\Story</li>
+<li>ZendService\AgileZen\Resources\Tag</li>
+<li>ZendService\AgileZen\Resources\Task</li>
+<li>ZendService\AgileZen\Resources\User</li>
+<li>ZendService\AgileZen\AgileZen</li>
+<li>ZendService\AgileZen\Container</li>
+<li>ZendService\AgileZen\Entity</li>
+</ul>
+
+<p>The <strong>ZendServiceAgileZenAgileZen</strong> is the main class that you have to instantiate to call the AgileZen's API. The results of the API are tipically Resources. Resources are organized into two basic types: entity resources (<strong>Entity</strong>) and container resources (<strong>Container</strong>). An entity resource refers to a single piece of information in AgileZen, like a project or a story. A container resource refers to a resource that contains one or more entity resources, like the list of stories in a project or the list of tags assigned to a story.
+We followed the naming convention reported in the <a href="http://dev.agilezen.com/concepts/overview.html">AgileZen API documentation</a>. The <strong>Entity</strong> is an abstract class and the <strong>Resources</strong> (Attachment, Comment, Invite, Phase, Project, Role, Story, Tag, Task, User) are the concrete implementations. The <strong>Container</strong> is a class that implements an array of entities, implementing the PHP interfaces <a href="http://php.net/manual/en/class.countable.php">Countable</a>, <a href="http://it.php.net/manual/en/class.iterator.php">Iterator</a> and <a href="http://it.php.net/manual/en/class.arrayaccess.php">ArrayAccess</a>.</p>
+
+<h2>How to use the service</h2>
+
+<p>Below are reported some examples of how to use the ZendServiceAgileZen component. In order to use the ZF AgileZen class you have to configure the autoload of the classes. For instance, in the following example we show how to use the standard autoloader of ZF2 (<a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md">PSR-0 standard</a>).</p>
+
+<pre><code class="php">// if you used the pyrus installation, point to the php subfolder
+require_once '/path to ZF2 library/Zend/Loader/StandardAutoloader.php';
+$loader = new Zend\Loader\StandardAutoloader(array(
+    'Zend' =&gt; '/path to ZF2 library/Zend/',
+));
+$loader-&gt;register();
+</code></pre>
+
+<p>With the autoloader in place we can start to use the AgileZen service.</p>
+
+<h3>- List all the projects of an account</h3>
+
+<p>This is an example to retrieve all the project names of a specific AgileZen account.</p>
+
+<pre><code class="php">use ZendService\AgileZen\AgileZen;
+
+$apiKey='insert here the API key';
+$agileZen = new AgileZen($apiKey);
+
+$projects = $agileZen-&gt;getProjects();
+if (!$agileZen-&gt;isSuccessful()) {
+    die(&quot;Error code    : &quot; . $agileZen-&gt;getErrorCode() .
+        &quot;nError message : &quot; . $agileZen-&gt;getErrorMsg());
+}
+
+echo &quot;List of projects in AgileZen:n&quot;;
+foreach ($projects as $prj) {
+    echo $prj-&gt;getName(). &quot;n&quot;;
+}
+</code></pre>
+
+<p>In order to execute this example code you have to insert your API key of AgileZen. This key can be generated in the Settings > Developer menu of the AgileZen backend.
+The error management of the API calls is provided using the <strong>isSuccessful()</strong> method that returns true if the operation was successfully, false otherwise. If we have an error we can use <strong>getErrorCode()</strong> or <strong>getErrorMsg()</strong> to retrieve the error code (the HTTP status code) and the error message.<br />The results of the <strong>getProject()</strong> call is an instance of <strong>Container</strong> contains an array of <strong>ResourceProject</strong> objects.
+We can iterate on the Container object ($projects) to get the name of each project, using the <strong>getName()</strong> method.</p>
+
+<h3>- Get all the phases and stories of a project</h3>
+
+<p>In this example we show how to get all the phases and stories of a specific AgileZen project.</p>
+
+<pre><code class="php">use ZendService\AgileZen\AgileZen;
+
+$apiKey='insert here the API key';
+$agileZen = new AgileZen($apiKey);
+
+$phases = $agileZen-&gt;getPhases('insert here the Id of the project');
+if (!$agileZen-&gt;isSuccessful()) {
+    die ('Error: ' . $agileZen-&gt;getErrorMsg());
+}
+
+foreach ($phases as $phase) {
+    printf (&quot;Phase (%d): %sn&quot;, $phase-&gt;getId(), $phase-&gt;getName());
+    $stories = $phase-&gt;getStories();
+    if ($agileZen-&gt;isSuccessful()) {
+        foreach ($stories as $story) {
+            printf (&quot;Story (%d): %sn&quot;, $story-&gt;getId(), $story-&gt;getText());
+        }
+    } else {
+        printf (&quot;Error reading the stories, %s&quot;, $agileZen-&gt;getErrorMsg());
+    }
+    echo &quot;n&quot;;
+}
+</code></pre>
+
+<h3>- Get all the details and tags of a story</h3>
+
+<p>If you want to retrieve the details and the tags of a story you have to specify additional parameters. These parameters are called <strong>enrichments</strong> in the AgileZend API terminology (see <a href="http://dev.agilezen.com/concepts/enrichments.html">here</a> for more details).<br />
+In the example below we retrieve all the id, name, detail and tags of each story of all the phases of a project.</p>
+
+<pre><code lang="php">use ZendService\AgileZen\AgileZen;
+$apiKey='insert here the API key';
+$agileZen = new AgileZen($apiKey);
+
+$phases = $agileZen-&gt;getPhases('insert here the Id of the project');
+if (!$agileZen-&gt;isSuccessful()) {
+    die ('Error: ' . $agileZen-&gt;getErrorMsg());
+}
+
+foreach ($phases as $phase) {
+    printf (&quot;Phase (%d): %sn&quot;, $phase-&gt;getId(), $phase-&gt;getName());
+    $params = array (
+        'with' =&gt; 'details,tags'
+    );
+    $stories = $phase-&gt;getStories($params);
+    if ($agileZen-&gt;isSuccessful()) {
+        foreach ($stories as $story) {
+            $tags = '';
+            foreach ($story-&gt;getTags() as $tag) {
+                $tags.= $tag-&gt;getName() . ', ';
+            }
+            $tags = substr($tags,0,-2);
+            printf (&quot;Story (%d): %sn&quot;, $story-&gt;getId(), $story-&gt;getText());
+            printf (&quot;Details : %sn&quot;, $story-&gt;getDetails());
+            printf (&quot;Tags : %sn&quot;, $tags);
+        }
+    } else {
+        printf (&quot;Error reading the stories, %s&quot;, $agileZen-&gt;getErrorMsg());
+    }
+    echo &quot;n&quot;;
+}
+</code></pre>
+
+<p>The enrichment parameters are passed as array to the <strong>getStories($params)</strong> method. The key and the value of this parameters follow the specification of the AgileZend API. The parameters can also include <a href="http://dev.agilezen.com/concepts/filters.html">Filter</a> and <a href="http://dev.agilezen.com/concepts/pagination.html">Pagination</a> options of AgileZen. For instance, if you want to filter the stories that contain the tag 'foo', you can use the parameter:</p>
+
+<pre><code class="php">$params = array (
+        'where' =&gt; 'tag:foo'
+);
+</code></pre>
+
+<p>in the getStories($params) call. In the <strong>where</strong> filter syntax you can specify multiple conditions using logical operators (and, or, not). For instance, you can specify a filter to get all the stories with tag 'foo' and status 'blocked' with the following syntax:</p>
+
+<pre><code class="php">$params = array (
+        'where' =&gt; '(tag:foo and status:blocked)'
+);
+</code></pre>
+
+<p>If you want to limit the size of the result you can use the pagination parameter. The pagination contains the key <strong>page</strong> and <strong>pageSize</strong>. By default, you will receive the first page of 100 entities in the container. To request the next page, you can supply the page argument. You can also change the size of the page using the pageSize parameter (max=1000).</p>
+
+<h2>Conclusion</h2>
+
+<p>In this post I showed hot to use AgileZen API in PHP using a service component of Zend Framework 2 (ZendServiceAgileZen). I explored only a subset of all functionalities of the AgileZen component. The complete reference guide of the AgileZen service component, as part of the ZF2 manual,  is still in development. I have to remember that Zend Framework 2 is released as a beta and also the API of AgileZen are still in beta. These releases are not intended for production use, please use at your own risk.</p>

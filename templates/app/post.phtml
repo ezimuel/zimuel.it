@@ -1,0 +1,29 @@
+<?php $this->layout('layout::default', [
+  'additionalCss' => [ '/js/highlight/styles/agate.css' ],
+  'additionalJs'  => [ '/js/highlight/highlight.pack.js']
+]) ?>
+
+<header class="intro-header" style="background-image: url('/img/post/<?php echo $img ?>')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1><?php echo $title ?></h1>
+                    <hr class="post">
+                    <span class="subheading"><?php echo $sub ?></span>
+                    <span class="meta">Posted by <a rel="author" href="http://www.zimuel.it/about.me">Enrico Zimuel</a> on <?php echo date("F d, Y", strtotime($date)) ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <?php echo $content ?>
+      </div>
+    </div>
+  </div>
+</article>

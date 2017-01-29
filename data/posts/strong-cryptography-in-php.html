@@ -1,0 +1,171 @@
+<post date="2011-01-02" title="Strong cryptography in PHP" sub="How to use cryptography in PHP" img="crypto_php.jpg">
+
+<p><i>Update</i>: I edited the article on Jan 2017 with some additional information about PHP 7 and other security considerations.</p>
+
+<p>If you are a professional web developer, security is an important aspect of your job. If you are planning to store some critical or sensitive data in your web application, like passwords, credit cards, etc, you should use <em>strong cryptography</em>.</p>
+
+<h2>What is <em>strong cryptography</em>?</h2>
+
+<p><em>Strong cryptography</em> is the usage of systems or components that are considered highly resistant to cryptanalysis, the study of methods to cracking the codes.</p>
+<p>Theoretically speaking, if we encrypt and store sensitive data in a database, file, or whatever, a malicious attacker will not be able to decrypt it without the knowledge of the key.</p>
+<p>How can we proof that an attacker will not be able to decrypt the data? We cannot. We can only trust in the security of well known algorithms.</p>
+
+
+<p>Even a well known algorithm can become non-secure, for instance <a href="https://en.wikipedia.org/wiki/Data_Encryption_Standard">DES</a>, a FIST standard in 1976 is not secure since 1998, when the Electronic Frontier Foundation (EFF) built a machine, the <a href="http://en.wikipedia.org/wiki/EFF_DES_cracker">EFF DES cracker</a>, to perform a brute force search of DES cipher's key space. This machine was able to find the key of an encrypted message in 56 hours.</p>
+<p>Today, thanks to GPU power we can decrypt DES in seconds! That means is very important to be updated with the security news of encryption algorithm.</p>
+
+<h2>Why we should use <em>standard algorithm</em>?</h2>
+
+<p>The answer is simple, because build an encryption algorithm or protocol is a very complicated and difficult stuff. You need to be an expert, you must submit the algorithm to the security community for review, you need to wait some years for feedbacks and at the end you have a good chance to fail.</p>
+
+<p>There are many examples of new cryptographic protocols, even developed by expert, that has been attacked in the past years. For instance, the protocol <a href="https://core.telegram.org/mtproto">MTProto</a> developed by Telegram. This new cryptographic protocol has been attacked in 2015 after a code review, and this <a href="https://eprint.iacr.org/2015/1177.pdf">paper</a> demonstrated that is not <a href="https://en.wikipedia.org/wiki/Ciphertext_indistinguishability">IND-CCA</a> secure,  since it is possible to turn any ciphertext into a different ciphertext that decrypts to the same message.</p>
+
+<p>Most people think that secrecy equals security, and open-source software doesn't sound compatible with the idea of strong cybersecurity. This is false! <a href="https://www.schneier.com/">Bruce Schneier</a>, a famous security expert and author of many encryption algorithms, wrote <a href="https://www.schneier.com/blog/archives/2011/06/open-source_sof.html">several times</a> about the value of open source cryptography.</p>
+
+<h2><em>Strong cryptography</em> in PHP</h2>
+
+<p>PHP offers different implementations of the most important cryptographic algorithms. In particular PHP has the following cryptographic extensions:</p>
+
+<ul>
+	<li><strong>Hash</strong></li>
+	<li><strong><s>mcrypt</s></strong></li>
+	<li><strong>OpenSSL</strong></li>
+</ul>
+
+<p>The <strong>Hash</strong> extension requires no external libraries and is enabled by default as of PHP 5.1.2. This extension replace the old mhash extension. With this extension you can generate hash values or HMAC (Hash-based Message Authentication Code). These extension support the most common hash algorithms used in strong cryptography. If you want to know which algorithms are supported by your PHP environment you can use the function <a href="http://php.net/manual/en/function.hash-algos.php">hash_algos()</a> that gives a list of all the algorithms supported.</p>
+
+<p>The <strong>mcrypt</strong> extension has been deprecated in PHP 7.1 and I don't recommend to use it anymore. If you are using it, I suggest to move to OpenSSL as soon as possible.</p>
+
+<p>The <strong>OpenSSL</strong> extension uses the functions of the <a href="http://www.openssl.org/">OpenSSL project</a> for generation and verification of signatures and for sealing (encrypting) and opening (decrypting) data. You can use OpenSSL to protect data using symmetric encryption (also <a href="/blog/authenticated-encrypt-with-openssl-and-php-7-1">authenticated encryption</a>) public key cryptography with the RSA algorithm.</p>
+
+<h2>Best practices in PHP</h2>
+
+<p>Below, I reported 10 best practices to follow when using cryptography in PHP:</p>
+
+<h3>1) Use standard algorithms</h3>
+
+<p>Always use a standard algorithm to encrypt your data. Never use an homemade encryption algorithm, never!</p>
+<p>PHP offers many strandard algorithm, mainly using OpenSSL. For instance:</p>
+
+<ul>
+	<li>Simmetric-key algorithm: <a href="http://en.wikipedia.org/wiki/Advanced_Encryption_Standard"><strong>AES</strong></a>, a FIST 197 standard since 2001;</li>
+	<li>Public-key algorithm: <a href="http://en.wikipedia.org/wiki/RSA"><strong>RSA</strong></a>, an industry standard algorithm used in many products;</li>
+	<li>Hash function: <a href="https://en.wikipedia.org/wiki/Secure_Hash_Algorithm"><strong>SHA</strong></a>, in particular SHA-256 or SHA-512. <a href="https://konklone.com/post/why-google-is-hurrying-the-web-to-kill-sha-1">Don't use SHA-1</a> for cryptography!</li>
+	<li>Key derivation algorithm: <a href="https://en.wikipedia.org/wiki/PBKDF2"><strong>PBKDF2</strong></a>, is a very popular algorithm (<a href="https://tools.ietf.org/html/rfc2898">RFC 2898</a>).</li>
+</ul>
+
+<h3>2) Key space</h3>
+
+<p>The key space is a very important parameter for the security of a cipher. If no explicit design strength is give by a cipher, the design strength equals to the key size. For instance, the DES cipher uses 56-bit key, that means the key space is 2^56 equal to 72,057,594,037,927,936, more than 72 quadrillion. This numbers seems to be big enough but it's not for modern computers, <a href="https://en.wikipedia.org/wiki/EFF_DES_cracker">EFF proved it since 1998</a>.</p>
+<p>For symmetric ciphers, even if 128 bit sounds reasonable I would suggest to move to 256 bit (here an interesting <a href="https://blog.agilebits.com/2013/03/09/guess-why-were-moving-to-256-bit-aes-keys/">article</a>).</p>
+<p>Regarding public-key cryptography, the most used size in industry is 2048 bit and this is <a href="http://crypto.stackexchange.com/questions/1978/how-big-an-rsa-key-is-considered-secure-today/1982#1982">considered secure for the next two decades</a>, with fair (but not absolute) confidence.</p>
+
+<h3>3) Kerchoof's principle</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Auguste_Kerckhoffs">Auguste Kerckhoffs</a> was a Dutch linguist and cryptographer who was professor of languages at the School of Higher Commercial Studies in Paris in the late 19th century. He wrote, in a <a href="http://www.petitcolas.net/kerckhoffs/crypto_militaire_1.pdf">famous article</a> of "le Journal des Sciences Militaires", the following sentence, that is considered a must in the modern cryptography:</p>
+
+<blockquote>A cryptosystem should be secure even if everything about the system, except the key, is public knowledge</blockquote>
+
+<p>There's also a similar quote by <a href="https://en.wikipedia.org/wiki/Claude_Shannon">Claude Shannon</a>, the father of <a href="https://en.wikipedia.org/wiki/Information_theory">information theory</a>:</p>
+
+<blockquote>The enemy knows the system</blockquote>
+
+<p>In my opinion, you can have security only with the usage of open source algorithms. If the source code has been tested by people around the world the probability to find a bug (and a fix) is higher using open source software compared to closed source.</p>
+
+<h3>4) Don't use rand() or mt_rand()</h3>
+
+<p>The PHP functions <a href="http://php.net/manual/en/function.rand.php">rand()</a> and <a href="http://php.net/manual/en/function.mt-rand.php">mt_rand()</a> don't generate cryptographically secure pseudo-random values.</p>
+<p>The rand() function uses the libc library to generate pseudo-random numbers that is not secure for cryptography applications. It generates random numbers using a linear additive feedback method, with a short period, that is predictable.</p>
+<p>Even the mt_rand() function is not secure from a cryptographically point of view. It uses the <a href="http://en.wikipedia.org/wiki/Mersenne_twister">Mersenne Twister</a> algorithm to generate pseudo random numbers. This function is better than the rand() because it faster and it produces pseudo random numbers with a biggest period but is still a deterministic algorithm so is predictable.</p>
+
+<p>To generate a cryptographically secure random number with PHP 7 we can use <a href="http://php.net/manual/en/function.random-int.php">random_int()</a> or <a href="http://php.net/manual/en/function.random-bytes.php">random_bytes()</a> for binary string.</p>
+
+<p>If you are using PHP 5.x you can use <a href="https://github.com/paragonie/random_compat">paragonie/random_compat</a> library that is a polyfill for the PHP 7 random functions.</p>
+
+
+<h3>5) Use bcrypt to store a password</h3>
+
+<p>If you are using MD5 or SHA functions to store user's passwords, please don't do that! Even if you <i>salt</i> the hash you are not safe. A random <i>salt</i> can protect from a <a href="http://en.wikipedia.org/wiki/Dictionary_attack">dictionary attack</a> but it cannot prevent brute-force attacks. Using a <a href="https://en.wikipedia.org/wiki/Graphics_processing_unit">GPU</a> (also a cheap one) you can decrypt <a href="https://securityledger.com/new-25-gpu-monster-devours-passwords-in-seconds/">passwords in seconds</a>.</p>
+
+<p>A secure way to store a password is to use <a href="http://bcrypt.sourceforge.net/" target="_blank">bcrypt</a> algorithm. This one-way function can prevent brute-force attacks because is computationally slow. If someone want to attack the algorithm needs a lot of time (years) to generate all the values.</p>
+
+<p>From PHP 5.5+ we can use two special functions for the bcrypt algorithm, they are <a href="http://php.net/manual/en/function.password-hash.php">password_hash()</a> and <a href="http://php.net/manual/en/function.password-verify.php">password_verify()</a></p>
+
+<p>Here is reported an example for generate the hash value of a user's password:</p>
+
+<pre><code class="php">$password='supersecretpassword';
+$hash = password_hash($password, PASSWORD_BCRYPT);
+echo $hash;
+</code></pre>
+
+<p>This script will print something like:</p>
+
+<pre><code>$2y$10$TZp7a29gDmtwa5Inch0Eq.INxx1tnjY9k6gWxwH/TUoX4uJYTxm76
+</code></pre>
+
+<p>The output of password_hash is a string of 60 bytes, with an header of 7 bytes including the bcrypt specification ($2y$) and the <a href="http://security.stackexchange.com/questions/85966/how-does-phps-password-hash-bcrypt-cost-factor-translate-into-cracking-comput">cost</a> parameter (10$).
+Each time you generate an hash you will get a different output. This because the algorithm uses a random salt each time, to improve the security.</p>
+
+<p>To verify an hash value, with a given password, we can use password_verify():</p>
+
+<pre><code class="php">if (password_verify($password, $hash)) {
+  echo 'The password is valid';
+} else {
+  echo 'Invalid password';
+}
+</code></pre>
+
+<p>If you are using an old version of PHP, you can use <a href="https://github.com/ircmaxell/password_compat">ircmaxell/password_compat</a> library that implements the password_hash() and password_verify() functions.</p>
+
+<h3>6) Use authenticated encryption</h3>
+
+<p>Encryption is not enough to protect data, you need also <a href="https://en.wikipedia.org/wiki/Data_integrity">integrity</a> and <a href="https://en.wikipedia.org/wiki/Message_authentication">authenticity</a>. Without integrity, you can alter an encrypted data without any evidence of it. Without authentication, you cannot be sure that the data are generated by a legitimate user.</p>
+
+<p>We can add authentication to an encryption system using <i>encrypt-then-authenticate</i> approach or we can use <a href="https://en.wikipedia.org/wiki/Authenticated_encryption">authenticated encryption</a> that offers authentication built-in in the algorithm.</p>
+
+<p>For the <i>encrypt-then-authenticate</i> approach you can use a PHP library like <a href="https://docs.zendframework.com/zend-crypt/block-cipher/">zendframework/zend-crypt</a> that offers authentication using HMAC-SHA256.</p>
+
+<p>Starting from PHP 7.1 you can use authenticated encryption with OpenSSL. In particular, we can use AES with 256 bit in GCM or CCM mode (<i>aes-256-gcm</i> and <i>aes-256-gcm</i>). I wrote a <a href="/blog/authenticated-encrypt-with-openssl-and-php-7-1">specific post</a> that show how to use it in PHP.</p>
+
+<h3>7) Force the usage of robust password</h3>
+
+<p>Using small and simple user's password is bad, we know. Today (2017), you should prevent a user to choose a password <a href="http://www.nbcnews.com/id/38771772/#.WICciGfavCI">less than 12 characters</a>, if permitted. I suggest to <a href="https://blog.codinghorror.com/passwords-vs-pass-phrases/">use a pass phrases</a> instead of some "random" password. A pass phrase is easy to remember than passwords and more secure against brute forcing, because of their length.</p>
+<p>In PHP, you can use the <a href="http://php.net/manual/en/book.crack.php">CrackLib library</a> to test the "strength" of a password.</p>
+
+<h3>8) Don't use password as encryption key</h3>
+
+<p>Never use a user's password as encryption key! A user's password is not random and it doesn't have a good <a href="https://en.wikipedia.org/wiki/Password_strength#Entropy_as_a_measure_of_password_strength">entropy bits</a>. Use always a <a href="https://en.wikipedia.org/wiki/Key_derivation_function">Key Derivation Function (KDF)</a> to generate an encryption key starting from a user's password.</p>
+<p>One of the most used key derivation function is the <a href="https://en.wikipedia.org/wiki/PBKDF2">PBKDF2</a> algorithm. PHP 5.5+ offers <a href="http://php.net/manual/en/function.hash-pbkdf2.php">hash_pbkdf2()</a> function for that.</p>
+<p>Here is reported an example:</p>
+
+<pre><code class="php">$password = 'supersecretpassword';
+$salt = random_bytes(16);
+$hash = hash_pbkdf2("sha256", $password, $salt, 20000);
+var_dump($hash);
+</code></pre>
+
+<p>In this example, the hash_pbkdf2() function generates the hash values iterating SHA-256 for 20,000 times. The function uses also a random salt value that is very important for the security of the algorithm. We used the random_bytes() function of PHP 7. If you are using PHP 5 you can use the <a href="https://github.com/paragonie/random_compat">paragonie/random_compat</a> library.</p>
+<p>The output of the PBKDF2 is a string of 32 bytes in hex format (64 characters). If you want a binary string with a different size you have to specify two additional parameters. For instance, if you need an hash value of 128 bytes in binary format you can use the following syntax:</p>
+
+<pre><code class="php">$hash = hash_pbkdf2("sha256", $password, $salt, 20000, 128, true);
+</code></pre>
+
+<p>Another important parameter of the PBKDF2 algorithm is the number of rounds. I used the value 20,000 that is used in many applications but you should use the maximum number of rounds which is tolerable, performance-wise, in your application. <a href="http://security.stackexchange.com/questions/3959/recommended-of-iterations-when-using-pkbdf2-sha256">Here</a> you can have more information on the number of rounds.</p>
+
+<h3>9) Use Base64 to encode data</h3>
+
+<p>If you need to exchange encrypted data with different systems, for instance, trasmitting data over internet, is reccomended to encode the data in <a href="https://en.wikipedia.org/wiki/Base64">Base64</a>.</p>
+<p>In PHP you can use the functions <a href="http://php.net/manual/en/function.base64-encode.php">base64_encode()</a> and <a href="http://php.net/manual/en/function.base64-decode.php">base64_decode()</a>. This encoding will garantee that your data will be stored correctly independently of the encoding system used in your environment.</p>
+
+<h3>10) Update your PHP version</h3>
+
+<p>The last but not least best practice is to update your PHP version. Work with the latest PHP version if you can, this is very important for security reason.</p>
+<p>It's important to note the <a href="http://php.net/supported-versions.php">current supported versions</a> of PHP. Today (Jan 2017), the only supported are PHP 5.6 (only security fixes), 7.0 and 7.1. If you are using an old PHP version, you are exposing your applications to potential security issues!</p>
+<p>As you know, PHP is a very popular language and it's used by million of people worldwide. This means many bugs and security fixes (that is good!). Subscribe to the <a href="http://php.net/mailing-lists.php">PHP internal mailing list</a> if you want to be updated. </p>
+
+<h2>Conclusion</h2>
+
+<p>In this article, I reported only some best practices for the usage of cryptography in PHP. As I wrote many times, cryptography is hard and you need to be very careful to use it in your application. If you can, hire an expert to review your code or ask for help in the PHP community.</p>
+<p>There are many good books and blog about applied cryptography but if I have to suggest only one reference, I recommend to read the book <a href="https://www.schneier.com/books/cryptography_engineering/">Cryptography Engineering</a> by N.Ferguson, B.Schneier, and T. Kohno.</p>
+
+</post>

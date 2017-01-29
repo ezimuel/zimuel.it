@@ -1,0 +1,88 @@
+<post date="2013-01-31" title="Zend Framework 2.1" sub="Overview of the new features" img="zf210.jpg">
+
+<p>Yesterday we released the 2.1.0 (and 2.0.7) version of <a href="http://framework.zend.com">Zend Framework</a>. I'm excited about this release because we introduced new features and we fixed more than 150 bugs. Some of the new features includes:</p>
+
+<ul>
+<li>new <strong>Zend\Permissions\Rbac</strong> component, that offer a new approach to build an authorization schema, more oriented to roles and their permissions rather than objects (resources as in Zend\Permissions\Acl);</li>
+<li>new <strong>Zend\Test</strong> component, providing the ability to perform functional or integration testing;</li>
+<li>new <strong>Zend\Crypt\Password\Apache</strong> component to encrypt/decrypt password in <a href="http://httpd.apache.org/docs/2.2/misc/password_encryptions.html" target="_blank">Apache format</a> (htpasswd);</li>
+<li>Apache password adapter for <strong>ZendAuthentication</strong>, based on the new component <strong>Zend\Crypt\Password\Apache</strong>;</li>
+<li><a href="http://www.tarsnap.com/scrypt.html" target="_blank">scrypt</a> algorithm support provided by <strong>Zend\Crypt\Key\Derivation\Scrypt</strong></li>
+<li>new <strong>Oracle</strong> and <strong>IBM DB2</strong> adapters for Zend\Db;</li>
+<li>new <strong>FirePHP</strong>, <strong>ChromePHP</strong>, <strong>MongoDB</strong>, and <strong>FingersCrossed</strong> adapters for Zend\Log;</li>
+<li>new <strong>MongoDB</strong> adapter for Zend\Session</li>
+</ul>
+
+<p><a href="http://framework.zend.com/blog/zend-framework-2-0-7-and-2-1-0-released.html" target="_blank">Here</a> the official release announcment.</p>
+
+<p>This new release of Zend Framework contains interesting new features related to security and cryptography. I mentioned the new <strong>Zend\Permissions\Rbac</strong> component that can facilitate the implementation of a classic authorization system. Below I reported a simple use case:</p>
+
+<pre><code class="php">use Zend\Permissions\Rbac\Rbac;
+use Zend\Permissions\Rbac\Role;
+
+$rbac = new Rbac();
+$foo  = new Role('foo');
+$foo-&gt;addPermission('bar');
+
+var_dump($foo-&gt;hasPermission('bar')); // true
+
+$rbac-&gt;addRole($foo);
+$rbac-&gt;isGranted('foo', 'bar'); // true
+$rbac-&gt;isGranted('foo', 'baz'); // false
+
+$rbac-&gt;getRole('foo')-&gt;addPermission('baz');
+$rbac-&gt;isGranted('foo', 'baz'); // true
+</code></pre>
+
+<p>I'm confident this component will simplify most of the existing use cases of web applications where tipically we have <i>users</i>, <i>roles</i> and <i>permissions</i>.</p>
+
+<p>Regarding the new cryptographic features, we implemented the <a href="http://www.tarsnap.com/scrypt.html" target="_blank">scrypt</a> algorithm and, as far I know, this is the first open source implementation of scrypt in pure PHP (we also supported the <a href="https://github.com/DomBlack/php-scrypt" target="_blank">PHP scrypt module</a> provided by <a href="https://github.com/DomBlack">Dominic Black</a>).</p>
+<p>The <strong>scrypt</strong> algorithm provides the most secure way, so far, to generate a key from a user's password. It uses a new idea to prevent brute force attacks consuming CPU time and high memory space (<i>Sequential Memory-Hard Functions</i>). This algorithm has been proposed as <a href="https://tools.ietf.org/html/draft-josefsson-scrypt-kdf-00">Internet Draft on 2012-09-17 by the IETF</a>. The usage of the <strong>Zend\Crypt\Key\Derivation\Scrypt</strong> component is very simple, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\Key\Derivation\Scrypt;
+use Zend\Math\Rand;
+
+$pass = 'password';
+$salt = Rand::getBytes(strlen($pass), true);
+$key  = Scrypt::calc($pass, $salt, 2048, 2, 1, 64);
+
+printf (&quot;Original password: %sn&quot;, $pass);
+printf (&quot;Derived key (hex): %sn&quot;, bin2hex($key));
+</code></pre>
+
+<p>In this example, the parameters of <i>Scrypt::calc</i> are: <strong>$pass</strong> the input password, <strong>$salt</strong> the salt of the algorithm, <strong>2048</strong> is the CPU cost, <strong>2</strong> is the memory cost, <strong>1</strong> is the paralization cost and 64 is the length of the output hash to be generated.</p>
+<p>More information on the scrypt implementation of ZF2 can be found <a href="http://framework.zend.com/manual/2.1/en/modules/zend.crypt.key.derivation.html#scrypt-adapter">here</a>.</p>
+
+<p>In ZF 2.1.0 we also released a new component <strong>Zend\Crypt\Password\Apache</strong>. This component supports all the Apache password formats (htpasswd).</p>
+<p>The password formats supported by Apache are reported <a href="http://httpd.apache.org/docs/2.2/misc/password_encryptions.html" target="_blank">here</a>. We can use this component to generate or verify a user's password using a simple API, here an example:</p>
+
+<pre><code class="php">use Zend\Crypt\Password\Apache;
+
+$apache   = new Apache();
+$password = 'password';
+
+$formats = array('crypt', 'sha1', 'md5', 'digest');
+foreach ($formats as $format) {
+    $apache-&gt;setFormat($format);
+    if ($format === 'digest') {
+        $apache-&gt;setUserName('enrico');
+        $apache-&gt;setAuthName('test');
+    }
+    $hash = $apache-&gt;create($password);
+    $result = $apache-&gt;verify($password, $hash) ? 'OK' : 'FAILED';
+    printf (&quot;%s output: %s (%s)n&quot;, $format, $hash, $result);
+}
+</code></pre>
+
+<p>A possible output for that script is as follow:</p>
+
+<pre><code class="nohighlight">crypt output: hHbcSkUv7q7kI (OK)
+sha1 output: {SHA}W6ph5Mm5Pz8GgiULbPgzG37mj9g= (OK)
+md5 output: $apr1$3HKJdb5X$VNpmjgqNEKQ5S4JXlI8pW/ (OK)
+digest output: 7f14e93e793186c46fc3e078cd777da9 (OK)
+</code></pre>
+
+<p>We used the Apache password component to implement a new adapter for <strong>Zend\Authentication</strong>. It's the <strong>ApacheResolver</strong> that can be found under the namespace <strong>Zend\Authentication\Adapter\Http</strong>. Using this component we can easly provide user's authentication using the password file produced by Apache (e.g. using the <i>htpasswd</i> command).</p>
+
+<p>As you can see the number of functionalities of Zend Framework 2 is growing very fast and the security components too. We are exiting to offer such set of security features to the PHP community. If you want to have more information about all the security aspects covered by ZF2 I suggest to watch the recorded video of my webinar <a href="http://www.zend.com/en/resources/webinars/framework#BSWAwZF2" target="_blank">"Building Secure Web Applications with ZF2"</a>.</p>
+</post>

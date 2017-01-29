@@ -1,0 +1,53 @@
+{
+    "name": "ezimuel/zimuel.it",
+    "description": "Enrico Zimuel's web site, based on PHP 7 and zend-expessive",
+    "type": "web",
+    "homepage": "https://github.com/ezimuel/zimuel.it",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Enrico Zimuel",
+            "homepage": "http://www.zimuel.it"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "roave/security-advisories": "dev-master",
+        "zendframework/zend-expressive": "^1.0",
+        "zendframework/zend-expressive-helpers": "^2.0",
+        "zendframework/zend-stdlib": "^2.7 || ^3.0",
+        "zendframework/zend-expressive-fastroute": "^1.0",
+        "zendframework/zend-servicemanager": "^2.7.3 || ^3.0",
+        "zendframework/zend-expressive-platesrenderer": "^1.0",
+        "zendframework/zend-paginator": "^2.7.0",
+        "guzzlehttp/guzzle": "^6.2",
+        "php-http/guzzle6-adapter": "^1.1",
+        "sparkpost/sparkpost": "^2.1",
+        "google/recaptcha": "~1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8",
+        "squizlabs/php_codesniffer": "^2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zimuel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZimuelTest\\": "test/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "serve": "php -S 0.0.0.0:8080 -t public/ public/index.php",
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    }
+}

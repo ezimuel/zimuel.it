@@ -1,0 +1,151 @@
+<post date="2015-02-05" title="Install PHP 7.0" sub="How to compile PHP 7 on Linux" img="install_php7.jpg">
+
+<p><em>Update:</em> PHP 7.0.0 has been released 3th Dec. 2015, you can install from <a href="http://php.net/releases/">php.net</a>.<br>
+<em>Update:</em> If you are using Ubuntu 15.04, you can have a look at this <a href="https://gist.github.com/m1st0/1c41b8d0eb42169ce71a">script</a> by Maulik Mistry.</p>
+
+<p>I just installed <strong>PHP 7.0.0-dev</strong> (based on <a href="https://wiki.php.net/phpng" target="_blank">PHPNG</a>) on my GNU/Linux box (Ubuntu 14.04) and I found some errors during the procedure. I decided to write this note to help people using the same Ubuntu environment.</p>
+
+<p>Before to start I would like to remind that PHP 7 is still in development and <strong>SHOULD NOT BE USED</strong> in production environments. I installed to try and experiment the new features of the language. The first stable release of PHP 7 is scheduled by the end of the year, with a <a href="https://wiki.php.net/rfc/php7timeline" target="_blank">projected release date of November 2015</a>.</p>
+
+<p>To install PHP 7 we need to clone the <strong>php-src</strong> repository, configure and compile. Let's create a php7 folder in the home directory and clone the project:</p>
+
+<pre><code class="bash">mkdir $HOME/php7
+cd $HOME/php7
+git clone https://git.php.net/repository/php-src.git
+</code></pre>
+
+<p>After that, we need to prepare and configure the compiler. We need to execute the following commands:</p>
+
+<pre><code class="bash">
+cd php-src
+./buildconf
+./configure \
+    --prefix=$HOME/php7/usr \
+    --with-config-file-path=$HOME/php7/usr/etc \
+    --enable-mbstring \
+    --enable-zip \
+    --enable-bcmath \
+    --enable-pcntl \
+    --enable-ftp \
+    --enable-exif \
+    --enable-calendar \
+    --enable-sysvmsg \
+    --enable-sysvsem \
+    --enable-sysvshm \
+    --enable-wddx \
+    --with-curl \
+    --with-mcrypt \
+    --with-iconv \
+    --with-gmp \
+    --with-pspell \
+    --with-gd \
+    --with-jpeg-dir=/usr \
+    --with-png-dir=/usr \
+    --with-zlib-dir=/usr \
+    --with-xpm-dir=/usr \
+    --with-freetype-dir=/usr \
+    --with-t1lib=/usr \
+    --enable-gd-native-ttf \
+    --enable-gd-jis-conv \
+    --with-openssl \
+    --with-mysql=/usr \
+    --with-pdo-mysql=/usr \
+    --with-gettext=/usr \
+    --with-zlib=/usr \
+    --with-bz2=/usr \
+    --with-recode=/usr \
+    --with-mysqli=/usr/bin/mysql_config
+</code></pre>
+
+<p>During the execution of configure command, I found a couple of errors.</p>
+
+<h3>Error: Your t1lib distribution is not installed correctly.</h3>
+
+<p>I fixed using:</p>
+
+<pre><code class="bash">
+sudo apt-get install libt1-dev
+</code></pre>
+
+<h3>Error: Unable to locate gmp.h</h3>
+
+<p>I tried to install the <a href="http://packages.ubuntu.com/search?keywords=libgmp-dev" target="_blank">libgmp-dev</a> library:</p>
+
+<pre><code class="bash">
+sudo apt-get install libgmp-dev
+</code></pre>
+
+<p>but the library was already installed, so I search for it:</p>
+
+<pre><code class="bash">
+locate gm.h
+</code></pre>
+
+<p>and I found it on /usr/include/x86_64-linux-gnu/gmp.h (I'm using a 64bit version). I tried to symlink it to /usr/include/gmp.h (the default location for include):</p>
+
+<pre><code class="bash">
+ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h
+</code></pre>
+
+<p>and finally the configure execution was successful. If you find other errors on your environment, I suggest to read <a href="http://zgadzaj.com/how-to-install-php-53-and-52-together-on-ubuntu-1204">this post</a> by <em>Maciej Zgadzaj</em>, where he reported a list of possible errors and solutions for Ubuntu systems.</p>
+
+<p>Now it's time to compile PHP 7 with the following commands:</p>
+
+<pre><code class="bash">make
+make install
+</code></pre>
+
+<p>The first command compile the PHP. I took about 9 minutes to compile PHP 7 on my computer (Intel i5-2500 at 3.3Ghz). The second command install the PHP modules and configuration in <strong>$HOME/php7/usr</strong> folder.</p>
+
+<p>We have almost done the installation, we just need to create the <strong>php.ini</strong> file in the <strong>$HOME/php7/usr/etc</strong> folder. We can easily create it using <strong>vi</strong> with the following commands:</p>
+
+<pre><code class="bash">mkdir $HOME/php7/usr/etc
+vi $HOME/php7/usr/etc/php.ini
+</code></pre>
+
+<p>We can use the following content for the php.ini:</p>
+
+<pre><code class="ini">max_execution_time=600
+memory_limit=128M
+error_reporting=0
+display_errors=0
+log_errors=0
+user_ini.filename=
+realpath_cache_size=2M
+cgi.check_shebang_line=0
+
+zend_extension=opcache.so
+opcache.enable_cli=1
+opcache.save_comments=0
+opcache.fast_shutdown=1
+opcache.validate_timestamps=1
+opcache.revalidate_freq=60
+opcache.use_cwd=1
+opcache.max_accelerated_files=100000
+opcache.max_wasted_percentage=5
+opcache.memory_consumption=128
+opcache.consistency_checks=0
+</code></pre>
+
+<p>And finally we can test PHP using the command line interface (CLI):</p>
+
+<pre><code class="bash">$HOME/php7/php-src/sapi/cli/php -v
+</code></pre>
+
+<p>You will get a result like this:</p>
+
+<pre><code class="bash">PHP 7.0.0-dev (cli) (built: xxx)
+Copyright (c) 1997-2015 The PHP Group
+Zend Engine v3.0.0-dev, Copyright (c) 1998-2015 Zend Technologies
+</code></pre>
+
+<p>If you want to learn about the new features of PHP 7 I suggest to read the following resources:</p>
+
+<ul>
+<li><a href="https://wiki.php.net/phpng" target="_blank">phpng</a></li>
+<li><a href="https://drive.google.com/file/d/0B3UKOMH_4lgBUTdjUGxIZ3l1Ukk/view" target="_blank">"PHPNG a new core for PHP7"</a> by Dmitry Stogov at <a href="http://zendcon.com" target="_blank">ZendCon 2014</a></li>
+<li><a href="https://nikic.github.io/2014/12/22/PHPs-new-hashtable-implementation.html" target="_blank">"PHP's new hashtable implementation"</a> by nikic</li>
+<li><a href="http://www.slideshare.net/pierrej/php-7-hhvm-and-co" target="_blank">"PHP 7 HHVM and co"</a> by Pierre Joye</li>
+</ul>
+
+</post>

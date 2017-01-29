@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Develop RESTful API in PHP using Apigility</title>
+
+		<meta name="description" content="Develop RESTful API in PHP using Apigility. Workshop delivered at PHP Summer Camp 2015">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/league.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('img/background.jpg'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<a href="http://2015.phpsummercamp.com/"><img src="img/logo-summercamp.png" style="border:0"></a>
+					<h3>Workshop:</h3>
+					<h2>Develop RESTful API in PHP using Apigility</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a> - Zend Technologies Ltd.<br /><br />
+						28 August - Rovinj (Croatia)</small>
+					</p>
+					<a href="http://www.zend.com"><img src="img/logo-zend.png" style="border:0"></a>
+				</section>
+
+				<section>
+					<h2>About me</h2>
+					<p style="text-align:left;font-size:30px">
+						<img src="img/enrico.png" align="left" style="margin-right:30px"><strong>Enrico Zimuel</strong> (<a href="https://twitter.com/ezimuel">@ezimuel</a>), developer since 1996. Senior Software Engineer in the R&D department of <a href="http://www.zend.com" target="_blank">Zend Technologies</a> since 2008. Research programmer at the <a href="http://ivi.uva.nl/" target="_blank">Informatics Institute</a> of Amsterdam University in 2006. Open source contributor, core team of <a href="http://apigility.org">Apigility</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a>. <a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker about computer programming. Co-founder of <a href="http://torino.grusp.org" target="_blank">PHP User Group Torino</a> (Italy).
+					</p>
+				</section>
+
+				<section>
+					<h2>Workshop Summary</h2>
+					<ul>
+						<li>Web API and RESTful architectures</li>
+						<li>Introduction to Apigility</li>
+						<li>Hands-on Apigility:<br />
+							- Build a RPC service<br />
+							- Build a RESTful service<br />
+							- Validate the input for REST services<br />
+						  - Manage the HAL-JSON response</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>API</h2>
+					<p>
+						API stands for <strong>"Application Programming Interface"</strong> and as a term, specifies how software should interact.
+					</p>
+					<p>
+						In this worskhop we are interested in <strong>Web APIs</strong>, those delivered over HyperText Transfer Protocol (HTTP).
+					</p>
+				</section>
+
+				<section>
+					<h2>REST</h2>
+					<p>
+						REpresentational State Transfer (REST) is an architecture designed around the HTTP specification.
+					</p>
+				</section>
+
+				<section>
+					<h2>RESTful</h2>
+					<p>
+						REST leverages HTTP's strengths, and builds on:
+					</p><ul>
+						<li>URIs as <u>unique identifiers</u> for resources</li>
+						<li>Rich set of <u>HTTP verbs</u> for operations on resources</li>
+						<li>Specify the <u>representation format</u> of the output</li>
+						<li>Linking between resources (<u>hypermedia</u>)</li>
+					</ul>
+					<p></p>
+				</section>
+
+				<section>
+					<h2>Glory of REST</h2>
+					<p>Talking about REST, the <a href="http://martinfowler.com/articles/richardsonMaturityModel.html">Richardson Maturity Model</a> is often used to describe the concerns necessary when implementing a well-designed REST API</p>
+					<p><img src="img/glory_of_rest.png"></p>
+				</section>
+
+				<section>
+					<h2>REST: Level 0</h2>
+					<p>The usage of <strong>HTTP</strong> as communication layer</p>
+					<p>A format for data representation (e.g. JSON)</p>
+					<p>Basically a Remote Procedure Call (<strong>RPC</strong>)</p>
+				</section>
+
+				<section>
+					<h2>REST: Level 1</h2>
+					<p>URIs as <strong>unique identifiers</strong> for resources</p>
+					<p>For instance, the resource <strong>User</strong> can be identified by</p>
+					<pre><code>http://domain/api/user[/:user_id]</code></pre>
+					<p>where <strong>user_id</strong> is an optional parameter</p>
+				</section>
+
+				<section>
+					<h2>REST: Level 2</h2>
+					<p>Usage of HTTP verbs for operations on resources</p>
+					<table width="500">
+						<tr>
+							<td><strong>CRUD</strong></td>
+							<td><strong>HTTP verbs</strong></td>
+						</tr>
+						<tr>
+							<td>CREATE</td>
+							<td>POST</td>
+						</tr>
+						<tr>
+							<td>READ</td>
+							<td>GET</td>
+						</tr>
+						<tr>
+							<td>UPDATE</td>
+							<td>PUT, PATCH*</td>
+						</tr>
+						<tr>
+							<td>DELETE</td>
+							<td>DELETE</td>
+						</tr>
+					</table>
+					<p><small>* partial update</small></p>
+				</section>
+
+				<section>
+					<h2>REST: Level 3</h2>
+					<p>Linking between resources to indicate relationships (<strong>hypermedia</strong>)</p>
+<pre><code data-trim>
+GET /api/user/ezimuel
+{
+	"_links": {
+		"self": {
+			"href": "http://domain/api/user/ezimuel"
+		},
+		"contacts": [
+			{ "href": "http://domain/api/user/mwop" },
+			{ "href": "http://domain/api/user/zeevs" }
+		]
+	},
+	"id": "ezimuel",
+	"name": "Enrico Zimuel"
+}
+</code></pre>
+					<p><small>JSON-HAL format</small></p>
+				</section>
+
+				<section>
+					<h2>Advantages of REST</h2>
+					<p>Scalable architecture</p>
+					<p>Very easy to consume</p>
+					<p>Reduce client/server coupling</p>
+					<p>Discoverability</p>
+				</section>
+
+				<section>
+					<h2>REST in PHP</h2>
+					<pre><code data-trim>
+header('Content-Type: application/json');
+echo json_encode([
+	'id'   => 'ezimuel',
+	'name' => 'Enrico Zimuel'
+]);
+</code></pre>
+					<p>Quite simple, right? </p>
+					<p class="fragment" style="color:red">No! What about error handling, hypermedia, data validation, content negotiation, versioning, etc?</p>
+				</section>
+
+				<section>
+					<p><a href="http://www.apigility.org"><img src="img/apigility.png" style="border:0px"></a></p>
+				</section>
+
+				<section>
+					<h2>Apigility</h2>
+					<ul>
+						<li>The API builder for PHP applications</li>
+						<li>Supports any PHP application!</li>
+						<li>Open source project by <a href="http://www.zend.com">Zend Technologies</a></li>
+						<li>Built using <a href="https://angularjs.org/">AngularJS</a> and <a href="http://framework.zend.com">Zend Framework 2</a></li>
+						<li>Last version is 1.3.1</li>
+						<li>Official website <a href="http://www.apigility.org">apigility.org</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Main features</h2>
+					<ul>
+							<li>RPC and REST</li>
+							<li>JSON (HAL) as default format</li>
+							<li>Error handling (API Problem)</li>
+							<li>Content negotiation</li>
+							<li>Versioning (via URI and Accept header)</li>
+							<li>Filtering and validation</li>
+							<li>Authentication (HTTP Basic/Digest, OAuth2)</li>
+							<li>Interactive documentation (HTML, Swagger)</li>
+							<li>Deploy, build package file ready for production</li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>JSON HAL</h2>
+						<ul>
+						<li>JSON Hypertext Application Language (<a href="http://tools.ietf.org/html/draft-kelly-json-hal-07">internet draft</a>)</li>
+
+						<li>Example:
+<pre><code data-trim>
+GET /api/user/ezimuel
+
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user/ezimuel"
+        }
+    }
+    "id": "ezimuel",
+    "name": "Enrico Zimuel"
+}
+</pre></code></li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>_embedded</h2>
+						<p>
+<pre><code data-trim>
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user/ezimuel"
+        }
+    }
+    "id": "ezimuel",
+    "name": "Enrico Zimuel",
+    "_embedded": {
+        "contacts": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/mwop"
+                    }
+                },
+                "id": "mwop",
+                "name": "Matthew Weier O'Phinney"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/zeevs"
+                    }
+                },
+                "id": "zeevs",
+                "name": "Zeev Suraski"
+            }
+        ]
+    }
+}
+</code></pre>
+					</p>
+				</section>
+
+				<section>
+				    	<h2>Collections</h2>
+						<p>
+<pre><code data-trim>
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user?page=3"
+        },
+        "first": {
+            "href": "http://domain/api/user"
+        },
+        "prev": {
+            "href": "http://domain/api/user?page=2"
+        },
+        "next": {
+            "href": "http://domain/api/user?page=4"
+        },
+        "last": {
+            "href": "http://domain/api/user?page=133"
+        }
+    }
+    "count": 3,
+    "total": 498,
+    "_embedded": {
+        "users": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/mwop"
+                    }
+                },
+                "id": "mwop",
+                "name": "Matthew Weier O'Phinney"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/mac_nibblet"
+                    }
+                },
+                "id": "mac_nibblet",
+                "name": "Antoine Hedgecock"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/spiffyjr"
+                    }
+                },
+                "id": "spiffyjr",
+                "name": "Kyle Spraggs"
+            }
+        ]
+    }
+}
+</code></pre>
+					</p>
+				</section>
+
+				<section>
+				    	<h2>API Problem</h2>
+				    	<ul>
+						<li>API Problem is a RFC proposal (<a href="https://tools.ietf.org/html/draft-ietf-appsawg-http-problem-00">internet draft</a>)</li>
+						<li>Example:
+<pre><code data-trim>
+Content-Type: application/problem+json
+
+{
+    "detail": "The GET method has not been defined for individual",
+    "status": 405,
+    "title": "Method Not Allowed",
+    "type": "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html"
+}
+</code></pre>
+</li>
+					</ul>
+				</section>
+
+                <section>
+				    	<h2>Content negotiation</h2>
+				    	<ul>
+						<li>Content negotiation is a mechanism defined in the HTTP specification that makes it possible to serve different versions of a document at the same URI.</li>
+						<li>Example:
+<pre><code data-trim>
+Accept: application/hal+json, application/json
+</code></pre>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>API Versioning</h2>
+					    <p>Agility uses two approaches:</p>
+				    	<ul>
+						<li>In the URL, e.g. /api/<code style="color:green">v1</code>/user</li>
+						<li>By Accept header, e.g. Accept:application/vnd.example.<code style="color:green">v1</code>+json </li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>Authentication</h2>
+                        <p align="left">Apigility supports three different authentication systems:
+                        <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">HTTP Basic</a>, <a href="http://en.wikipedia.org/wiki/Digest_access_authentication">HTTP Digest</a>, and <a href="http://oauth.net/2/">OAuth2</a></p>
+				</section>
+
+				<section>
+						<h2>Hands-on!</h2>
+						<p>Start the <img src="img/vagrant.png" style="border:0;vertical-align:middle;"> environment<br />(<a href="https://github.com/netgen/summercamp-2015">netgen/summercamp-2015</a>):</p>
+						<ul>
+							<li>vagrant up --no-provision</li>
+							<li>vagrant ssh</li>
+							<li>cd /var/www/summercamp</li>
+							<li>./run.sh apigility</li>
+						</ul>
+				</section>
+
+				<section>
+						<h2>In your laptop:</h2>
+						<ul>
+							<li>Add this line in /etc/hosts:
+<pre><code data-trim>
+172.21.12.10	apigility.phpsc
+</code></pre>
+							</li>
+							<li>Open the browser to <strong>apigility.phpsc</strong></li>
+						</ul>
+						<img src="img/apigility_screenshot.png">
+				</section>
+
+				<section>
+						<h2>Exercises on github</h2>
+						<p>All the exercise are on github:</p>
+						<p><a href="https://github.com/ezimuel/php-summercamp-apigility">https://github.com/ezimuel/php-summercamp-apigility</a></p>
+						<p>Four exercises with solutions in branches: exercise/1, exercise/2, exercise/3, and exercise/4</p>
+				</section>
+
+				<section>
+						<h2>Exercise 1: RPC service</h2>
+						<ol>
+							<li>Create a RPC service that returns the timezone of the server on GET /timezone</li>
+							<li>Enable POST and check if the <i>timezone</i> parameter is a valid timezone</li>
+						</ol>
+				</section>
+
+				<section>
+						<h2>Check the solution</h2>
+						<p>In your <img src="img/vagrant.png" style="border:0;vertical-align:middle;"> environment:</p>
+						<ul>
+							<li>cd /var/www/summercamp/workshops/apigility</li>
+							<li>git fetch</li>
+							<li>git checkout exercise/1</li>
+						</ul>
+				</section>
+
+				<section>
+						<h2>Build a Conference API</h2>
+						<ul>
+							<li>We want to build a simple API for the SummerCamp 2015 conference</li>
+							<li>We want to publish the following URIs:
+<pre><code data-trim>
+/speaker[/:speaker_id]
+/talk[/:talk_id]
+</code></pre>
+							</li>
+						</ul>
+				</section>
+
+				<section>
+						<h2>The SQLite database</h2>
+<pre><code data-trim>
+CREATE TABLE speakers (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(80) NOT NULL,
+  title VARCHAR(80) NOT NULL,
+  company VARCHAR(80) NOT NULL,
+  url_company VARCHAR(255),
+  twitter VARCHAR(80)
+);
+
+CREATE TABLE talks (
+  id INTEGER PRIMARY KEY,
+  title TEXT,
+  abstract TEXT,
+  day TEXT,
+  start_time TEXT,
+  end_time TEXT
+);
+
+CREATE TABLE talks_speakers (
+  talk_id INTEGER NOT NULL,
+  speaker_id INTEGER NOT NULL
+);
+</code></pre>
+				</section>
+
+				<section>
+						<h2>Data Mapper</h2>
+						<p>The Data Mapper is a class that interacts with the data model</p>
+						<p>It's consumed by REST Resource to return Entities/Collection</p>
+						<p>Can be injected in the Resource using ResourceFactory</p>
+				</section>
+
+				<section>
+						<h2>Database Adapters</h2>
+						<p>Apigility offers the management of DBs using adapters</p>
+						<p>Support for PDO, MySQL, Oci8, IbmDb2, PgSQL, SqlSrv</p>
+						<p>Use the <a href="http://framework.zend.com/manual/current/en/modules/zend.db.adapter.html">Zend\Db\Adapter</a> component of <a href="http://framework.zend.com">ZF2</a></p>
+				</section>
+
+				<section>
+						<h2>Exercise 2: REST service</h2>
+						<ol>
+							<li>Create two REST services for speakers and talks</li>
+							<li>Create the Mapper classes for speakers and talks</li>
+							<li>Use the SQLite adapter inside the Mapper</li>
+							<li>Consume the Mapper class in the REST Resources</li>
+							<li>Implement GET, POST, PATCH and DELETE for Entities</li>
+							<li>Implement GET for Collections</li>
+						</ol>
+				</section>
+
+				<section>
+						<h2>Check the solution</h2>
+						<p>In your <img src="img/vagrant.png" style="border:0;vertical-align:middle;"> environment:</p>
+						<ul>
+							<li>cd /var/www/summercamp/workshops/apigility</li>
+							<li>git fetch</li>
+							<li>git checkout exercise/2</li>
+						</ul>
+				</section>
+
+				<section>
+						<h2>Exercise 3: Fields and Validators</h2>
+						<ol>
+							<li>Add fields <i>name</i>, <i>title</i> and <i>company</i> to the Speaker resource</li>
+							<li>Add fields <i>title</i>, and <i>day</i> to the Talk resource</li>
+							<li>Add a validator for <i>day</i> to accept only date in the format YYYY-MM-DD<small>*</small></li>
+							<li>Add a custom error message for the validator <i>day</i></li>
+							<li>Try to POST against /speaker and /talk without data</li>
+						</ol>
+						<p><small>* use the <a href="http://framework.zend.com/manual/current/en/modules/zend.validator.date.html">Zend\Validator\Date</a> with the options "format" to "Y-m-d"</small></p>
+				</section>
+
+				<section>
+						<h2>Check the solution</h2>
+						<p>In your <img src="img/vagrant.png" style="border:0;vertical-align:middle;"> environment:</p>
+						<ul>
+							<li>cd /var/www/summercamp/workshops/apigility</li>
+							<li>git fetch</li>
+							<li>git checkout exercise/3</li>
+						</ul>
+				</section>
+
+				<section>
+						<h2>Exercise 4: Manage HAL-JSON result</h2>
+						<p>Using the <i>_embedded</i> field format, add the following:</p>
+						<ol>
+							<li>Add the "speakers" to GET /talk/:talk_id <small>*</small></li>
+							<li>Add the "talks" to GET /speaker/:speaker_id </li>
+						</ol>
+						<p><small>* Add a speakers field in TalkEntity to return a SpeakerCollection</small></p>
+				</section>
+
+				<section>
+						<h2>Check the solution</h2>
+						<p>In your <img src="img/vagrant.png" style="border:0;vertical-align:middle;"> environment:</p>
+						<ul>
+							<li>cd /var/www/summercamp/workshops/apigility</li>
+							<li>git fetch</li>
+							<li>git checkout exercise/4</li>
+						</ul>
+				</section>
+
+				<section>
+						<h2>Thanks!</h2>
+						<p><br />More information on <a href="http://www.apigility.org">apigility.org</a></p>
+						<p>Contact me: enrico [at] zend.com</p>
+						<p>Rate this talk <a href="https://joind.in/15133">https://joind.in/15133</a></p>
+						<p><small><br /><br />
+						<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="img/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

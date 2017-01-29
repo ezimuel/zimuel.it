@@ -1,0 +1,49 @@
+<?php $this->layout('layout::default') ?>
+
+<header class="intro-header" style="background-image: url('/img/blog-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="site-heading">
+                    <h1>Blog</h1>
+                    <hr class="small">
+                    <span class="subheading">Sometime, I remember to write a post</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <?php foreach ($paginator as $id => $post): ?>
+          <div class="post-preview">
+              <a href="/blog/<?php echo urlencode($id) ?>">
+                  <h2 class="post-title">
+                      <?php echo $post['title'] ?>
+                  </h2>
+                  <h3 class="post-subtitle">
+                      <?php echo $post['sub'] ?>
+                  </h3>
+              </a>
+              <p class="post-meta">Posted by <a href="/">Enrico Zimuel</a> on <?php echo date("F d, Y", strtotime($post['date'])) ?></p>
+          </div>
+      <?php endforeach; ?>
+      <hr>
+      <ul class="pager">
+      <?php if (isset($prev)) : ?>
+        <li class="previous">
+            <a href="<?php echo $prev ?>"><i class="fa fa-chevron-left" aria-hidden="true"></i> Previous</a>
+        </li>
+      <?php endif; ?>
+      <?php if (isset($next)) : ?>
+        <li class="next">
+            <a href="<?php echo $next ?>">Next <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+        </li>
+      <?php endif; ?>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="row"></div>

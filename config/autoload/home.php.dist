@@ -1,0 +1,7 @@
+<?php
+return [
+    'home' => [
+        'events' => [ ], // list of next events
+        'book' => '' // latest book
+    ]
+];

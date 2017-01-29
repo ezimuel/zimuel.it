@@ -1,0 +1,33 @@
+<post date="2009-03-21" title="How to get system info in Gnu/Linux" sub="A set of commands to get CPU, memory and other system information" img="system.jpg">
+
+
+<p>Sometimes you need to get info about the Gnu/Linux where your application is running. For instance you need to know the linux distro, the core of the CPU, etc, to personalize the environment of your application during an installation process.</p>
+
+<p>In a Gnu/Linux environment you can easly get system information using the following shell commands:</p>
+
+<h2>RAM (total memory):</h2>
+
+<pre><code class="bash">grep MemTotal /proc/meminfo
+</code></pre>
+
+<h2>CPU (model name):</h2>
+
+<pre><code class="bash">grep "model name" /proc/cpuinfo
+</code></pre>
+
+<h2>Kernel version:</h2>
+
+<pre><code class="bash">uname -rs
+</code></pre>
+
+<h2>Linux distro:</h2>
+
+<pre><code class="bash">lsb_release -a
+</code></pre>
+
+<p>or in some distro like Fedora:</p>
+
+<pre><code class="bash">cat /etc/*release*
+</code></pre>
+
+</post>
