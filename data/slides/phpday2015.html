@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base href="/lib/reveal.js-2.6.1/">
+  <title>Pushing Boundaries: Zend Framework 3 and the Future</title>
+
+  <meta name="description" content="Pushing Boundaries: Zend Framework 3 and the Future">
+  <meta name="author" content="Enrico Zimuel">
+  <meta name="keywords" content="PHP, Zend Framework, ZF1, ZF2, ZF3, PSR-7, Middleware, web programming">
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#018401">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/reveal.min.css">
+  <link rel="stylesheet" href="css/theme/sky.css" id="theme">
+  <link rel="stylesheet" href="css/custom.css" id="custom">
+
+  <!-- For syntax highlighting -->
+  <link rel="stylesheet" href="css/solarized_light.css">
+
+  <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+  <script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'css/print/pdf.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+  </script>
+
+  <!--[if lt IE 9]>
+  <script src="lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+
+<body style="background-image: url('/img/slides/phpday2015/background.jpg'); color: #EEEEEE;">
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <p><a href="http://framework.zend.com"><img src="/img/slides/phpday2015/zf.png" style="border:0px;"></a></p>
+					<h2>Pushing Boundaries: <font color="green">Zend Framework 3</font> and the Future</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a>,	<i>Senior Sofware Engineer</i><br /><a href="http://www.zend.com">Zend Technologies Ltd</a></small><br /><br />
+						<small><a href="http://www.phpday.it">PHP Day</a>, Verona (Italy), 15th May 2015</small>
+					</p>
+      </section>
+
+      <section>
+					<h2>About me</h2>
+					<p style="text-align:left;font-size:30px">
+						<img src="/img/slides/phpday2015/enrico.png" align="left" style="margin-right:30px"><strong>Enrico Zimuel</strong> (<a href="https://twitter.com/ezimuel">@ezimuel</a>), professional developer since 1996. Senior Software Engineer in the R&D department of <a href="http://www.zend.com" target="_blank">Zend Technologies</a>, since 2008. Research in computer science at the <a href="http://ivi.uva.nl/" target="_blank">Informatics Institute</a> of Amsterdam University. Open source contributor and co-author of <a href="http://apigility.org">Apigility</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a>. Co-author of the Italian books <a href="http://www.phpbestpractices.it/">PHP Best Practices</a> and <a href="http://www.jsbestpractices.it/">Javascript Best Practices</a>. Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy).
+					</p>
+			</section>
+
+      <section>
+        <h2>ZF3 in a nutshell</h2>
+
+        <ul>
+          <li class="fragment">Emphasis on <strong>components</strong></li>
+          <li class="fragment">Focus on HTTP, via <strong>PSR-7</strong> and <strong>middleware</strong></li>
+          <li class="fragment">Optimize for <strong>PHP 7</strong>, but support <strong>PHP 5.5+</strong></li>
+          <li class="fragment">Stable release <strong>October 2015!</strong></li>
+        </ul>
+      </section>
+
+
+      <section>
+        <h2><strong>Components</strong></h2>
+        <img src="/img/slides/phpday2015/components.png">
+      </section>
+
+      <section>
+        <h2>ZF1: the past</h2>
+
+        <ul>
+          <li class="fragment">Components are developed within the framework
+            repository, <em>and</em></li>
+          <li class="fragment">are installable <em>only with the entire
+            framework</em>.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>ZF2: today</h2>
+
+        <ul>
+          <li class="fragment">Components are developed within the framework
+            repository, <em>and</em></li>
+          <li class="fragment">can be installed <em>individually</em>
+            (Composer, git submodules).</li>
+        </ul>
+
+        <aside class="notes">
+          <ul>
+            <li>"Individually" is a loose term; most components have several
+              dependencies currently.</li>
+            <li>This is accomplished via a semi-manual process (we trigger it
+              for each release).</li>
+            <li>If a patch lands in a component, you can only test it in your
+              application before a release if you add <strong>all</strong> of
+              ZF as a dependency.</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section>
+        <h2>The future</h2>
+        <h3>ZF 2.5+</h3>
+
+          <ul>
+            <li class="fragment">Components will be developed in their own repositories.</li>
+            <li class="fragment">Components will be installable individually.</li>
+            <li class="fragment">The ZF repository will <strong>depend</strong> on components!</li>
+          </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>We'll be focusing on separated interfaces as well, to better
+                decouple components, allowing them to be used
+                independently.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2 class="nocaps">ZF's composer.json becomes...</h2>
+
+          <pre><code class="lang-json" data-trim>
+{
+  "require": {
+    "zendframework/zend-authentication": "^2.5",
+    "zendframework/zend-cache": "^2.5",
+    "zendframework/zend-captcha": "^2.5",
+    "etc": "*"
+  }
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>Why?</h2>
+        </section>
+
+        <section>
+          <h2>Ease maintenance</h2>
+
+          <ul>
+            <li>Allow more teams with commit rights</li>
+            <li>Allow deterministic fate of repositories</li>
+          </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>If a repo has no contributors, and isn't receiving issues/pull
+                requests, we may determine in the future to abandon it.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Selective evolution</h2>
+
+          <ul>
+            <li>Bump major versions as needed</li>
+            <li>Framework repo can selectively upgrade
+              components</li>
+          </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>Some components need more changes than others: SM, EM,
+                InputFilter, Forms.</li>
+              <li>Others are stable, and may not need huge changes in the
+                future: Escaper, Config, Paginator, etc.</li>
+              <li>Let them evolve on their own timelines; the framework can
+                upgrade them selectively.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Use-case specific skeletons</h2>
+
+          <ul>
+            <li>Delivering only web services?</li>
+            <li>Need performance?</li>
+            <li>Need everything?</li>
+          </ul>
+
+          <h3 class="nocaps"><br />There will be a skeleton for
+            that!</h3>
+
+          <aside class="notes">
+            <ul>
+              <li>If you're only doing SOAP, XML-RPC, or JSON-RPC, you might do
+                a small subset of components. Or if you're doing REST, you might
+                omit things like Navigation, Form, XmlRpc, Soap, and
+                session.</li>
+              <li>If you're focusing on performance, you might do a different
+                subset.</li>
+            </ul>
+          </aside>
+        </section>
+
+
+        <section>
+          <h2>HTTP, PSR-7, and Middleware</h2>
+          <img src="/img/slides/phpday2015/mosaic.png">
+        </section>
+
+        <section>
+          <h2>HTTP is the foundation of the web</h2>
+
+          <ul>
+            <li class="fragment">A client sends a <em>request</em></li>
+            <li class="fragment">A server returns a <em>response</em></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>HTTP messages</h2>
+
+          <div class="fragment">
+            <h4>Request</h4>
+
+            <pre><code class="lang-http" data-trim>
+GET /path HTTP/1.1
+Host: example.com
+Accept: application/json
+            </code></pre>
+          </div>
+
+          <div class="fragment">
+            <h4>Response</h4>
+
+            <pre><code class="lang-http" data-trim>
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"foo":"bar"}
+            </code></pre>
+          </div>
+        </section>
+
+        <section>
+          <h2>Frameworks model messages</h2>
+
+          <p>But every framework does it differently.</p>
+
+          <pre><code class="lang-php" data-trim>
+$method = $request->getMethod();
+$method = $request->getRequestMethod();
+$method = $request->method;
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>PSR-7</h2>
+          <h3>Shared HTTP Message Interfaces</h3>
+          <img src="/img/slides/phpday2015/phpfig.jpg">
+        </section>
+
+        <section>
+          <h2>Request</h2>
+
+          <pre><code class="lang-php" data-trim>
+$method     = $request->getMethod();
+$accept     = $request->getHeader('Accept');
+$path       = $request->getUri()->getPath();
+$controller = $request->getAttribute('controller');
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>Response</h2>
+
+          <pre><code class="lang-php" data-trim>
+$response->getBody()->write('Hello world!');
+$response = $response
+  ->withStatus(200, 'OK')
+  ->withHeader('Content-Type', 'text/plain');
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>PSR-7 and the ZF MVC</h2>
+
+          <p>Still under discussion, but…</p>
+
+          <ul>
+            <li>we may consume PSR-7 directly</li>
+            <li>or create a bridge implementation</li>
+          </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>Bridging would happen in order to retain our current API,
+                while manipulating a PSR-7 instance underneath. This would give
+                us compatibility with both worlds, and make for an easier
+                migration path. PSR-7 users would still be supported.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Middleware<h2>
+          <h3 class="nocaps">Between the request and response</h3>
+
+          <pre><code class="lang-php" data-trim>
+function (Request $request, Response $response)
+{
+    // do some work
+    return $response; // same, or a new instance.
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <img src="/img/slides/phpday2015/middleware.png" style="border:0">
+        </section>
+
+        <section>
+          <h2>Types of middleware</h2>
+        </section>
+
+        <section>
+          <h2>Stacks or pipelines</h2>
+
+          <pre><code class="lang-php" data-trim>
+$pipeline->pipe($middleware1);          // always evaluate
+$pipeline->pipe('/path', $middleware2); // only if path matches
+$pipeline->pipe('/different/path', $middleware3);
+$response = $pipeline->run();
+          </code></pre>
+
+          <aside class="notes">
+            <ul>
+              <li>This is like Connect in node.js</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Onion style</h2>
+
+          <pre><code class="lang-php" data-trim>
+class Outer
+{
+    public $inner;
+    public function __invoke($request, $response)
+    {
+        // do some work
+
+        $response = ($this->inner)($request, $response);
+
+        // do some work
+        return $response;
+    }
+}
+
+$response = $outer($request, $response);
+          </code></pre>
+
+          <aside class="notes">
+            <ul>
+              <li>This is like Rack and WSGI</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Lambda style</h2>
+
+          <pre><code class="lang-php" data-trim>
+function (Request $request)
+{
+    // do some work
+    return $response;
+}
+
+$response = $middleware($request);
+          </code></pre>
+
+          <aside class="notes">
+            <ul>
+              <li>This is a functional paradigm</li>
+              <li>Laravel 5 uses this style</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Consuming middleware</h2>
+
+          <p>ZF will allow dispatching the following middleware:</p>
+
+          <pre><code class="lang-php" data-trim>
+/**
+ * @return Response
+ */
+public function (Request $request, Response $response);
+          </code></pre>
+
+          <p>… and ZF controllers will be middleware.</p>
+
+          <aside class="notes">
+            <ul>
+              <li>ZF's DispatchableInterface is essentially this middleware
+                interface already.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Middleware wrapper for ZF</h2>
+
+          <pre><code class="lang-php" data-trim>
+$middleware = new MvcMiddlewareWrapper(
+    require 'config/application/config.php'
+);
+
+class MvcMiddlewareWrapper
+{
+    public function __invoke($request, $response)
+    {
+        $app = Application::init($this->config);
+        return $app->dispatch($request, $response);
+    }
+}
+          </code></pre>
+
+          <aside class="notes">
+            <ul>
+              <li>Request/response are PSR-7 messages</li>
+              <li>We'll likely do something like this for ZF1, too, which can
+                bridge the request/response instances.</li>
+              <li>Requires we have a new path that returns the response, instead
+                of emitting it.</li>
+              <li>Lazy-initialization so that it only loads ZF if the middleware
+                is invoked!</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Middleware as an alternative runtime</h2>
+
+          <p>Why?!?!?!?!</p>
+
+          <ul>
+            <li>Performance</li>
+            <li>Developer experience</li>
+            <li>Reusability across frameworks</li>
+          </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>Performance: lazy-loading of resources based on opportunistic
+                path matching; slimmer runtime engine (typically). You **can**
+                run into the same performance issues of any web application;
+                it's a matter of how you architect things.</li>
+              <li>DX: simpler patterns; usually do only one thing per
+                middleware; compose middleware in order to accomplish complex
+                workflows; etc.</li>
+              <li>If you target middleware, and not the framework, you create
+                reusable web-facing widgets!</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Example</h2>
+
+          <pre><code class="lang-php" data-trim>
+$app = new Middleware();
+$app->pipe('/', $homepage);              // Static!
+$app->pipe('/customer', $zf2Middleware); // ZF2!
+$app->pipe('/products', $zf1Middleware); // ZF1!
+$app->pipe('/api', $apigility);          // Apigility!
+$app->pipe('/user', $userMiddleware);    // 3rd party!
+
+$server->listen($app);
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>PSR-7 and Middleware provide…</h2>
+
+          <ul>
+            <li>Paths for performance optimization</li>
+            <li>Simpler web-facing interfaces</li>
+            <li>Greater interoperability and re-use potential</li>
+          </ul>
+        </section>
+
+
+        <section>
+          <h2>PHP 7 and PHP 5.5</h2>
+          <img src="/img/slides/phpday2015/php7.png" style="border:0">
+        </section>
+
+        <section>
+          <h2>Upgrade to PHP 5.5</h2>
+
+          <ul>
+            <li>We get to use traits!</li>
+            <li>We get to use short array syntax!</li>
+            <li>We get to use the callable type hint!</li>
+            <li>We get to use <kbd>finally</kbd>!</li>
+            <li>We can use the <kbd>::class</kbd> magic constant!</li>
+            <li>We get to use generators!</li>
+            <li>We get faster, more secure PHP!</li>
+          </ul>
+        </section>
+
+	<section>
+					<h2>PHP 7</h2>
+					<p>Impressive performance improvement!</p>
+					<p>New data structure management in the PHP engine</p>
+					<p>New features like return/scalar type declarations</p>
+				</section>
+
+				<section>
+					<h2>PHP 7: benchmark</h2>
+<pre><code data-trim>
+$a = array();
+for ($i = 0; $i < 1000000; $i++) {
+	$a[$i] = array("hello");
+}
+echo memory_get_usage(true);
+</code></pre>
+					<table width="100%">
+            <thead>
+  						<tr>
+  							<td></td>
+  							<td><strong>PHP 5.6</strong></td>
+  							<td><strong>PHP 7</strong></td>
+  						</tr>
+            </thead>
+            <tbody>
+  						<tr>
+  							<td><strong>Memory Usage</strong></td>
+  							<td>428 MB</td>
+  							<td>33 MB</td>
+  						</tr>
+  						<tr>
+  							<td><strong>Execution time</strong></td>
+  							<td>0.49 sec</td>
+  							<td>0.06 sec</td>
+  						</tr>
+            </tbody>
+					</table>
+				</section>
+
+        <section>
+          <h2>bench.php</h2>
+          <img src="/img/slides/phpday2015/bench1.png">
+        </section>
+
+				<section>
+					<h2>Wordpress</h2>
+					<img src="/img/slides/phpday2015/bench2.png">
+				</section>
+
+				<section>
+					<h2>Frameworks</h2>
+					<img src="/img/slides/phpday2015/bench3.png">
+				</section>
+
+        <section>
+          <h2>ZF3: optimized for PHP 7</h2>
+
+          <ul>
+            <li>Running tests in strict and/or coercive mode.
+              <ul>
+                <li>Allowing us to fix bugs for PHP 5, and also forward-proof
+                  code for PHP 7.</li>
+              </ul>
+            </li>
+            <li>Potentially automate release builds that add
+              scalar typehints from docblock annotations.</li>
+            <li>Profiling in PHP 7 to see where we can optimize
+              architecture for performance.</li>
+          </ul>
+
+          <aside class="notes">
+            <ul>
+              <li>The last is important, as a lot of work hsa been done in PHP 7
+                to streamline the object call graph; if we profile early, we can
+                make changes that will benefit PHP 7 users specifically.</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Updating PHP…</h2>
+
+          <ul>
+            <li>Provides better security</li>
+            <li>Improves performance</li>
+            <li>Allows us to improve the framework</li>
+          </ul>
+        </section>
+
+
+        <section>
+          <h2>Summarize</h2>
+        </section>
+
+        <section>
+          <h2>Components!</h2>
+
+          <aside class="notes">
+            <ul>
+              <li>Welcome to a true <strong>component</strong> library, built
+                with <strong>Composer</strong> in mind!</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>HTTP, PSR-7, and Middleware!</h2>
+
+          <aside class="notes">
+            <ul>
+              <li>Welcome to a truly <strong>HTTP-centric</strong> framework,
+                utilizing the <strong>best enterprise stack</strong> alongside
+                an optimized <strong>middleware</strong> runtime!</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>PHP 7 and PHP 5.5!</h2>
+
+          <aside class="notes">
+            <ul>
+              <li>Welcome to the future of PHP, using the
+                <strong>latest</strong> and greatest features in order to
+                deliver you a better, more <strong>secure</strong>, more
+                <strong>performant</strong> runtime!</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section>
+          <h2>Some references</h2>
+          <ul>
+            <li>Matthew Weier O'Phinney, <a href="https://mwop.net/blog/2015-01-26-psr-7-by-example.html">PSR-7 By Example</a></li>
+            <li>Matthew Weier O'Phinney, <a href="https://mwop.net/blog/2015-01-08-on-http-middleware-and-psr-7.html">On HTTP, Middleware, and PSR-7</a></li>
+            <li>PHP Framework Interop Group, <a href="https://github.com/php-fig/http-message">PSR HTTP Message</a></li>
+            <li><a href="https://pages.zend.com/ty-infographic.html">5 THINGS YOU MUST KNOW ABOUT PHP7</a>, Infographic by Zend</li>
+            <li><a href="http://info.zend.com/f004j0A0X0004X0LLrCH30a">Get performance insight into the upcoming release of PHP 7</a>, Infographic by Zend</li>
+            <li>Dmitry Stogov, <a href="https://drive.google.com/file/d/0B3UKOMH_4lgBUTdjUGxIZ3l1Ukk/view">PHPNG a New Core for PHP7</a>, ZendCond 2014</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Thank you!</h2>
+          <p>Rate this talk at: <a href="https://joind.in/14532">joind.in/14532</a><br /><br /></p>
+
+
+          <h4 class="nocaps">Enrico Zimuel<br />
+            <a href="http://framework.zend.com">http//framework.zend.com</a><br />
+            <a href="https://apigility.org">https://apigility.org</a><br />
+            <a href="https://twitter.com/ezimuel">@ezimuel</a><br />
+            <a href="http://www.zimuel.it">http://www.zimuel.it</a>
+          </h4>
+
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/phpday2015/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+
+        </section>
+    </div>
+  </div>
+
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.min.js"></script>
+  <script>
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+
+      theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+      transition: Reveal.getQueryHash().transition || 'concave', // default/cube/page/concave/zoom/linear/fade/none
+
+      // Parallax scrolling
+      // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+      // parallaxBackgroundSize: '2100px 900px',
+
+      // Optional libraries used to extend on reveal.js
+      dependencies: [
+        { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+        { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+        { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+      ]
+    });
+  </script>
+</body>
+</html>

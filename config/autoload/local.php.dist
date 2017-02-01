@@ -2,6 +2,15 @@
 
 return [
     'debug' => true,
-
     'config_cache_enabled' => false,
+
+    // home page settings
+    'home' => [
+        'events' => [ ], // list of next events
+        'book' => '' // latest book
+    ],
+
+    // slides path
+    'path_slides' => '',
+    
 ];

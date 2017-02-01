@@ -1,9 +1,29 @@
 <?php $this->layout('layout::default', ['title' => '404 Not Found']) ?>
 
-<h1>Oops!</h1>
-<h2>This is awkward.</h2>
-<p>We encountered a 404 Not Found error.</p>
-<p>
-    You are looking for something that doesn't exist or may have moved. Check out one of the links on this page
-    or head back to <a href="/">Home</a>.
-</p>
+<header class="intro-header" style="background-image: url('/img/error-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="site-heading">
+                    <h1>404</h1>
+                    <hr class="small">
+                    <span class="subheading">Page Not Found :(</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <h1>Oops! This is awkward.</h1>
+        <p>
+            You are looking for something that doesn't exist or may have moved. Check out one of the links on this page
+            or head back to <a href="/">Home</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</article>

@@ -21,6 +21,6 @@ class StaticPage
     {
         $path = $request->getUri()->getPath();
         $path = substr($path, 1);
-        return new HtmlResponse($this->template->render("app::$path", $data));
+        return new HtmlResponse($this->template->render("app::$path"));
     }
 }

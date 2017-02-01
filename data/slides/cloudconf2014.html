@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<base href="/lib/reveal.js-2.6.1/">
+		<title>RESTful API development: problems and solutions</title>
+
+		<meta name="description" content="RESTful API development: problems and solutions">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/sky.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h2>RESTful API development:<br /> problems and solutions</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a> / <a href="http://twitter.com/ezimuel">@ezimuel</a><br />
+						<i>Senior Software Engineer - Zend Technologies</i></small>
+					</p>
+					<p><a href="http://www.cloudconf.it"><img src="/img/slides/cloudconf2014/cloudconf2014.png"></a></p>
+				</section>
+
+				<section>
+					<h2>About me</h2>
+					<p style="text-align:left">
+						<img src="/img/slides/cloudconf2014/enrico.jpg" align="left" style="margin-right:30px">I'm a Software Engineer since 1996. I work in the R&D department of <a href="http://www.zend.com">Zend Technologies</a>, the PHP Company. I'm an open source contributor: <a href="http://apigility.org">Apigility</a> and <a href="http://framework.zend.com">Zend Framework</a>. I did research in computer science at the <a href="http://ivi.uva.nl/">Informatics Institute</a> of the University of Amsterdam. I wrote a couple of books: <a href="http://www.phpbestpractices.it/">"PHP best practices"</a> and <a href="http://www.jsbestpractices.it/">"Javascript best practices"</a>. I'm the co-founder of <a href="http://torino.grusp.org">PUG Torino</a>.
+					</p>
+
+				</section>
+
+				<section>
+					<h2>API</h2>
+					<p>
+						API stands for <strong>"Application Programming Interface"</strong> and as a term, specifies how software should interact.
+					</p>
+					<p>
+						Generally speaking, when we refer to APIs today, we are referring more specifically to <strong>web APIs</strong>, those delivered over HyperText Transfer Protocol (HTTP).
+					</p>
+				</section>
+
+				<section>
+					<h2>REST</h2>
+					<p>
+						REpresentational State Transfer (REST) is not a specification, but an architecture designed around the HTTP specification.
+					</p>
+				</section>
+
+				<section>
+					<h2>RESTful</h2>
+					<p>
+						REST leverages HTTP's strengths, and builds on:
+						<ul>
+<li>URIs as unique identifiers for resources</li>
+<li>Rich set of HTTP verbs for operations on resources</li>
+<li>The ability for clients to specify representation formats they can render</li>
+<li>Linking between resources to indicate relationships</li>
+</ul>
+					</p>
+				</section>
+
+				<section>
+					<h2>Glory of REST</h2>
+					<p>When talking about REST, the <a href="http://martinfowler.com/articles/richardsonMaturityModel.html">Richardson Maturity Model</a> is often used to describe the concerns necessary when implementing a well-designed REST API</p>
+					<p><img src="/img/slides/cloudconf2014/glory_of_rest.png"></p>
+				</section>
+
+				<section>
+					<h2>REST in practice?</h2>
+					<p>All of this theory helps tell us how REST services should act, but tell us very little about how to implement them. This is somewhat by design; REST is more of an architectural consideration.</p>
+				</section>
+
+				<section>
+					<h2>Some questions</h2>
+					<ul>
+						<li>What representation formats will you expose?</li>
+						<li>How will you report errors?</li>
+						<li>How will you advertise which HTTP methods are available for a given resource?</li>
+						<li>How will you handle features such as authentication?</li>
+						<li>How will you handle hypermedia linking?</li>
+						<li>How will you document what resources are available?</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Possible answers</h2>
+					<ul>
+						<li><font color="gray">What representation formats will you expose?</font> JSON</li>
+						<li><font color="gray">How will you report errors?</font> application/problem+json</li>
+						<li><font color="gray">How will you advertise which HTTP methods are available for a given resource?</font> OPTIONS</li>
+						<li><font color="gray">How will you handle features such as authentication?</font> OAuth2</li>
+						<li><font color="gray">How will you handle hypermedia linking?</font> Hypermedia Application Language (<a href="http://stateless.co/hal_specification.html">HAL</a>)</li>
+						<li><font color="gray">How will you document what resources are available?</font> <a href="https://helloreverb.com/developers/swagger">Swagger</a>, <a href="http://apiary.io/">Apiary.io</a>, <a href="http://apiblueprint.org/">API Blueprint</a>, etc</li>
+					</ul>
+				</section>
+
+				<section>
+					<p><a href="http://www.apigility.org"><img src="/img/slides/cloudconf2014/apigility.png" style="border:0px"></a></p>
+				</section>
+
+				<section>
+					<h2>Apigility</h2>
+					<ul>
+					<li>API builder for PHP applications, the world's easiest way to create high-quality APIs</li>
+					<li>Open source project by <a href="http://www.zend.com">Zend Technologies</a></li>
+					<li>Built using <a href="http://framework.zend.com">Zend Framework 2</a> (modules)</li>
+					<li>Version 1.0.0beta1 released in March 2014</li>
+					<li><a href="http://www.apigility.org">http://www.apigility.org</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Main features</h2>
+					<ul>
+							<li>RPC and REST</li>
+							<li>JSON (HAL) as default format</li>
+							<li>Error handling (API Problem)</li>
+							<li>Content negotiation</li>
+							<li>Versioning (via URI and Accept header)</li>
+							<li>Filtering and validation</li>
+							<li>Authentication (HTTP Basic/Digest, OAuth2)</li>
+							<li>Documentation (HTML, Swagger)</li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>RPC</h2>
+					<ul>
+				    	<li>"A remote procedure call (RPC) is an inter-process communication that allows a computer program to cause a subroutine or procedure to execute in another address space" (Wikipedia)</li>
+					<li>A RPC over HTTP is actually any kind of API request provided using a specific data format (e.g. RPC-XML, RPC-JSON).</li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>RESTful</h2>
+				    	<ul>
+						<li>REST is a simple stateless architecture that generally runs over HTTP.</li>
+						<li>It uses URI and HTTP methods to map the different actions (GET, POST, PUT, DELETE).</li>
+						<li>A typical RESTful API url:
+<pre><code data-trim>
+http://domain/api/user[/:user_id]
+</pre></code></li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>JSON</h2>
+					<ul>
+				    	<li>JSON (JavaScript Object Notation), is an open standard format used to transmit data between a server and web application, expressed using Javascript syntax.</li>
+					<li>Example of JSON:
+<pre><code data-trim>
+{
+    "firstName": "John",
+    "lastName": "Smith",
+    "age": 25,
+    "address": {
+        "streetAddress": "21 2nd Street",
+        "city": "New York"
+    },
+    "emails" : [
+	'john.smith@gmail.com',
+	'john@smith.com'
+    ]
+}
+</pre></code></li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>JSON HAL</h2>
+				    	<ul>
+						<li>JSON Hypertext Application Language, is a RFC draft proposal (<a href="http://tools.ietf.org/html/draft-kelly-json-hal-06">draft-kelly-json-hal-06</a>)</li>
+						<li>Example:
+<pre><code data-trim>
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user/ezimuel"
+        }
+    }
+    "id": "ezimuel",
+    "name": "Enrico Zimuel"
+}
+</pre></code></li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>_embedded</h2>
+						<p>
+<pre><code data-trim>
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user/ezimuel"
+        }
+    }
+    "id": "ezimuel",
+    "name": "Enrico Zimuel",
+    "_embedded": {
+        "contacts": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/mwop"
+                    }
+                },
+                "id": "mwop",
+                "name": "Matthew Weier O'Phinney"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/ralphschindler"
+                    }
+                },
+                "id": "ralphschindler",
+                "name": "Ralph Schindler"
+            }
+        ]
+    }
+}
+</pre></code>
+					</p>
+				</section>
+
+				<section>
+				    	<h2>Collections</h2>
+						<p>
+<pre><code data-trim>
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user?page=3"
+        },
+        "first": {
+            "href": "http://domain/api/user"
+        },
+        "prev": {
+            "href": "http://domain/api/user?page=2"
+        },
+        "next": {
+            "href": "http://domain/api/user?page=4"
+        },
+        "last": {
+            "href": "http://domain/api/user?page=133"
+        }
+    }
+    "count": 3,
+    "total": 498,
+    "_embedded": {
+        "users": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/mwop"
+                    }
+                },
+                "id": "mwop",
+                "name": "Matthew Weier O'Phinney"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/mac_nibblet"
+                    }
+                },
+                "id": "mac_nibblet",
+                "name": "Antoine Hedgecock"
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "http://domain/api/user/spiffyjr"
+                    }
+                },
+                "id": "spiffyjr",
+                "name": "Kyle Spraggs"
+            }
+        ]
+    }
+}
+</pre></code>
+					</p>
+				</section>
+
+				<section>
+				    	<h2>API Problem</h2>
+				    	<ul>
+						<li>API Problem is a RFC draft proposal (<a href="https://tools.ietf.org/html/draft-nottingham-http-problem-06">draft-nottingham-http-problem-06</a>)</li>
+						<li>Example:
+<pre><code data-trim>
+Content-Type: application/problem+json
+
+{
+    "detail": "The GET method has not been defined for individual",
+    "status": 405,
+    "title": "Method Not Allowed",
+    "type": "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html"
+}
+</code></pre>
+</li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>Content negotiation</h2>
+				    	<ul>
+						<li>Content negotiation is a mechanism defined in the HTTP specification that makes it possible to serve different versions of a document at the same URI.</li>
+						<li>Example:
+<pre><code data-trim>
+Accept: application/hal+json, application/json
+</code></pre>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>API Versioning</h2>
+					<p>Agility uses two approaches:</p>
+				    	<ul>
+						<li>In the URL, e.g. /api/<code style="color:red">v1</code>/user</li>
+						<li>By Accept header, e.g. Accept:application/vnd.example.<code style="color:red">v1</code>+json </li>
+					</ul>
+				</section>
+
+				<section>
+				    	<h2>Authentication</h2>
+					<p align="left">"Authentication is the act of confirming the identity of a person or software program" (Wikipedia)</p>
+					<p align="left">Apigility supports 3 different authentication systems:
+				    	<ul>
+						<li>HTTP Basic</li>
+						<li>HTTP Digest</li>
+						<li>OAUth2</li>
+					</ul></p>
+				</section>
+
+				<section>
+				    	<h2>Use Apigility for</h2>
+				    	<p>Create RESTful/RPC API for an existing PHP application:<br /> <code style="color:red">code-connected</code></p>
+						<p>Expose a database table as RESTful API:<br /> <code style="color:red">db-connected</code></p>
+				</section>
+
+				<section>
+					<h2>Installation</h2>
+					<p>Super easy, just one command:</p>
+					<pre><code data-trim>
+$ curl -sS https://apigility.org/install | php
+</code></pre>
+					<p>Or, if you don't have <a href="http://curl.haxx.se/">CURL</a> installed:</p>
+					<pre><code data-trim>
+$ php -r "readfile('https://apigility.org/install');" | php
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Apigility UI</h2>
+					<p>Open the browser to <a href="http://localhost:8888">http://localhost:8888</a></p>
+					<p><img src="/img/slides/cloudconf2014/welcome.png"></p>
+				</section>
+
+				<section>
+					<h2>DEMO time</h2>
+					<p>Apigility in action!</p>
+				</section>
+
+                <!-- Final slide -->
+				<section>
+					<h2>Thanks!</h2>
+					<p><br />More information on <a href="http://www.apigility.org">apigility.org</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/cloudconf2014/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+
+
+
+				</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

@@ -10,6 +10,7 @@ return [
             Zimuel\Middleware\HomePage::class => Zimuel\Middleware\HomePageFactory::class,
             Zimuel\Middleware\Blog::class => Zimuel\Middleware\BlogFactory::class,
             Zimuel\Middleware\Send::class => Zimuel\Middleware\SendFactory::class,
+            Zimuel\Middleware\Slide::class => Zimuel\Middleware\SlideFactory::class,
         ],
     ],
 ];

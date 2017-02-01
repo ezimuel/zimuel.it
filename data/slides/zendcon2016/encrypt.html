@@ -1,0 +1,435 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<base href="/lib/reveal.js-3.1.0/">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Encryption, authentication and data integrity in PHP 7</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body style="background-image: url('/img/slides/zendcon2016/background.png'); background-color: white;">
+		<div class="reveal">
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h2>Encryption, authentication and data integrity in PHP 7</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a> / <a href="http://twitter.com/ezimuel">@ezimuel</a><br />
+						<i>Senior Software Engineer</i><br /><a href="http://www.zend.com">Zend Technologies</a> a Rogue Wave Company</small>
+					</p>
+					<p><br /><small>21th October 2016 - <a href="http://www.zendcon.com/">ZendCon</a> - Las Vegas</small></p>
+					<p><img src="/img/slides/zendcon2016/zend.png" style="border-style:none;margin-right:50px"> <img src="/img/slides/zendcon2016/roguewave.png" style="border-style:none;margin-left:50px"></p>
+				</section>
+
+				<section>
+					<h2>About me</h2>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/zendcon2016/enrico.png">
+							</td>
+							<td>
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Senior Software Engineer at <a href="http://www.zend.com" target="_blank">Zend</a>, a Rogue Wave Company</li>
+									<li>Research in computer science at <a href="http://ivi.uva.nl/" target="_blank">Amsterdam University</a></li>
+									<li>Open source contributor of <a href="http://apigility.org">Apigility</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<h2>Encryption in PHP</h2>
+					<ul>
+						<li><strike><a href="http://it1.php.net/manual/en/book.mcrypt.php" target="_blank">Mcrypt</a> extension</strike>, symmetric encryption (outdated)</li>
+						<li><a href="http://it1.php.net/manual/en/book.openssl.php" target="_blank">OpenSSL</a> extension, public key and symmetric encryption</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2><strike>Mcrypt</strike> (outdated)</h2>
+					<ul>
+						<li>Ciphers: rijndael (AES), Twofish, Blowfish, DES, 3DES, etc</li>
+						<li>Block modes: CBC, CFB, CTR, OFB, NOFB, NCFB</li>
+						<li>Padding: zero padding, padded with '\0'</li>
+						<li>No Authentication!</li>
+						<li><a href="https://wiki.php.net/rfc/mcrypt-viking-funeral">Deprecated in PHP 7.1</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>OpenSSL</h2>
+					<ul>
+						<li>Ciphers: RSA, AES, CAMELLIA, DES, RC2, RC4, check with <a href="http://www.php.net/manual/en/function.openssl-get-cipher-methods.php">openssl_get_cipher_methods()</a></li>
+						<li>Block modes: CBC, CFB, CTR, ECB, XTS</li>
+						<li>Padding: PKCS#1, No padding, SSLV23, PKCS1_OAEP</li>
+						<li>Authenticated encryption: GCM, CCM (<a href="https://wiki.php.net/rfc/openssl_aead">AEAD proposal for PHP 7.1</a>)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Symmetric encryption</h2>
+					<ul>
+						<li class="fragment">Choose the algorithm, e.g. <a href="https://it.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a> (FIPS 197)</li>
+						<li class="fragment">Choose the mode of operation, e.g. <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_Block_Chaining_.28CBC.29">CBC</a></li>
+						<li class="fragment">Choose the padding mode, e.g. <a href="https://en.wikipedia.org/wiki/Padding_%28cryptography%29#PKCS7">#PKCS7</a></li>
+						<li class="fragment">Build an encryption key using a <a href="https://en.wikipedia.org/wiki/Key_derivation_function">Key Derivation Function</a> (KDF), e.g. <a href="https://en.wikipedia.org/wiki/PBKDF2">PBKDF2</a></li>
+						<li class="fragment">Encrypt-then-authenticate using, e.g. <a href="https://it.wikipedia.org/wiki/HMAC">HMAC</a> + <a href="https://it.wikipedia.org/wiki/Secure_Hash_Algorithm">SHA-256</a>
+					</ul>
+				</section>
+
+				<section>
+					<h2>CBC encryption</h2>
+					<img src="/img/slides/zendcon2016/cbc_encryption.png" style="border-style:none">
+				</section>
+
+				<section>
+					<h2>CBC decryption</h2>
+					<img src="/img/slides/zendcon2016/cbc_decryption.png" style="border-style:none">
+				</section>
+
+				<section>
+					<h2>PBKDF2</h2>
+						<ul>
+							<li class="fragment">PBKDF2 (Password-Based Key Derivation Function 2) is a key derivation function <a href="https://www.ietf.org/rfc/rfc2898.txt">RFC 2898</a></li>
+							<li class="fragment">In PHP:
+<pre><code data-trim lang="php">
+hash_pbkdf2($algo, $password, $salt, $iterations, $length=0, $raw=false)
+</code></pre></li>
+						<li class="fragment">We will use <a href="https://en.wikipedia.org/wiki/SHA-2">SHA-256</a> as $algo</li>
+						<li class="fragment">In 2016 a reasonable $iterations is around 80k<br /><small>Source: <a href="https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2015/march/enough-with-the-salts-updates-on-secure-password-schemes/">Enough With the Salts: Updates on Secure Password Schemes</a></small></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>HMAC</h2>
+					<ul>
+						<li class="fragment">Hash-based message authentication code (<a href="https://tools.ietf.org/html/rfc2104">RFC 2140</a>)<br /><br />
+						<img src="/img/slides/zendcon2016/hmac.png" style="border-style:none;margin-top:0px;margin-bottom:10px"><br /><small>where <i>H</i> is hash function, <i>K</i> is key, <i>K'</i> derivated key, <i>opad</i> is outer padding (0x5c), <i>ipad</i> is inner padding (0x36), &oplus; is XOR, and || is concatenation</small></li>
+						<li class="fragment">In PHP:
+<pre><code data-trim>
+hash_hmac ($algo, $data, $key, $raw_output = false)
+hash_hmac_file ($algo, $filename, $key, $raw_output = false)
+</code></pre></li>
+						<li class="fragment">We will use <a href="https://en.wikipedia.org/wiki/SHA-2">SHA-256</a> as $algo</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Why we need authentication?</h2>
+					<ul>
+						<li class="fragment">Encryption only provides confidentiality</li>
+						<li class="fragment">An attacker can easily alter the encrypted message</li>
+						<li class="fragment"><a href="http://en.wikipedia.org/wiki/Padding_oracle_attack" target="_blank">Padding Oracle Attacks</a> can be applied to retrieve the plaintext without the key!</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Padding Oracle Attack</h2>
+					<ul>
+						<li class="fragment">Side channel attack which is performed on the padding of a cryptographic message</li>
+						<li class="fragment">Discovered in 2001 by <a href="http://en.wikipedia.org/wiki/Serge_Vaudenay" target="_blank">Serge Vaudenay</a></li>
+						<li class="fragment">Works on ECB, CBC, OAEP modes for all the block ciphers</li>
+						<li class="fragment">In <a href="https://www.usenix.org/legacy/event/woot10/tech/full_papers/Rizzo.pdf">2010</a> the attack was applied to several web application frameworks, including JavaServer Faces, Ruby on Rails and ASP.NET.</li>
+						<li class="fragment">Can be prevented using authentication</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Encryption</h2>
+<pre><code data-trim lang="php">
+function encrypt(string $text, string $key): string {
+  $iv      = random_bytes(16); // iv size for aes-256-cbc
+  $keys    = hash_pbkdf2('sha256', $key, $iv, 80000, 64, true);
+  $encKey  = mb_substr($keys, 0, 32, '8bit');
+  $hmacKey = mb_substr($keys, 32, null, '8bit');
+
+  $ciphertext = openssl_encrypt($text, 'aes-256-cbc', $encKey,
+    OPENSSL_RAW_DATA, $iv
+  );
+
+  $hmac = hash_hmac('sha256', $iv . $ciphertext, $hmacKey);
+  return $hmac . $iv . $ciphertext;
+}</code></pre>
+				</section>
+
+
+                <section>
+                    <h2>Decryption</h2>
+<pre><code data-trim lang="php">
+function decrypt(string $text, string $key): string {
+  $hmac       = mb_substr($text, 0, 64, '8bit');
+  $iv         = mb_substr($text, 64, 16, '8bit');
+  $ciphertext = mb_substr($text, 80, null, '8bit');
+
+  $keys    = hash_pbkdf2('sha256', $key, $iv, 80000, 64, true);
+  $encKey  = mb_substr($keys, 0, 32, '8bit');
+  $hmacKey = mb_substr($keys, 32, null, '8bit');
+  $hmacNow = hash_hmac('sha256', $iv . $ciphertext, $hmacKey);
+  if (! hash_equals($hmac, $hmacNow)) {
+    throw new Exception('Authentication error!');
+  }
+  return openssl_decrypt($ciphertext, 'aes-256-cbc', $encKey,
+    OPENSSL_RAW_DATA, $iv
+  );
+}</code></pre>
+                </section>
+
+                <section>
+					<h2>Timing attacks?</h2>
+                    <p>A <a href="http://en.wikipedia.org/wiki/Timing_attack" target="_blank">timing attack</a> is a side channel attack in which the attacker attempts to compromise a cryptosystem by analyzing the time taken to execute cryptographic algorithms</p>
+                    <p><small>From Wikipedia</small></p>
+										<p class="fragment">To compare two strings in PHP use<br /><a href="http://php.net/manual/en/function.hash-equals.php">hash_equals($known, $user)</a> to prevent timing attacks</p>
+				</section>
+
+				<section>
+					<h2>Authenticated Encryption</h2>
+					<p>
+						PHP 7.1 provides AEAD support for OpenSSL:<br />
+							<ul>
+								<li><a href="https://en.wikipedia.org/wiki/Galois/Counter_Mode">Galois/Counter Mode (GCM)</a></li>
+					  		<li><a href="https://en.wikipedia.org/wiki/CCM_mode">Counter with CBC-MAC (CCM)</a></li>
+							</ul>
+					</p>
+					<p>
+<pre><code data-trim lang="php">
+openssl_encrypt ($data, $method, $key, $options = 0, $iv = "",
+                 &$tag = null, $aad = "", $tag_len = 16)
+openssl_decrypt ($data, $method, $key, $options = 0, $iv = "",
+                 $tag = null, $aad = "")
+</code></pre>
+					</p>
+				</section>
+
+				<section>
+					<h2>Example</h2>
+<pre><code data-trim lang="php">
+$data = 'Hello World!';
+$key  = random_bytes(32); // 256 bit
+
+// GCM and CCM
+$modes = ['aes-256-gcm', 'aes-256-ccm'];
+foreach ($modes as $mode) {
+  $iv = random_bytes(openssl_cipher_iv_length($mode));
+  $ciphertext = openssl_encrypt($data, $mode, $key,
+    OPENSSL_RAW_DATA, $iv, $tag
+  );
+  printf("%s, tag size: %d bytes\n", $mode, mb_strlen($tag, '8bit'));
+  $text = openssl_decrypt($ciphertext, $mode, $key,
+    OPENSSL_RAW_DATA, $iv, $tag
+  );
+  printf("Decrypt %s\n\n", $text === $data ? 'Ok' : 'Failed');
+}
+</code></pre>
+				</section>
+
+								<section>
+									<h2>Best practices for encryption</h2>
+									<ul>
+										<li class="fragment">Use <a href="http://en.wikipedia.org/wiki/Advanced_Encryption_Standard" target="_blank">AES</a> as standard algorithm</li>
+										<li class="fragment">Use <a href="http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher-block_chaining_.28CBC.29" target="_blank">CBC</a> or <a href="http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29" target="_blank">CTR</a> mode</li>
+										<li class="fragment">Use random IVs, different for each encryption</li>
+										<li class="fragment">Generate a encryption key from user's password using a <a href="http://en.wikipedia.org/wiki/Key_derivation_function" target="_blank">KDF</a> function, e.g. <a href="http://en.wikipedia.org/wiki/PBKDF2" target="_blank">PBKDF2</a></li>
+										<li class="fragment">ALWAYS use authenticated encryption algorithms</li>
+										<li class="fragment">Secure random number: <a href="http://php.net/manual/en/function.random-int.php">random_int()</a> or <a href="http://php.net/manual/en/function.random-bytes.php">random_bytes()</a>
+										</li>
+									</ul>
+								</section>
+
+                <section>
+                    <h2>Public key encryption</h2>
+                    <h2>&</h2>
+                    <h2>Digital signature</h2>
+                </section>
+
+                <section>
+                    <h2>Hybrid cryptosystem</h2>
+										<ul>
+                    	<li class="fragment">Public key algorithms are too slow to encrypt a full text message</li>
+                    	<li class="fragment">We need a different approach (<a href="http://en.wikipedia.org/wiki/Hybrid_cryptosystem" target="_blank">Hybrid cryptosystem</a>):<br />
+                    		<ul>
+                        	<li class="fragment">generate a random <i>session key</i>;</li>
+                        	<li class="fragment">encrypt the <i>session key</i> using a public key algorithm;</li>
+                        	<li class="fragment">encrypt the message with a symmetric cipher using the <i>session key</i>;</li>
+                        	<li class="fragment">send the ciphertext and the encrypted <i>session key</i>;</li>
+                    		</ul>
+											</li>
+										</ul>
+                </section>
+
+								<section>
+									<img src="/img/slides/zendcon2016/openpgp.png">
+								</section>
+
+                <section>
+                    <h2>Public and private key</h2>
+<pre><code data-trim>
+// Generate public and private keys
+$keys = openssl_pkey_new(array(
+  "private_key_bits" => 4096,
+  "private_key_type" => OPENSSL_KEYTYPE_RSA,
+));
+
+// Store the private key in a file
+$passphrase = 'test';
+openssl_pkey_export_to_file($keys, 'private.key', $passphrase);
+
+// Store the public key in a file
+$details   = openssl_pkey_get_details($keys);
+$publicKey = $details['key'];
+file_put_contents('public.key', $publicKey);
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Hybrid encryption</h2>
+<pre><code data-trim>
+$msg = 'This is the secret message';
+// Encryption
+$key = random_bytes(32);
+openssl_public_encrypt($key, $encKey, $publicKey);
+$ciphertext = encrypt($msg, $key);
+file_put_contents('encrypted.msg', $encKey . $ciphertext);
+// Decryption
+$ciphertext = file_get_contents('encrypted.msg');
+$encKey     = mb_substr($ciphertext, 0, 512, '8bit');
+$ciphertext = mb_substr($ciphertext, 512, null, '8bit');
+$privateKey = openssl_pkey_get_private(
+  'file:///path/to/private.key',
+  $passphrase // to access the private key
+);
+openssl_private_decrypt($encKey, $key, $privateKey);
+$result = decrypt($ciphertext, $key); // $result === $msg
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Digital signature</h2>
+                    <ul>
+                        <li class="fragment">How to provide authentication and non-repudiation?</li>
+                        <li class="fragment">A <a href="http://en.wikipedia.org/wiki/Digital_signature" target="_blank">digital signature</a> is a mathematical scheme for demonstrating the authenticity of a digital message or document</li>
+                        <li class="fragment">Commonly used for software distribution, financial transactions, and in other cases where it is important to detect forgery or tampering</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <img src="/img/slides/zendcon2016/digital_sign.png">
+                </section>
+
+                <section>
+                    <h2>Signature with OpenSSL</h2>
+<pre><code data-trim>
+// Compute the signature
+$priKey = openssl_pkey_get_private(
+  'file:///path/to/private.key',
+  $passphrase
+);
+$data = file_get_contents('/path/to/file_to_sign');
+openssl_sign($data, $sign, $priKey, "sha256");
+printf("Signature : %s\n", base64_encode($sign));
+
+// Verify the signature
+$pubKey = openssl_pkey_get_public(
+  'file:///path/to/public.key'
+);
+$result = openssl_verify($data, $sign, $pubKey, "sha256");
+
+echo $result === 1 ? 'Signature ok' : 'Signature not valid';
+</code></pre>
+                </section>
+
+                <section>
+                    <h2>Crypto library in PHP</h2>
+										<ul>
+											<li><a href="https://github.com/paragonie/halite">Halite</a>, based on <a href="https://pecl.php.net/package/libsodium">libsodium</a>;</li>
+											<li><a href="https://github.com/defuse/php-encryption">defuse/php-encryption</a>;</li>
+											<li><a href="https://github.com/zendframework/zend-crypt">zendframework/zend-crypt</a>;</li>
+											<li><a href="https://github.com/ezimuel/phpcrypto">ezimuel/phpcrypto</a>, for PHP 7.</li>
+										</ul>
+                </section>
+
+                <section>
+					<h2>References: articles and books</h2>
+					<small>
+					<ul>
+						<li>Serge Vaudenay, <a href="http://www.iacr.org/cryptodb/archive/2002/EUROCRYPT/2850/2850.pdf" target="_blank">Security Flaws Induced by CBC Padding Applications to SSL, IPSEC, WTLS...</a>, EUROCRYPT 2002</li>
+						<li>J. Rizzo, T. Duong, <a href="http://www.usenix.org/event/woot10/tech/full_papers/Rizzo.pdf" target="_blank">Practical Padding Oracle Attacks</a>, USENIX WOOT 2010</li>
+						<li>M. Bellare, C. Namprempre, <a href="http://cseweb.ucsd.edu/~mihir/papers/oem.html" target="_blank">Authenticated Encryption: Relations among notions and analysis of the generic composition paradigm</a>, ASIACRYPT 2000</li>
+						<li>D. Brumley, D. Boneh, <a href="http://crypto.stanford.edu/~dabo/papers/ssl-timing.pdf">Remote Timing Attacks are Pratical</a>, USENIX Security Symposium, August 2003</li>
+						<li>N. Ferguson, B. Schneier, T. Kohno, <a href="https://www.schneier.com/book-ce.html" target="_blank">Cryptography Engineering</a>, John Wiley & Sons, 2010</li>
+						<li>Joshua Davies, <a href="http://eu.wiley.com/WileyCDA/WileyTitle/productCd-0470920416.html" target="_blank">Implementing SSL / TLS Using Cryptography and PKI</a>, John Wiley & Sons, 2011</li>
+						<li>A.J. Menezes, P.C. van Oorschot, S.A. Vanstone, <a href="http://cacr.uwaterloo.ca/hac/" target="_blank">Handbook of Applied Cryptography</a>, CRC Press, 2001</li>
+            <li>Ross J. Anderson, <a href="http://eu.wiley.com/WileyCDA/WileyTitle/productCd-0470068523.html" target="_blank">Security Engineering</a>, John Wiley & Sons, 2008</li>
+					</ul>
+					</small>
+				</section>
+
+				<section>
+					<h2>References: blog and websites</h2>
+					<small>
+					<ul>
+						<li>Rob Heaton, <a href="http://robertheaton.com/2013/07/29/padding-oracle-attack/" target="_blank">The Padding Oracle Attack - why crypto is terrifying</a>, 29 Jul 2013</li>
+						<li>Dennis Fisher, <a href="http://threatpost.com/padding-oracle-crypto-attack-affects-millions-aspnet-apps-091310">Padding Oracle’ Crypto Attack Affects Millions of ASP.NET Apps</a>, 13 Set 2010</li>
+						<li>J. Rizzo, T. Duong, <a href="http://netifera.com/research/poet/PaddingOracleBHEU10.pdf" target="_blank">Practical Padding Oracle Attacks (slides)</a>, Black Hat Europe, 2010</li>
+						<li>Brian Holyfield, <a href="http://erlend.oftedal.no/blog/poet/" target="_blank">Automated Padding Oracle Attacks with PadBuster</a>, 14 Set 2010</li>
+						<li>Moxie Marlinspike, <a href="http://www.thoughtcrime.org/blog/the-cryptographic-doom-principle/" target="_blank">The Cryptographic Doom Principle</a>, 13 Dec 2011</li>
+						<li>Matthew Green, <a href="http://blog.cryptographyengineering.com/2012/05/how-to-choose-authenticated-encryption.html" target="_blank">How to choose an Authenticated Encryption mode</a>, Hopkins University, 19 May 2012 </li>
+						<li>Dan Boneh, <a href="https://www.coursera.org/course/crypto" target="_blank">Cryptography course</a> Stanford University, Coursera</li>
+						<li>Thomas & Erin Ptacek, <a href="http://sockpuppet.org/blog/2013/07/22/applied-practical-cryptography/" target="_blank">Applied Cryptography Engineering</a>, 22 July 2013</li>
+						<li>Thomas Hühn, <a href="http://www.2uo.de/myths-about-urandom/" target="_blank">Myths about /dev/urandom</a>, 20 March 2014</li>
+						<li>Timo, <a href="http://timoh6.github.io/2013/11/05/Secure-random-numbers-for-PHP-developers.html" target="_blank">Secure random numbers for PHP developers</a>, 8 Nov 2013</li>
+						<li>Timo, <a href="http://timoh6.github.io/2014/06/16/PHP-data-encryption-cheatsheet.html" target="_blank">PHP data encryption primer</a>, 16 June 2014</li>
+            <li>Pádraic Brady, <a href="http://blog.astrumfutura.com/2010/10/nanosecond-scale-remote-timing-attacks-on-php-applications-time-to-take-them-seriously/"i target="_blank">Nanosecond Scale Remote Timing Attacks On PHP Applications: Time To Take Them Seriously?</a>, 20 Oct 2010</li>
+					</ul>
+					</small>
+                </section>
+
+                <section>
+						<h2>Thanks!</h2>
+						<p>Rate this talk at <a href="https://joind.in/talk/90174">https://joind.in/talk/90174</a></p>
+						<p>Contact me: enrico [at] zend.com</p>
+						<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+                    <p><small><br /><br />
+                    <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/zendcon2016/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+                </section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
