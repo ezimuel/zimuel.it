@@ -17,6 +17,9 @@ class SendFactory
         }
         $sparkPost = new SparkPost($httpClient, [ 'key' => $config['sparkpost']['key'] ]);
 
-        return new Send($sparkPost);
+        if (!isset($config['recaptcha']['secret'])) {
+            throw new Exception\RuntimeException('The reCaptcha secret key is empty or not defined');
+        }
+        return new Send($config['recaptcha']['secret'], $sparkPost);
     }
 }

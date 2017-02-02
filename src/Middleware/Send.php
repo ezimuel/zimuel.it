@@ -5,14 +5,19 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response\JsonlResponse;
 use SparkPost\SparkPost;
+use ReCaptcha\ReCaptcha;
 
 class Send
 {
+    // reCaptcha secret
+    private $secret;
+
     private $sparkPost;
 
-    public function __construct(SparkPost $sparkPost)
+    public function __construct(string $secret, SparkPost $sparkPost)
     {
         $this->sparkPost = $sparkPost;
+        $this->secret    = $secret;
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
@@ -27,6 +32,16 @@ class Send
         if (empty($data['message'])) {
             return $response->withStatus(400, 'The message value cannot be empty');
         }
+        if (empty($data['g-recaptcha-response'])) {
+            return $response->withStatus(400, 'The reCaptcha response is empty');
+        }
+
+        $recaptcha = new ReCaptcha($this->secret);
+        $result = $recaptcha->verify($gRecaptchaResponse, $_SERVER['REMOTE_ADDR']);
+        if (!$result->isSuccess()) {
+            return $response->withStatus(400, 'The captcha code is failing!');
+        }
+
         $promise = $this->sparkPost->transmissions->post([
             'content' => [
                 'from' => [
@@ -48,14 +63,10 @@ class Send
         ]);
 
         try {
-            $response = $promise->wait();
-            echo $response->getStatusCode()."\n";
-            print_r($response->getBody())."\n";
+            $result = $promise->wait();
+            return $response->withStatus($result->getStatusCode());
         } catch (\Exception $e) {
-            echo $e->getCode()."\n";
-            echo $e->getMessage()."\n";
+            return $response->withStatus(500);
         }
-        exit;
-        return new JsonResponse();
     }
 }

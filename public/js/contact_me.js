@@ -26,7 +26,8 @@ $(function() {
                     name: name,
                     phone: phone,
                     email: email,
-                    message: message
+                    message: message,
+                    g-recaptcha-response: grecaptcha.getResponse(),
                 },
                 cache: false,
                 success: function() {
