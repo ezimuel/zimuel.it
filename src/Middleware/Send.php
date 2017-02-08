@@ -26,20 +26,20 @@ class Send
         if (empty($data['name'])) {
             return $response->withStatus(400, 'The name value cannot be empty');
         }
-        if (empty($data['email'] || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))) {
-            return $response->withStatus(400, 'The email value must be a valid email address');
+        if (empty($data['email']) || (false === filter_var($data['email'], FILTER_VALIDATE_EMAIL))) {
+            return $response->withStatus(400, 'The email value must be a valid address');
         }
         if (empty($data['message'])) {
             return $response->withStatus(400, 'The message value cannot be empty');
         }
-        if (empty($data['g-recaptcha-response'])) {
+        if (empty($data['recaptcha'])) {
             return $response->withStatus(400, 'The reCaptcha response is empty');
         }
 
         $recaptcha = new ReCaptcha($this->secret);
-        $result = $recaptcha->verify($gRecaptchaResponse, $_SERVER['REMOTE_ADDR']);
+        $result = $recaptcha->verify($data['recaptcha'], $_SERVER['REMOTE_ADDR']);
         if (!$result->isSuccess()) {
-            return $response->withStatus(400, 'The captcha code is failing!');
+            return $response->withStatus(400, 'The reCaptcha code is failing!');
         }
 
         $promise = $this->sparkPost->transmissions->post([
