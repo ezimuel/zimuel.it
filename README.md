@@ -9,8 +9,10 @@ The web site is built using the following technologies:
 
 - PHP 7
 - [zend-expressive](https://zendframework.github.io/zend-expressive/)
-- [SparkPost](https://www.sparkpost.com/), for delivery service email
-- [Invisible reCAPTCHA](https://www.google.com/recaptcha), for contact validation
+- [Plates](http://platesphp.com/) as template engine for PHP
+- [Bootstrap](http://getbootstrap.com/) for HTML, CSS and JS
+- [SparkPost](https://www.sparkpost.com/) for delivery service email
+- [Invisible reCAPTCHA](https://www.google.com/recaptcha) for contact validation
 
 The blog post section is managed using static HTML files, collecting the data
 for pagination using a simple cache file in PHP.
