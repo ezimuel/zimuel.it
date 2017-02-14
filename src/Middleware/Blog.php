@@ -33,7 +33,7 @@ class Blog
 
         $data = $this->post->getPost($postName);
         if (! $data) {
-          return $response->withStatus(404);
+            return $next($request, $response->withStatus(404));
         }
 
         $data['content'] = $this->post->getPostContent($postName);

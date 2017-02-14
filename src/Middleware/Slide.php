@@ -27,7 +27,7 @@ class Slide
         }
         $file .= '.html';
         if (! file_exists($file)) {
-          return $response->withStatus(404);
+            return $next($request, $response->withStatus(404));
         }
         return new HtmlResponse(require $file);
     }
