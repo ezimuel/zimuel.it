@@ -1,4 +1,7 @@
-<?php $this->layout('layout::recaptcha') ?>
+<?php $this->layout('layout::default', [
+  'title'        => 'Contact',
+  'additionalJs' => ['/js/send.js', 'https://www.google.com/recaptcha/api.js']
+]) ?>
 
 <header class="intro-header" style="background-image: url('/img/contacts-bg.jpg')">
     <div class="container">

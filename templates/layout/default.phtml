@@ -4,19 +4,25 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Enrico Zimuel - Software developer since 1996, speaker, author">
-    <meta name="keywords" content="developer, programmer, software, programming, hacker, open source, tedx, web, cryptography, applied cryptography, cryptanalysis, php, javascript, node.js, zend framework, apigility">
+    <meta name="description" content="Enrico Zimuel - Software developer since 1996, specialized in web technologies and secure software. Open source contributor. TEDx and international speakers. Author of books and articles.">
+    <meta name="keywords" content="php developer, full stack developer, senior developer, api developer, developer, programmer, software, software engineer, senior software engineer, software architect, programming, open source, tedx, web, cryptography, applied cryptography, php cryptography, zend framework, apigility, expressive, middleware, remote work, telecommute">
     <meta name="author" content="Enrico Zimuel">
     <meta name="verify-v1" content="bTeIQmLAmw7y/jy+pfVxXYYm9NqFscBMmw2jEVIqv4k=">
     <meta name="wot-verification" content="7ca48dd483cee64e4099"/>
 
-    <title>Enrico Zimuel - Software developer since 1996, speaker, author</title>
+    <title>Enrico Zimuel - <?=$this->e($title)?></title>
 
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Theme CSS -->
     <link href="/css/clean-blog.css" rel="stylesheet">
+
+    <!-- Additional CSS -->
+    <?php if (isset($additionalCss) && is_array($additionalCss)): ?>
+        <?php foreach ($additionalCss as $css): ?>
+    <link rel="stylesheet" href="<?=$this->e($css)?>">
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <!-- Custom Fonts -->
     <link href="/css/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -125,6 +131,13 @@
 
           <!-- Theme JavaScript -->
           <script src="/js/clean-blog.min.js"></script>
+
+          <!-- Additional Javascript -->
+          <?php if (isset($additionalJs) && is_array($additionalJs)): ?>
+              <?php foreach ($additionalJs as $js): ?>
+          <script src="<?=$this->e($js)?>"></script>
+              <?php endforeach; ?>
+          <?php endif; ?>
 
           <?php $this->insert('layout::google-analytics'); ?>
 </body>
