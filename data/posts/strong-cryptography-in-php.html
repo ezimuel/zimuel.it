@@ -34,7 +34,7 @@
 
 <p>The <strong>Hash</strong> extension requires no external libraries and is enabled by default as of PHP 5.1.2. This extension replace the old mhash extension. With this extension you can generate hash values or HMAC (Hash-based Message Authentication Code). These extension support the most common hash algorithms used in strong cryptography. If you want to know which algorithms are supported by your PHP environment you can use the function <a href="http://php.net/manual/en/function.hash-algos.php">hash_algos()</a> that gives a list of all the algorithms supported.</p>
 
-<p>The <strong>mcrypt</strong> extension has been deprecated in PHP 7.1 and I don't recommend to use it anymore. If you are using it, I suggest to move to OpenSSL as soon as possible.</p>
+<p>The <strong>mcrypt</strong> extension has been deprecated in PHP 7.1. I recommend to do not use it anymore, move to OpenSSL as soon as possible.</p>
 
 <p>The <strong>OpenSSL</strong> extension uses the functions of the <a href="http://www.openssl.org/">OpenSSL project</a> for generation and verification of signatures and for sealing (encrypting) and opening (decrypting) data. You can use OpenSSL to protect data using symmetric encryption (also <a href="/blog/authenticated-encrypt-with-openssl-and-php-7-1">authenticated encryption</a>) public key cryptography with the RSA algorithm.</p>
 
