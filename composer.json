@@ -23,7 +23,8 @@
         "guzzlehttp/guzzle": "^6.2",
         "php-http/guzzle6-adapter": "^1.1",
         "sparkpost/sparkpost": "^2.1",
-        "google/recaptcha": "~1.1"
+        "google/recaptcha": "~1.1",
+        "zendframework/zend-feed": "^2.8"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8",

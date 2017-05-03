@@ -39,6 +39,7 @@ $app->get('/blog/page/{page:\d+}', Middleware\Blog::class, 'blog-page');
 $app->get('/blog[/{post}]', Middleware\Blog::class, 'blog');
 $app->post('/send', Middleware\Send::class, 'send');
 $app->get('/slides/{conference}[/{talk}]', Middleware\Slide::class, 'slide');
+$app->get('/feed', Middleware\Feed::class, 'feed');
 
 $app->raiseThrowables();
 $app->run();

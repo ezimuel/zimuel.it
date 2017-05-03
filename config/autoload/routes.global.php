@@ -11,6 +11,7 @@ return [
             Zimuel\Middleware\Blog::class => Zimuel\Middleware\BlogFactory::class,
             Zimuel\Middleware\Send::class => Zimuel\Middleware\SendFactory::class,
             Zimuel\Middleware\Slide::class => Zimuel\Middleware\SlideFactory::class,
+            Zimuel\Middleware\Feed::class => Zimuel\Middleware\FeedFactory::class
         ],
     ],
 ];
