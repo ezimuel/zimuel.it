@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<base href="/lib/reveal.js-3.4.1/">
+		<title>Design Security in PHP Using Middleware - ZendCon 2017</title>
+
+		<meta name="description" content="Design Security in PHP Using Middleware - ZendCon 2017">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/roguewave.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/zendcon2017/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="roguewave-footer-off">
+					<h2>Design Security in PHP Using Middleware</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="https://www.roguewave.com/">Rogue Wave Software, Inc.</a></small><br /><br />
+						<small><a href="http://www.zendcon.com">ZendCon 2017</a>, Las Vegas (NV), Oct. 25</small>
+					</p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/zendcon2017/roguewave.png" style="border-style:none;" width="400"></a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/zendcon2017/enrico.png">
+							</td>
+							<td>
+								<ul>
+									<li>Web developer since 1996</li>
+									<li>Senior Software Engineer at <a href="http://www.roguewave.com/">Rogue Wave Software</a> Inc.</li>
+									<li>Core team of <a href="http://apigility.org">Apigility</a>, <a href="https://docs.zendframework.com/zend-expressive/">Expressive</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Research Programmer at <a href="http://ivi.uva.nl/">Amsterdam University</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Web security</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Securing a web application</h3>
+					<ul>
+						<li class="fragment">Filter Input, Escape Output</li>
+						<li class="fragment">Do not use component with known vulnerabilities</li>
+						<li class="fragment">Harden your production setup (e.g. use HTTPS)</li>
+						<li class="fragment">Minimize the usage of critical data and use <i>strong encryption</i> for storing</li>
+						<li class="fragment">Backup, log and monitor all the things!</li>
+					</ul>
+				</section>
+
+				<section data-background="#c10c06" data-state="roguewave-footer-off">
+					<p><img src="/img/slides/zendcon2017/hacked.gif" width="500"></p>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Middleware</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/zendcon2017/middleware-lambda.png" class="noborder">
+				</section>
+
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Middleware in PHP</h2>
+					<ul>
+						<li class="fragment"><i><a href="http://www.php-fig.org/psr/psr-7/">PSR-7</a></i>: HTTP request and response messages</li>
+						<li class="fragment"><i>Delegate</i>: turn a request into a response (<i><a href="https://github.com/http-interop/http-middleware">PSR-15</a></i>)</li>
+						<li class="fragment"><i>Middleware</i>: intercepts a request and optionally delegates creation of a response</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Delegate Interface</h2>
+<pre><code data-trim class="php big-font-code">
+interface DelegateInterface
+{
+    public function process(
+        ServerRequestInterface $request
+    ) : ResponseInterface;
+}
+</code></pre>
+					<p><small>PSR-15 ^0.4.1</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Middleware Interface</h2>
+<pre><code data-trim class="php big-font-code">
+interface MiddlewareInterface
+{
+    public function process(
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) : ResponseInterface;
+}
+</code></pre>
+					<p><small>PSR-15 ^0.4.1</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php medium-font-code">
+class FooMiddleware implements MiddlewareInterface
+{
+    public function process(
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) {
+        $item = $this->repository->fetchById(
+            $request->getAttribute('id')
+        );
+        return new JsonResponse($item);
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Security & Middleware</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<p><img src="/img/slides/zendcon2017/middleware_workflow.gif" class="noborder" width="520"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Security bonus</h2>
+					<ul>
+						<li class="fragment">Only 1 entry point: PSR-7 request</li>
+						<li class="fragment">Simple linear workflow, easy to manage</li>
+						<li class="fragment">Avoid usage of GLOBALS (e.g. $_POST)</li>
+						<li class="fragment">Usage of immutable HTTP requests</li>
+						<li class="fragment">Delegating middleware improves the security chain</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<p><img src="/img/slides/zendcon2017/api_workflow.png" class="noborder" width="250"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Expressive 2</h2>
+					<ul>
+						<li class="fragment">Build PSR-7 Middleware in Minutes!</li>
+						<li class="fragment">Features: routing, dependency injection, templating, error handling</li>
+						<li class="fragment">Use <a href="https://github.com/zendframework/zend-diactoros">zend-diactoros</a> for PSR-7 message</li>
+						<li class="fragment">Use <a href="https://github.com/zendframework/zend-stratigility">zend-stratigility</a> for the middleware pipeline</li>
+						<li class="fragment"><a href="https://docs.zendframework.com/zend-expressive">docs.zendframework.com/zend-expressive</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Getting Started</h2>
+					<p class="fragment"><b>Install:</b><br />composer create-project zendframework/zend-expressive-skeleton &lt;path-to-install&gt;</p>
+					<p class="fragment"><b>Run (localhost:8008):</b><br />composer run --timeout=0 serve</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Zend-log</h2>
+					<ul>
+						<li class="fragment">Component: <a href="https://github.com/zendframework/zend-log">zendframework/zend-log</a></li>
+						<li class="fragment">Just add <a href="https://github.com/zendframework/zend-log/blob/master/src/ConfigProvider.php">Zend\Log\ConfigProvider::class</a> in your config/config.php</li>
+						<li class="fragment">A <a href="https://github.com/zendframework/zend-log/blob/master/src/Logger.php">Zend\Log\Logger::class</a> is provided in the service container</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+use Zend\Log\Logger;
+
+class LoginAction implements ServerMiddlewareInterface
+{
+    public function __construct(Logger $logger, ...) {
+        $this->logger = $logger;
+    }
+
+    public function process(
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) {
+        // ...
+        $this->logger->log(Logger::INFO, "User $user logged in");
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Authentication</h2>
+					<ul>
+						<li class="fragment"><a href="https://github.com/ezimuel/zend-expressive-authentication">zend-expressive-authentication</a> (still in dev)</li>
+						<li class="fragment">Support of <a href="https://en.wikipedia.org/wiki/Basic_access_authentication">Basic Access Authentication</a> (only bcrypt) and <a href="https://oauth.net/2/">OAuth2</a></li>
+						<li class="fragment">User Repositories: htpasswd, PDO databases, etc</li>
+						<li class="fragment">Easy to customize using 'authentication' config</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Basic + PDO config</h2>
+<pre><code data-trim class="php medium-font-code">
+return [
+    'authentication' => [
+        'realm' => 'ZendCon2017',
+        'pdo' => [
+            'dsn' => 'sqlite:database.sq3',
+            'table' => 'user',
+            'field' => [
+                'username' => 'email',
+                'password' => 'pwd'
+            ]
+        ]
+    ]
+];
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Usage</h2>
+<pre><code data-trim class="php medium-font-code">
+// config/routes.php
+use Zend\Expressive\Authentication;
+use Zend\Expressive\Helper;
+
+$app->post('/api/admin/posts', [
+    Authentication\AuthenticationMiddleware::class,
+    Helper\BodyParams\BodyParamsMiddleware::class,
+    Book\Action\AddReviewAction::class
+], 'admin.posts');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Authorization</h2>
+					<ul>
+						<li class="fragment"><a href="https://github.com/zendframework/zend-expressive-authorization">zend-expressive-authorization</a></li>
+						<li class="fragment">Authorization based on route names</li>
+						<li class="fragment">Support of <a href="https://en.wikipedia.org/wiki/Access_control_list">ACL</a> and <a href="https://en.wikipedia.org/wiki/Role-based_access_control">RBAC</a></li>
+						<li class="fragment">Easy to customize using 'authorization' config</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>RBAC adapter</h2>
+<pre><code data-trim class="php">
+use Zend\Expressive\Authorization\AuthorizationInterface;
+use Zend\Expressive\Authorization\Rbac\ZendRbac;
+
+return [
+    'dependencies' => [
+        'aliases' => [
+            AuthorizationInterface::class => ZendRbac::class
+        ]
+    ]
+];
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>RBAC config</h2>
+<pre><code data-trim class="php">
+return [
+    'authorization' => [
+        'roles' => [
+            'administrator' => [],
+            'user'          => ['administrator']
+        ],
+        'permissions' => [
+            'user' => [
+                'admin.dashboard',
+                'admin.posts'
+            ],
+            'administrator' => [
+               'admin.settings',
+            ],
+        ]
+    ]
+];
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Usage</h2>
+<pre><code data-trim class="php medium-font-code">
+// config/routes.php
+use Zend\Expressive\Authentication;
+use Zend\Expressive\Authorization;
+use Zend\Expressive\Helper;
+
+$app->post('/api/admin/posts', [
+    Authentication\AuthenticationMiddleware::class,
+    Authorization\AuthorizationMiddleware::class,
+    Helper\BodyParams\BodyParamsMiddleware::class,
+    Book\Action\AddReviewAction::class
+], 'admin.posts');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Filter &amp; Validation</h2>
+					<ul>
+						<li class="fragment"><a href="https://github.com/zendframework/zend-inputfilter">zend-inputfilter</a></li>
+						<li class="fragment">Filter &amp; validate input data</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+use Zend\InputFilter\InputFilter;
+class Posts extends InputFilter
+{
+    public function init()
+    {
+        $this->add([
+            'name' => 'title',
+            'required' => true,
+            'filters' => [
+                ['name' => StringTrim::class],
+            ],
+            'validators' => [
+                [
+                    'name' => StringLength::class,
+                    'options' => ['min' => 1],
+                ],
+            ],
+        ]);
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Middleware</h2>
+<pre><code data-trim class="php">
+class ContentValidationMiddleware implements MiddlewareInterface
+{
+    public function __construct(InputFilter $filter)
+    {
+        $this->filter = $filter;
+    }
+
+    public function process(
+        ServerRequestInterface $request,
+        DelegateInterface $delegate
+    ) {
+        $this->filter->setData($request->getParsedBody());
+        if (! $this->filter->isValid()) {
+            throw Exception\UnValidationException(
+                $this->filter->getMessages()
+            );
+        }
+        return $delegate->process(
+            $request->withParsedBody($this->filter->getValues())
+        );
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Other PSR-7 tools</h2>
+					<ul>
+						<li class="fragment">Forcing HTTPS usage: <a href="https://github.com/middlewares/https">middlewares/https</a></li>
+						<li class="fragment">Content-Security-Policy: <a href="https://github.com/middlewares/csp">middlewares/csp</a></li>
+						<li class="fragment">Cross-Origin Resource Sharing: <a href="https://github.com/bairwell/middleware-cors">bairwell/middleware-cors</a></li>
+						<li class="fragment">Rate limit: <a href="https://github.com/Prezto/Rate-limit">prezto/ratelimit</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-off">
+					<h2>Questions?</h2>
+				</section>
+
+
+				<section data-state="roguewave-footer-off">
+					<h2>Thanks!</h2>
+					<p>
+						Rate this talk at <a href="https://joind.in/talk/3c288">https://joind.in/talk/3c288</a><br />
+						<img src="/img/slides/zendcon2017/joind_qrcode.png" width="300" class="noborder">
+					</p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/zendcon2017/roguewave.png" class="noborder" width="400"></a></p>
+				</section>
+			</div>
+		</div>
+
+		<aside id="roguewave-footer">
+			<div style="float:left">
+				<img src="/img/slides/zendcon2017/roguewave-footer.png" width="200">
+			</div>
+			<div style="float:right">
+				&copy; 2017 Rogue Wave Software, Inc. All Rights Reserved.
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+				]
+			});
+
+			Reveal.addEventListener('roguewave-footer-on', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('roguewave-footer-off', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<base href="/lib/reveal.js-3.4.1/">
+		<title>The most exciting features of PHP 7.1 - ZendCon 2017</title>
+
+		<meta name="description" content="The most exciting features of PHP 7.1 - ZendCon 2017">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/roguewave.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/zendcon2017/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="roguewave-footer-off">
+					<h2>The most exciting features of PHP 7.1</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="https://www.roguewave.com/">Rogue Wave Software, Inc.</a></small><br /><br />
+						<small><a href="http://www.zendcon.com">ZendCon 2017</a>, Las Vegas (NV), Oct. 26</small>
+					</p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/zendcon2017/roguewave.png" style="border-style:none;" width="400"></a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/zendcon2017/enrico.png">
+							</td>
+							<td>
+								<ul>
+									<li>Web developer since 1996</li>
+									<li>Senior Software Engineer at <a href="http://www.roguewave.com/">Rogue Wave Software</a> Inc.</li>
+									<li>Core team of <a href="http://apigility.org">Apigility</a>, <a href="https://docs.zendframework.com/zend-expressive/">Expressive</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Research Programmer at <a href="http://ivi.uva.nl/">Amsterdam University</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h1>PHP 7.1</h1>
+					<ul>
+						<li class="fragment" data-fragment-index="0">7.1.0 released (01 Dec 2016) </li>
+						<li class="fragment" data-fragment-index="1">Latest is 7.1.10 (29 Sep 2017)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>By numbers</h2>
+					<ul>
+						<li class="fragment" data-fragment-index="0">376 bug fixes</li>
+						<li class="fragment" data-fragment-index="1">12 new features</li>
+						<li class="fragment" data-fragment-index="2">13 new functions</li>
+						<li class="fragment" data-fragment-index="3">36 new global constants</li>
+						<li class="fragment" data-fragment-index="4">20 backward incompatible changes</li>
+						<li class="fragment" data-fragment-index="5">2 deprecated features</li>
+						<li class="fragment" data-fragment-index="6">16 changed functions</li>
+						<li class="fragment" data-fragment-index="7">7 other changes</li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h1 style="color:white">New Features</h1>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h1>Nullable types</h1>
+					<ul>
+						<li class="fragment">For parameters and return values</li>
+						<li class="fragment">Prefixing the type name with a <strong>?</strong></li>
+						<li class="fragment"><strong>NULL</strong> can be passed as an argument,<br />or returned as a value</li>
+					</ul>
+					<aside class="notes">
+						This <strong>null</strong> often indicates an error or lack of something to return. It can also be done for parameters in PHP by using a default parameter of null. However, this does not work for return types which do not have a concept of a default value
+					</aside>
+				</section>
+
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php medium-font-code">
+function hi(?string $name): ?string
+{
+    if (null === $name) {
+        return null;
+    }
+    return 'Hello ' . $name;
+}
+
+echo hi(null); // returns null
+echo hi('Enrico'); // returns 'Hello Enrico'
+echo hi(); // Fatal error
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example (2)</h2>
+<pre><code data-trim class="php medium-font-code">
+interface Fooable {
+    function foo(): ?Fooable;
+}
+interface StrictFooable extends Fooable {
+    function foo(): Fooable; // valid
+}
+</code></pre>
+<pre><code data-trim class="php medium-font-code">
+interface Fooable {
+    function foo(): Fooable;
+}
+interface LooseFooable extends Fooable {
+    function foo(): ?Fooable; // invalid
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example (3)</h2>
+<pre><code data-trim class="php medium-font-code">
+interface Fooable {
+    function foo(Fooable $f);
+}
+interface LooseFoo extends Fooable {
+    function foo(?Fooable $f); // valid
+}
+</code></pre>
+<pre><code data-trim class="php medium-font-code">
+interface Fooable {
+    function foo(?Fooable $f);
+}
+interface StrictFoo extends Fooable {
+    function foo(Fooable $f); // invalid
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Void Return Type</h2>
+<pre><code data-trim class="php medium-font-code">
+function swap(&$left, &$right): void
+{
+    if ($left === $right) {
+        return;
+    }
+    $tmp   = $left;
+    $left  = $right;
+    $right = $tmp;
+}
+$a = 1;
+$b = 2;
+var_dump(swap($a, $b), $a, $b); // null, 2, 1
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Array destructuring</h2>
+<pre><code data-trim class="php medium-font-code">
+$data = [['foo', 'bar', 'baz']];
+[$a, $b] = $data[0];
+var_dump($a, $b); // string(3) "foo", string(3) "bar"
+[$a, , $c] = $data[0];
+var_dump($a, $c); // string(3) "foo", string(3) "baz"
+foreach ($data as [$a, $b, $c]) {
+    var_dump($a, $b, $c);
+    // string(3) "foo"
+    // string(3) "bar"
+    // string(3) "baz"
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Support for keys</h2>
+					<p>Specify keys in list(), or its new shorthand [] syntax</p>
+<pre><code data-trim class="php medium-font-code">
+$data = ['a' => 'foo', 'b' => 'bar', 'c' => 'baz'];
+
+list('a' => $a, 'b' => $b, 'c' => $c) = $data;
+var_dump($a, $b, $c); // foo, bar, baz
+
+['a' => $a, 'b' => $b, 'c' => $c] = $data;
+var_dump($a, $b, $c); // foo, bar, baz
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>No mix list() and [ ]</h2>
+<pre><code data-trim class="php medium-font-code">
+// Not allowed
+list([$a, $b], [$c, $d]) = [[1, 2], [3, 4]];
+[list($a, $b), list($c, $d)] = [[1, 2], [3, 4]];
+
+// Allowed
+list(list($a, $b), list($c, $d)) = [[1, 2], [3, 4]];
+[[$a, $b], [$c, $d]] = [[1, 2], [3, 4]];
+</code></pre>
+					<aside class="notes">
+						PHP Fatal error:  Cannot mix [] and list()
+					</aside>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h1>Iterable</h1>
+					<ul>
+						<li class="fragment">Added the <strong>iterable</strong> pseudo-type</li>
+						<li class="fragment">It accepts <strong>array</strong> or <strong>Traversable</strong></li>
+						<li class="fragment">Can be used in parameter and return types</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php big-font-code">
+function foo(iterable $iterable): void
+{
+    foreach ($iterable as $value) {
+        var_dump($value);
+    }
+}
+
+foo([1,2,3]);
+foo(new ArrayIterator([1,2,3]));
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Class CONST visibility</h2>
+<pre><code data-trim class="php big-font-code">
+class ConstDemo
+{
+    const CONST_A = 1; // public
+    public const CONST_B    = 2;
+    protected const CONST_C = 3;
+    private const CONST_D   = 4;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Using Reflection</h2>
+<pre><code data-trim class="php medium-font-code">
+$obj = new ReflectionClass("ConstDemo");
+foreach ($obj->getReflectionConstants() as $const) {
+    var_dump($const); // ReflectionClassConstant
+    var_dump($const->getName());
+    var_dump($const->getValue());
+    var_dump($const->isPublic());
+    var_dump($const->isPrivate());
+    var_dump($const->isProtected());
+}
+</code></pre>
+					<p><small>More info: <a href="http://php.net/manual/en/class.reflectionclassconstant.php#reflectionclassconstant.synopsis">ReflectionClassConstant</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Multiple catch {}</h2>
+<pre><code data-trim class="php big-font-code">
+try {
+   // Some code...
+} catch (ExceptionA | ExceptionB $e) {
+   // Handle exceptions A or B
+} catch (\Exception $e) {
+   // ...
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Negative offsets</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+var_dump("abcdef"[-2]); <span class="fragment">// string(1) "e"</span>
+var_dump("abcdef"[-7]); <span class="fragment">// string(0) "", PHP Notice</span>
+// strpos
+var_dump(strpos("aabbcc", "b", -3)); <span class="fragment">// int(3)</span>
+</code></pre>
+<pre class="fragment"><code data-trim class="php medium-font-code">
+// get the last character of a string
+$last = substr($foo, -1); // before PHP 7.1
+$last = $foo[-1];
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Async signal handling</h2>
+					<p class="fragment"><strong>pcntl_async_signals()</strong> has been introduced to enable asynchronous signal handling without using ticks</p>
+<pre class="fragment"><code data-trim class="php medium-font-code">
+pcntl_async_signals(true); // turn on async signals
+pcntl_signal(SIGHUP,  function($sig) {
+    echo "SIGHUP\n";
+});
+posix_kill(posix_getpid(), SIGHUP);
+</code></pre>
+					<aside class="notes">
+						<ul>
+							<li>synchronously, calling pcntl_signal_dispatch() manually</li>
+	    					<li>asynchronously, compiling scripts with declare(ticks=1)</li>
+						</ul>
+					</aside>
+				</section>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Closure from callable</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+class Test
+{
+  public function exposeFunction() {
+    return Closure::fromCallable([$this, 'privF']);
+  }
+  private function privF($param) {
+    var_dump($param);
+  }
+}
+$privFunc = (new Test)->exposeFunction();
+var_dump($privFunc); // object(Closure)
+$privFunc('some value'); // string(10) "some value"
+</code></pre>
+					<aside class="notes">
+						Added static <strong>Closure::fromCallable</strong> to convert callables into Closure objects
+					</aside>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h1>OpenSSL AEAD</h1>
+					<p>Authenticated Encrypt with Associated Data (AEAD)</p>
+					<p class="fragment">Support <strong>GCM</strong> and <strong>CCM</strong> encryption modes</p>
+					<p class="fragment">GCM is 3x faster than CCM. See this <a href="https://gist.github.com/ezimuel/485eb4745b58b30a2435bd92bdffb19f">benchmark</a></p>
+					<p class="fragment"><small>More info on <a href="http://zimuel.it/blog/authenticated-encrypt-with-openssl-and-php-7-1">Authenticated Encryption in PHP 7.1</a></small></p>
+
+					<aside class="notes">
+						Galois/Counter Mode (GCM), Counter with CBC-MAC (CCM)
+					</aside>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>openssl_encrypt()</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+string openssl_encrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = "" ],
+    <mark>[ string &$tag = NULL ]</mark>,
+    <mark>[ string $aad = "" ],</mark>
+    <mark>[ int $tag_length = 16 ]</mark>
+)
+</code></pre>
+					<p class="fragment"><strong>$tag</strong> contains the <i>authentication hash</i></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>openssl_decrypt()</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+string openssl_decrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = "" ],
+    <mark>[ string $tag = "" ]</mark>,
+    <mark>[ string $aad = "" ]</mark>
+)
+</code></pre>
+					<p class="fragment"><strong>$tag</strong> is the <i>authentication hash</i></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Encrypt example</h2>
+<pre><code data-trim class="php medium-font-code">
+$algo = 'aes-256-gcm';
+$iv   = random_bytes(openssl_cipher_iv_length($algo));
+$key  = random_bytes(32); // 256 bit
+$data = random_bytes(1024); // 1 Kb of random data
+$ciphertext = openssl_encrypt(
+    $data,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag
+);
+</code></pre>
+					<p>Output is $ciphertext . $tag</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Decrypt example</h2>
+<pre><code data-trim class="php medium-font-code">
+$decrypt = openssl_decrypt(
+    $ciphertext,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag
+);
+if (false === $decrypt) {
+    throw new Exception(openssl_error_string());
+}
+echo $data === $decrypt ? 'Ok' : 'Failure';
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HTTP/2 Server Push</h2>
+					<ul>
+						<li class="fragment">Server push has been added to CURL 7.46+</li>
+						<li class="fragment">Use <strong>curl_multi_setopt()</strong> function with the new <strong>CURLMOPT_PUSHFUNCTION</strong> constant</li>
+						<li class="fragment">Added <strong>CURL_PUSH_OK</strong> and <strong>CURL_PUSH_DENY</strong> to approve or deny the callback execution</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim data-noescape class="php">
+$transfers = 1;
+$callback = function($parent_ch, $pushed_ch, array $headers)
+            use (&$transfers) {
+    $transfers++;
+    return CURL_PUSH_OK;
+};
+$mh = curl_multi_init();
+curl_multi_setopt($mh, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+<mark>curl_multi_setopt($mh, CURLMOPT_PUSHFUNCTION, $callback);</mark>
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https://localhost:8080/index.html");
+curl_setopt($ch, CURLOPT_HTTP_VERSION, 3);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); // self-signed cert
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); // self-signed cert
+curl_multi_add_handle($mh, $ch);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example (2)</h2>
+<pre><code data-trim lang="php">
+$active = null;
+do {
+    $status = curl_multi_exec($mh, $active);
+    do {
+        $info = curl_multi_info_read($mh);
+        if (false !== $info && $info['msg'] == CURLMSG_DONE) {
+            $handle = $info['handle'];
+            if ($handle !== null) {
+                $transfers--; // decrement remaining requests
+                $body = curl_multi_getcontent($info['handle']);
+                curl_multi_remove_handle($mh, $handle);
+                curl_close($handle);
+            }
+        }
+    } while ($info);
+} while ($transfers);
+curl_multi_close($mh);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>New hash functions</h2>
+					<p class="fragment">Added <strong>hash_hkdf()</strong> function to support HKDF (<a href="http://www.faqs.org/rfcs/rfc5869.html">RFC 5869</a>)</p>
+<pre class="fragment"><code data-trim lang="php">
+$key = random_bytes(32);
+$salt = random_bytes(16);
+
+$encryptKey = hash_hkdf('sha256', $key, 32, 'encrypt', $salt);
+$authKey = hash_hkdf('sha256', $key, 32, 'auth', $salt);
+
+var_dump($encryptKey !== $authKey); // bool(true)
+</code></pre>
+					<p class="fragment">Added SHA3 support (224, 256, 384, and 512)</p>
+<pre class="fragment"><code data-trim lang="php">
+$hash = hash('sha3-224', 'This is a text');
+var_dump($hash);
+// string(56)"9209f5869ad03ac11549902b3c83fe8e6b7e1cd1614ab4291587db43"
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>More to come with PHP 7.2</h2>
+					<p>GA: Nov 30 2017</p>
+				</section>
+
+				<section data-state="roguewave-footer-off">
+					<h2>Thanks!</h2>
+					<p>Rate this talk at <a href="https://joind.in/talk/f8f7e">https://joind.in/talk/f8f7e</a></p>
+					<p>Contact me: enrico [at] zend.com</p>
+					<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/zendcon2017/roguewave.png" class="noborder" width="400"></a></p>
+				</section>
+			</div>
+		</div>
+
+		<aside id="roguewave-footer">
+			<div style="float:left">
+				<img src="/img/slides/zendcon2017/roguewave-footer.png" width="200">
+			</div>
+			<div style="float:right">
+				&copy; 2017 Rogue Wave Software, Inc. All Rights Reserved.
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+		<script src="js/clickgif.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+				]
+			});
+
+			Reveal.addEventListener('roguewave-footer-on', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('roguewave-footer-off', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
