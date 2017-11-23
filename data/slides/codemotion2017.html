@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="it">
+
+	<head>
+		<meta charset="utf-8">
+		<base href="/lib/reveal.js-3.4.1/">
+		<title>Sviluppare in PHP 7: le novità del PHP 7.1 e 7.2</title>
+
+		<meta name="description" content="Sviluppare in PHP 7: le novità del PHP 7.1 e 7.2">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/sky.css" id="theme">
+		<link rel="stylesheet" href="css/codemotion2017.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/codemotion2017/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h2>Sviluppare in PHP 7:<br />le novità del PHP 7.1 e 7.2</h2>
+					<p>
+						<small>di <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="http://www.zend.com">Zend Technologies</a>, una società Rogue Wave (USA)</small><br /><br />
+						<small><a href="https://milan2017.codemotionworld.com">Codemotion 2017</a>, Milano, 10 Novembre</small>
+					</p>
+					<p><a href=""><img src="/img/slides/codemotion2017/codemotion.png" style="border-style:none;" width="400"></a></p>
+				</section>
+
+				<section>
+					<h3>Mi presento</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/codemotion2017/enrico.png"><br />
+								<a href="https://www.zimuel.it"><small>www.zimuel.it</small></a>
+							</td>
+							<td>
+								<ul>
+									<li>Sviluppatore web dal 1996</li>
+									<li>Senior Software Engineer presso <a href="http://www.zend.com" target="_blank">Zend</a>, una società <a href="http://www.roguewave.com/">Rogue Wave</a></li>
+									<li>Coautore di <a href="http://apigility.org">Apigility</a>, <a href="https://docs.zendframework.com/zend-expressive/">Expressive</a> e <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li>Speaker <a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> e relatore internazionale</li>
+									<li>Research Programmer presso <a href="http://ivi.uva.nl/">Università di Amsterdam</a></li>
+									<li>Co-fondatore del <a href="http://torino.grusp.org" target="_blank">PUG Torino</a></li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<a href="https://www.sviluppareinphp7.it"><img src="/img/slides/codemotion2017/sviluppareinphp7.jpg" height="500"></a>
+					<p><small><a href="https://www.sviluppareinphp7.it">www.sviluppareinphp7.it</a></small></p>
+				</section>
+
+				<section>
+					<h2>PHP 7.1</h1>
+					<ul>
+						<li class="fragment">7.1.0 (1 Dic 2016)</li>
+						<li class="fragment">Ultima release 7.1.11 (26 Ott 2017)</li>
+					</ul>
+				</section>
+
+				<section>
+					<table border="1">
+						<tr>
+							<td><strong>Versione</strong></td>
+							<td><strong>Rilascio</strong></td>
+							<td><strong>Supporto attivo</strong></td>
+							<td><strong>Security fix</strong></td>
+						</tr>
+						<tr>
+							<td bgcolor="red">5.5</td>
+							<td>EOL</td>
+							<td>EOL</td>
+							<td>EOL</td>
+						</tr>
+						<tr>
+							<td bgcolor="orange">5.6</td>
+							<td>28 Ago 2014</td>
+							<td>19 Gen 2017</td>
+							<td>31 Dic 2018</td>
+						</tr>
+						<tr>
+							<td bgcolor="#a0e75a">7.0</td>
+							<td>3 Dic 2015</td>
+							<td>3 Dic 2017</td>
+							<td>3 Dic 2018</td>
+						</tr>
+						<tr>
+							<td bgcolor="#a0e75a">7.1</td>
+							<td>1 Dic 2016</td>
+							<td>1 Dic 2018</td>
+							<td>1 Dic 2019</td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<h2>Novità 7.1</h2>
+				</section>
+
+				<section>
+					<h2>Tipi Nullable</h2>
+					<ul>
+						<li class="fragment">Per parametri e valori di ritorno di funzioni</li>
+						<li class="fragment">Sintassi: aggiunta del <strong>?</strong> prima del tipo</li>
+						<li class="fragment"><strong>null</strong> può essere passato come argomento,<br />o restituito come valore</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Example</h2>
+<pre><code data-trim class="php medium-font-code">
+function hi(?string $name): ?string
+{
+    return $name ? 'Hello ' . $name : null;
+}
+
+echo hi(null); // returns null
+echo hi('Enrico'); // returns 'Hello Enrico'
+echo hi(); // Fatal error
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Ritorno di tipo Void</h2>
+<pre><code data-trim class="php medium-font-code">
+function swap(&$left, &$right): void
+{
+    if ($left === $right) {
+        return;
+    }
+    $tmp   = $left;
+    $left  = $right;
+    $right = $tmp;
+}
+
+$a = 1;
+$b = 2;
+var_dump(swap($a, $b), $a, $b);
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Array destrutturati</h2>
+<pre><code data-trim class="php medium-font-code">
+$data = [['foo', 'bar', 'baz']];
+[$a, $b] = $data[0];
+var_dump($a, $b); // string(3) "foo", string(3) "bar"
+[$a, , $c] = $data[0];
+var_dump($a, $c); // string(3) "foo", string(3) "baz"
+foreach ($data as [$a, $b, $c]) {
+    var_dump($a, $b, $c);
+    // string(3) "foo"
+    // string(3) "bar"
+    // string(3) "baz"
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Con array associativi</h2>
+					<p>Chiavi specificate in list(), o con la sintassi []</p>
+<pre><code data-trim class="php medium-font-code">
+$data = ['a' => 'foo', 'b' => 'bar', 'c' => 'baz'];
+
+list('a' => $a, 'b' => $b, 'c' => $c) = $data;
+var_dump($a, $b, $c); // foo, bar, baz
+
+['a' => $a, 'b' => $b, 'c' => $c] = $data;
+var_dump($a, $b, $c); // foo, bar, baz
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Iterable</h2>
+					<ul>
+						<li class="fragment">Aggiunto lo pseudo-tipo <strong>iterable</strong></li>
+						<li class="fragment">Accetta <strong>array</strong> o <strong>Traversable</strong></li>
+						<li class="fragment">Utilizzato in parametri e ritorno di funzioni</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Esempio</h2>
+<pre><code data-trim class="php medium-font-code">
+function foo(iterable $iterable): void
+{
+    foreach ($iterable as $value) {
+        var_dump($value);
+    }
+}
+
+foo([1,2,3]);
+foo(new ArrayIterator([1,2,3]));
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Visibilità di CONST</h2>
+<pre><code data-trim class="php medium-font-code">
+class ConstDemo
+{
+    const CONST_A = 1; // public
+    public const CONST_B    = 2;
+    protected const CONST_C = 3;
+    private const CONST_D   = 4;
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Catch multipli</h2>
+<pre><code data-trim class="php medium-font-code">
+try {
+   // Some code...
+} catch (ExceptionA | ExceptionB $e) {
+   // Handle exceptions A or B
+} catch (\Exception $e) {
+   // ...
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Indici negativi</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+var_dump("abcdef"[-2]); <span class="fragment">// string(1) "e"</span>
+var_dump("abcdef"[-7]); <span class="fragment">// string(0) "", PHP Notice</span>
+// strpos
+var_dump(strpos("aabbcc", "b", -3)); <span class="fragment">// int(3)</span>
+</code></pre>
+<pre class="fragment"><code data-trim class="php medium-font-code">
+// get the last character of a string
+$last = substr($foo, -1); // before PHP 7.1
+$last = $foo[-1];
+</code></pre>
+				</section>
+
+				<section>
+					<h2>OpenSSL AEAD</h2>
+					<p>Cifratura e autenticazione (Authenticated Encryption)</p>
+					<p class="fragment">Supporto modalità <strong>GCM</strong> e <strong>CCM</strong></p>
+					<p class="fragment">GCM è 3 volte più veloce di CCM. <a href="https://gist.github.com/ezimuel/485eb4745b58b30a2435bd92bdffb19f">Dettagli benchmark</a></p>
+					<p class="fragment"><small>Più informazioni su <a href="http://zimuel.it/blog/authenticated-encrypt-with-openssl-and-php-7-1">Authenticated Encryption in PHP 7.1</a></small></p>
+
+					<aside class="notes">
+						Galois/Counter Mode (GCM), Counter with CBC-MAC (CCM)
+					</aside>
+				</section>
+
+				<section>
+					<h2>openssl_encrypt()</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+string openssl_encrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = "" ],
+    <mark>[ string &$tag = NULL ]</mark>,
+    <mark>[ string $aad = "" ],</mark>
+    <mark>[ int $tag_length = 16 ]</mark>
+)
+</code></pre>
+					<p class="fragment"><strong>$tag</strong> contiene l'hash di autenticazione</p>
+				</section>
+
+				<section>
+					<h2>openssl_decrypt()</h2>
+<pre><code data-trim data-noescape class="php medium-font-code">
+string openssl_decrypt(
+    string $data,
+    string $method,
+    string $password,
+    [ int $options = 0 ],
+    [ string $iv = "" ],
+    <mark>[ string $tag = "" ]</mark>,
+    <mark>[ string $aad = "" ]</mark>
+)
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Encrypt example</h2>
+<pre><code data-trim class="php small-font-code">
+$algo = 'aes-256-gcm';
+$iv   = random_bytes(openssl_cipher_iv_length($algo));
+$key  = random_bytes(32); // 256 bit
+$data = random_bytes(1024); // 1 Kb of random data
+$ciphertext = openssl_encrypt(
+    $data,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag
+);
+</code></pre>
+					<p>Il risultato è $ciphertext . $tag</p>
+				</section>
+
+				<section>
+					<h2>Decrypt example</h2>
+<pre><code data-trim class="php medium-font-code">
+$decrypt = openssl_decrypt(
+    $ciphertext,
+    $algo,
+    $key,
+    OPENSSL_RAW_DATA,
+    $iv,
+    $tag
+);
+if (false === $decrypt) {
+    throw new Exception(openssl_error_string());
+}
+echo $data === $decrypt ? 'Ok' : 'Failure';
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Funzionalità deprecate</h2>
+				</section>
+
+				<section>
+					<h2><strike>Mcrypt</strike></h2>
+					<p class="fragment">Utilizzare OpenSSL al suo posto</p>
+				</section>
+
+				<section>
+					<h2>PHP 7.2</h1>
+					<ul>
+						<li class="fragment">7.2.0 (Prevista per 30 Nov 2017)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Alcune novità</h2>
+				</section>
+
+				<section>
+					<h2>Tipo Object</h2>
+					<p>Utilizzabile come parametro e ritorno di tipo</p>
+<pre class="fragment"><code data-trim class="php medium-font-code">
+function foo(object $obj): string {
+    return $obj->var;
+}
+
+function bar(MyClass $arg): object {
+    return $arg;
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Omissione del tipo</h2>
+					<p>E' possibile omettere il tipo di un parametro per interfacce o classi ereditate</p>
+<pre class="fragment"><code data-trim class="php medium-font-code">
+class Foo {
+    public function myFunction(array $myarray)
+    { /* ... */ }
+}
+
+class Bar extends Foo {
+    public function myFunction($myarray)
+    { /* ... */ }
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Ultima virgola</h2>
+					<p>Lasciare la virgola nell'ultimo elemento di un lista</p>
+<pre class="fragment"><code data-trim class="php medium-font-code">
+// Arrays (already possible)
+$array = [1, 2, 3,];
+
+use Foo\Bar\{ Foo, Bar, Baz, };
+
+fooCall($arg1, $arg2, $arg3,);
+
+protected
+    $a = 'foo',
+    $b = 'bar',
+;
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Sicurezza</h2>
+					<ul>
+						<li class="fragment">Supporto <a href="https://framework.zend.com/blog/2017-08-17-php72-argon2-hash-password.html">Argon2</a> per memorizzazione sicura password</li>
+						<li class="fragment"><a href="https://github.com/jedisct1/libsodium-php">Sodium</a>, supporto crittografia moderna</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Grazie!</h2>
+					<p>Contatti: enrico [at] zimuel.it</p>
+					<p>Web: <a href="https://www.zimuel.it">www.zimuel.it</a></p>
+					<p>Twitter: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/codemotion2017/license.png" /></a><br />Questa presentazione è rilasciata con licenza <br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />Presentazione realizzata con <a href="http://lab.hakim.se/reveal-js">reveal.js</a></small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        	{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
