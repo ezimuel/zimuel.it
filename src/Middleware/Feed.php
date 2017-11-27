@@ -23,14 +23,14 @@ class Feed
         $feedUrl    = (string) $request->getUri();
         $blogUrl    = $this->helper->generate('blog');
         $postInFeed = 15;
-        $this->feed->setLink($blogUrl);
+        $this->feed->setLink('https://www.zimuel.it' . $blogUrl);
         $this->feed->setFeedLink($feedUrl, $feedType);
         $dateModified = false;
 
         foreach ($this->post->getItems(0, $postInFeed) as $url => $post) {
             $entry = $this->feed->createEntry();
             $entry->setTitle($post['title']);
-            $entry->setLink($blogUrl . $url);
+            $entry->setLink('https://www.zimuel.it' . $blogUrl . '/' . $url);
             $entry->addAuthor([
                 'name' => 'Enrico Zimuel'
             ]);
