@@ -1,0 +1,143 @@
+<post date="2017-11-26" img="php72.jpg" title="The new features in PHP 7.2" sub="Waiting the new minor release of PHP">
+
+<p>The <a href="https://wiki.php.net/todo/php72#timetable">30th November 2017</a> is scheduled the relase of PHP 7.2. This new version becomes after 6 months of testing with 3 alpha, 3 beta, and 6 RC versions. In this post, I'll present some of the new features.</p>
+
+<h2>Performance</h2>
+
+<p>As we known, PHP 7 introduced a big performance improvement compared with PHP 5. The <a href="http://www.zend.com/en/resources/php7_infographic">benchmarks reported</a> an average improvement of 2x for the execution time and a great reduction of the memory consumption (10x in some cases).</p>
+<p>This performance boost took PHP to be one of the fast interpreted language in the world (see Figure below).</p>
+<p><img src="/img/slides/codemotion2016/bench_lang.png"></p>
+<p>PHP 7.2 introduces again some performance improvement. According to the <a href="https://www.phoronix.com/scan.php?page=news_item&px=PHP-7.2-Beta-1">benchmark</a> published by <i>Michael Larabel</i>, PHP 7.2 is 20% faster than 7.0 and 10% faster than 7.1 (see Figure below).
+<p><img src="/img/post/php72_benchmark.png"></p>
+
+<h2>Object type</h2>
+
+<p>PHP 7.2 introduces the usage of the <strong>object</strong> type. This new scalar type can be used to represent PHP objects. As an example:</p>
+
+<pre><code class="php">
+function test(object $obj) : object
+{
+    return new SplQueue();
+}
+
+test(new StdClass());
+</code></pre>
+
+<p>The function test accepts an object parameter (<i>$obj</i>) as input and returns an object value. In the example, we used a StdClass object as input and we returned a SplQueue object as output.</p>
+<p>The introduction of the object type fills a previous PHP gap by adding <strong>object</strong> as scalar type of the language. This new type can be useful in all cases where we need to handle objects of different classes.</p>
+
+<h2>Abstract and interface method override</h2>
+
+<p>PHP 7.2 allows the overriding of methods in abstract classes and interfaces. In detail, we can omit the type declaration of a parameter in an abstract extended method (<a href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)">contravariance</a>) and we can add the type hint for a return value (<a href="https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)">covariance</a>).</p>
+<p>As an example, using abstract:</p>
+
+<pre><code class="php">
+abstract class A
+{
+    abstract function test(string $s);
+}
+
+abstract class B extends A
+{
+    abstract function test($s) : int;
+}
+</code></pre>
+
+<p>In this example, we extended class A overriding the test function removing the type constrain of the parameter ($s). This overriding can be useful to extend an abstract class with more general input types.</p>
+
+<p>As an example, using interface:</p>
+
+<pre><code class="php">
+interface A
+{
+    public function test(string $s);
+}
+
+class B implements A
+{
+    public function test($s){}
+}
+</code></pre>
+
+<p>This example shows how to change the implementation of an interface, removing the type hint of a parameter. This is called parameter type widening. The point of this feature for interfaces is to allow dropping a type when the underlying behavior is the same.</p>
+
+<h2>Argon2</h2>
+
+<p>PHP 7.2 introduces the support of the <a href="https://en.wikipedia.org/wiki/Argon2">Argon2</a> algorithm for password hashing. This algorithm is the <a href="https://password-hashing.net/?lipi=urn%3Ali%3Apage%3Ad_flagship3_pulse_read%3Bfjqy0n2WQXykQGwtWg1tWg%3D%3D">state of art</a> for secure password storing. It's considered more secure of <a href="https://en.wikipedia.org/wiki/Bcrypt">bcrypt</a>, the default algorithm used by <a href="http://php.net/manual/en/function.password-hash.php">password_hash()</a> function of PHP. Argon2 has been developed to prevent <a href="https://en.wikipedia.org/wiki/Brute-force_attack">brute force attacks</a> even if performed using parallel CPU architectures, like <a href="https://en.wikipedia.org/wiki/Graphics_processing_unit">GPU</a>.</p>
+<p>PHP implemented the <strong>Argon2i</strong> version of the algorithm, that is considered the more secure for password hashing. In order to use it, we need to specify the <strong>PASSWORD_ARGON2I</strong> constant in the password_hash() function. As an example:</p>
+
+<pre><code class="php">
+$password = 'test';
+$hash = password_hash($password, PASSWORD_ARGON2I);
+var_dump($hash);
+</code></pre>
+
+<p>The <i>$hash</i> variabile will contain the hash of the 'test' password, a string of <strong>98 characters</strong> like the follows:</p>
+
+<pre>
+$argon2i
+$v=19
+$m=1024,t=2,p=2
+$TmxLemFoVnZFaEJuT1NyYg
+$4j2ZFDn1fVS70ZExmlJ33rXOinafcBXrp6A6grHEPkI
+</pre>
+
+<p>This string contains 5 sections divided by dollar character ($). The first section contains the name of the algorithm (<i>argon2i</i>), the second the version of the algorithm (<i>v=19</i>), the third contains the parameters algorithm: the memory cost (in kB), the execution cost (t) and the degree of parallelism (p). The fourth section contains a random <i>salt</i> value and the last section contains the hash value.</p>
+<p>This string of 98 characters can be stored in a database. We can verify if a user password corresponds to the stored hash using the <a href="http://php.net/manual/it/function.password-verify.php">password_verify()</a> function of PHP.</p>
+
+<h2>Modern cryptography support</h2>
+
+<p>PHP 7.2 introduces <strong>Sodium</strong>, a new extension in the standard library for modern cryptography.</p>
+<p>This new extension uses the <a href="https://download.libsodium.org/doc/">libsodium</a> library for advanced cryptography, like the support of <a href="https://en.wikipedia.org/wiki/Elliptic-curve_cryptography">Elliptic-curve cryptography</a> (ECC).</p>
+<p>PHP 7.2 is the first programming language to add modern cryptography to its standard library. For more information about the Sodium extension, read this <a href="">post</a> by <i>Scott Arciszewski</i>.</p>
+
+<h2>Added debug info for ext/PDO</h2>
+
+<p>The function <a href="http://php.net/manual/en/pdostatement.debugdumpparams.php">PDOStatement::debugDumpParams</a> returns debug information for a PDO SQL statement. PHP 7.2 added the raw SQL string generated by PDOStatement.</p>
+<p>This SQL string is very useful for debugging because it contains the real SQL query sent to the database. As an example:</p>
+
+<pre><code class="php">
+$pdo = new PDO(
+    'mysql:dbname=test;host=localhost',
+    'user',
+    'password'
+);
+$sth = $pdo->prepare("SELECT * FROM user WHERE active=:active");
+if (! $sth->execute(['active' => true])) {
+    print_r($sth->errorInfo());
+    exit(1);
+}
+$sth->debugDumpParams();
+</code></pre>
+
+<p>PHP 7.2 will generate an output as follows:</p>
+
+<pre>
+SQL: [39] SELECT * FROM user WHERE active=:active
+Sent SQL: [35] SELECT * FROM user WHERE active='1'
+Params:  1
+Key: Name: [7] :active
+paramno=-1
+name=[7] ":active"
+is_param=1
+param_type=2
+</pre>
+
+<p>The raw SQL generated by PDO is the <strong>Sent SQL</strong> string, in the second line.</p>
+
+<h2>New functions</h2>
+
+<p>PHP 7.2 introduces some new functions. Some of these are: <a href="https://github.com/php/php-src/pull/2615">ftp_append()</a>, <a href="php.net/manual/en/function.hash-hmac-algos.php">hash_hmac_algos()</a>, <a href="http://php.net/manual/en/function.imagesetclip.php">imagesetclip()</a>, <a href="http://php.net/manual/en/function.imagegetclip.php">imagegetclip()</a>, <a href="http://php.net/manual/en/function.imageopenpolygon.php">imageopenpolygon()</a>, <a href="http://php.net/manual/en/function.imageresolution.php">imageresolution()</a>, <a href="http://php.net/manual/en/function.imagecreatefrombmp.php">imagecreatefrombmp()</a>, <a href="http://php.net/manual/en/function.imagebmp.php">imagebmp()</a>.</p>
+<p>For the complete list of new functions, you can read <a href="http://php.net/manual/en/migration72.new-functions.php">this page</a> from php.net website.</p>
+
+<h2>Deprecated functions</h2>
+
+<p>PHP 7.2 deprecates some functions, some of these are: <a href="http://php.net/manual/en/function.autoload.php">__autoload()</a>, <a href="http://php.net/manual/en/function.create-function.php">create_function()</a>, <a href="http://php.net/manual/en/function.gmp-random.php">gmp_random()</a>, <a href="http://php.net/manual/en/function.each.php">each()</a>, <a href="http://php.net/manual/en/function.assert.php">assert()</a> with a string parameter, <a href="http://php.net/manual/en/function.parse-str.php">parse_str()</a> without the second parameter, <a href="http://php.net/manual/en/function.png2wbmp.php">png2wbmp()</a>, <a href="http://php.net/manual/en/function.jpeg2wbmp.php">jpeg2wbmp()</a>.
+
+<h2>Conclusions</h2>
+
+<p>The new features of PHP 7.2 are quite a lot and interesting. In my opinion, the most significant are the introduction of the <strong>object</strong> type, the support of the <strong>Argon2i</strong> algorithm and the new cryptographic extension <strong>Sodium</strong>.</p>
+<p>We look forward to use these new features in our PHP projects! Let's wait some more days, until 30th November 2017.</p>
+<p>For more information about PHP 7.2 you can read the <a href="http://php.net/manual/en/migration72.php">Migrating from PHP 7.1.x to PHP 7.2.x</a> page from php.net.</p>
+
+</post>
