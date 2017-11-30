@@ -381,15 +381,15 @@ function bar(MyClass $arg): object {
 
 				<section>
 					<h2>Omissione del tipo</h2>
-					<p>E' possibile omettere il tipo di un parametro per interfacce o classi ereditate</p>
+					<p>E' possibile omettere il tipo di un parametro per interfacce o classi astratte ereditate</p>
 <pre class="fragment"><code data-trim class="php medium-font-code">
-class Foo {
-    public function myFunction(array $myarray)
+abstract class Foo {
+    abstract function myFunction(array $myarray)
     { /* ... */ }
 }
 
-class Bar extends Foo {
-    public function myFunction($myarray)
+abstract class Bar extends Foo {
+    abstract function myFunction($myarray)
     { /* ... */ }
 }
 </code></pre>
