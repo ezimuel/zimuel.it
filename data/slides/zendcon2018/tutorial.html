@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.4.1/">
+		<title>Building a RESTful web API using Expressive, ZendCon & OpenEnterprise 2018</title>
+
+		<meta name="description" content="Develop web APIs in PHP, Workshop ApiConf 2018">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/roguewave.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/zendcon2018/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="roguewave-footer-off">
+					<h3>Tutorial<br /><strong>Building a RESTful web API using Expressive</strong></h3>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="https://www.roguewave.com/">Rogue Wave Software</a> (USA)</small><br /><br />
+						<small><a href="https://www.zendcon.com">ZendCon & OpenEnterprise</a>, Las Vegas (NV), Oct 15, 2018</small>
+					</p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/zendcon2018/roguewave.png" style="border-style:none;" height="100"></a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+				<h3>About me</h3>
+				<table>
+					<tr>
+						<td width="35%" style="padding-right:0;vertical-align: top">
+							<img src="/img/slides/zendcon2018/enrico.png" class="noborder">
+						</td>
+						<td>
+							<ul>
+								<li>Developer since 1996</li>
+								<li><i>Senior Software Engineer</i> at <a href="https://www.roguewave.com/" target="_blank">Rogue Wave Software</a>, Inc.</li>
+								<li>Co-author of <a href="http://apigility.org">Apigility</a>, <a href="http://getexpressive.org" target="_blank">Expressive</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+								<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+								<li><i>Research Programmer</i> at <a href="http://ivi.uva.nl/">UvA</a></li>
+								<li>Member of the <a href="http://www.zend.com/services/certification/framework/education-advisory-board">Zend Education Advisory Board</a></li>
+								<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+							</ul>
+						</td>
+					</tr>
+				</table>
+			</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Web APIs</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+						<h2>HTTP IN &amp; OUT</h2>
+						<p><img src="/img/slides/zendcon2018/webapp.png" class="noborder" width="700"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+					<p class="fragment">HTTP Request:</p>
+<pre class="fragment"><code data-trim class="medium-font-code">
+GET /api/version
+</code></pre>
+					<p class="fragment">HTTP Response:</p>
+<pre class="fragment"><code data-trim class="medium-font-code">
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 17
+Content-Type: application/json
+
+{
+  "version": "1.0"
+}
+	</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Building a Web API</h2>
+					<ul>
+						<li class="fragment">Managing the HTTP request and response</li>
+						<li class="fragment">Choosing a representation format</li>
+						<li class="fragment">Choosing an error format</li>
+						<li class="fragment">Filtering &amp; validating input data</li>
+						<li class="fragment">Authenticating HTTP requests</li>
+						<li class="fragment">Authorizing HTTP requests</li>
+						<li class="fragment">Documentation</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>HTTP Methods (REST approach)</h3>
+					  <ul>
+						  <li class="fragment"><strong>GET</strong>: read a resource</li>
+						  <li class="fragment"><strong>HEAD</strong>: read without <i>body</i></li>
+						  <li class="fragment"><strong>POST</strong>: create a resource</li>
+						  <li class="fragment"><strong>PUT</strong>: replace a resource</li>
+						  <li class="fragment"><strong>PATCH</strong>: update a resource</li>
+						  <li class="fragment"><strong>DELETE</strong>: delete a resource</li>
+						  <li class="fragment"><strong>OPTIONS</strong>: information about a resource</li>
+					  </ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HTTP Status-code</h2>
+					<ul>
+						<li class="fragment"><strong>Informational 1xx</strong>: 100 Continue</li>
+						<li class="fragment"><strong>Successful 2xx</strong>: 200 OK, 201 Created, 202 Accepted</li>
+						<li class="fragment"><strong>Redirection 3xx</strong>: 301 Moved Permanently, 307 Temporary Redirect</li>
+						<li class="fragment"><strong>Client Error 4xx</strong>: 401 Unauthorized, 404 Not Found, 405 Method Not Allowed</li>
+						<li class="fragment"><strong>Server Error 5xx</strong>: 500 Internal Server Error, 503 Service Unavailable</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Representation format</h2>
+					<ul>
+						<li class="fragment"><strong>JSON</strong> (JavaScript Object Notation)<br />in PHP json_encode(), json_decode()</li>
+						<li class="fragment"><strong>XML</strong> (eXtensible Markup Language)<br />in PHP SimpleXML, libxml, DOM, etc</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HAL-JSON</h2>
+					<p class="fragment"><strong>HAL-JSON</strong> (Hypertext Application Language JSON), <a href="https://datatracker.ietf.org/doc/draft-kelly-json-hal/">Internet-Draft</a></p>
+<pre class="fragment"><code data-trim class="">
+GET /api/user/ezimuel
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user/ezimuel"
+        },
+        "contacts": [
+            { "href": "http://domain/api/user/mwop" },
+            { "href": "http://domain/api/user/zeevs" }
+        ]
+    },
+    "id": "ezimuel",
+    "name": "Enrico Zimuel"
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Error format</h2>
+					<p class="fragment">Problem Details (<a href="https://tools.ietf.org/html/rfc7807">RFC 7807</a>)</p>
+<pre class="fragment"><code data-trim class="">
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Language: en
+
+{
+    "type": "https://example.net/validation-error",
+    "title": "Your request parameters didn't validate.",
+    "invalid-params": [
+        {
+            "name": "age",
+            "reason": "must be a positive integer"
+        },
+    ]
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Authentication</h2>
+					<ul>
+						<li class="fragment"><a href="https://it.wikipedia.org/wiki/Basic_access_authentication">Basic/Digest access authentication</a></li>
+						<li class="fragment"><a href="https://oauth.net/2/">OAuth2</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Documentation</h2>
+					<ul>
+						<li class="fragment"><a href="https://swagger.io/docs/">Swagger</a></li>
+						<li class="fragment"><a href="http://apidocjs.com">APIDOC</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">HTTP in PHP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HTTP message in PHP</h2>
+					<p>Global variables:</p>
+					<ul>
+						<li class="fragment">$_SERVER</li>
+						<li class="fragment">$_POST</li>
+						<li class="fragment">$_GET</li>
+						<li class="fragment">$_FILES</li>
+						<li class="fragment">$_COOKIE</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HTTP functions in PHP</h2>
+					<ul>
+						<li class="fragment">http_response_code()</li>
+						<li class="fragment">header(), header_remove(), headers_list(), headers_sent()</li>
+						<li class="fragment">setcookie(), setrawcookie()</li>
+						<li class="fragment">gethostname(), etc</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Manage HTTP in PHP</h2>
+					<ul>
+						<li class="fragment">PHP does not offer an object representation of HTTP request/response</li>
+						<li class="fragment">Unfortunately, It's quite hard to manage HTTP messages in PHP!</li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">PHP-FIG</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PHP FIG</h2>
+					<ul>
+						<li class="fragment"><strong>PHP Framework Interop Group</strong> (PHP FIG)</li>
+						<li class="fragment">A working group for defining common standards to interop between PHP frameworks/libraries</li>
+						<li class="fragment"><strong>PHP Standards Recommendations</strong> (PSR)</li>
+						<li class="fragment">More information at <a href="https://www.php-fig.org">php-fig.org</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PSR-7</h2>
+					<p class="fragment">Common interfaces for <strong>representing HTTP messages</strong> as described in <a href="https://tools.ietf.org/html/rfc7230">RFC 7230</a> and <a href="https://tools.ietf.org/html/rfc7231">RFC 7231</a>, and URIs for use with HTTP messages as described in <a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PSR-7 interfaces</h2>
+					<ul>
+						<li class="fragment">github: <a href="https://github.com/php-fig/http-message">psr/http-message</a></li>
+						<li class="fragment">Psr\Http\Message\MessageInterface</li>
+						<li class="fragment">Psr\Http\Message\RequestInterface</li>
+						<li class="fragment">Psr\Http\Message\ResponseInterface</li>
+						<li class="fragment">Psr\Http\Message\ServerRequestInterface</li>
+						<li class="fragment">Psr\Http\Message\StreamInterface</li>
+						<li class="fragment">Psr\Http\Message\UploadedFileInterface</li>
+						<li class="fragment">Psr\Http\Message\UriInterface</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+// Returns an empty array if not found:
+$header = $message->getHeader('Accept');
+// Returns an empty string if not found:
+$header = $message->getHeaderLine('Accept');
+// Test for a header:
+if (! $message->hasHeader('Accept')) {
+}
+// If the header has multiple values, fetch them
+// as an array:
+$values = $message->getHeader('X-Foo');
+// Or as a comma-separated string:
+$values = $message->getHeaderLine('X-Foo');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Immutability</h2>
+					<ul>
+						<li class="fragment">PSR-7 Request and Response model <strong>immutability</strong></li>
+						<li class="fragment">Messages are modeled as value objects; a change to any value results in a new instance</li>
+						<li class="fragment">PSR-7 Stream does not model immutability</li>
+					</ul>
+					<p class="fragment"><small><a href="https://github.com/zendframework/zend-diactoros">zendframework/zend-diactoros</a> implements PSR-7</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+$response = $response->withStatus(418, "I'm a teapot");
+
+$query   = $request->getQueryParams();
+$body    = $request->getBodyParams();
+
+$request = $request->withBodyParams(json_decode($body));
+</code></pre>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Middleware</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+						<h2>Middleware</h2>
+						<p>A function that gets a request and generates a response</p>
+<pre><code data-trim class="php big-font-code">
+function ($request)
+{
+    // do something with $request
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Delegating middleware</h2>
+<pre><code data-trim class="php medium-font-code">
+function ($request, callable $delegate)
+{
+    // delegating $request to another middleware
+    $response = $delegate($request);
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Middleware onion</h2>
+					<img src="/img/slides/zendcon2018/middleware.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Execution pipeline</h2>
+					<img src="/img/slides/zendcon2018/middleware_app.png" style="border-style:none" height="450">
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example: cache</h2>
+<pre><code data-trim class="php medium-font-code">
+function ($request, callable $delegate) use ($cache)
+{
+    if ($cache->has($request)) {
+        return $cache->get($request);
+    }
+    $response = $delegate($request);
+    $cache->set($request, $response);
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PSR-15</h2>
+					<p class="fragment">Common interfaces for <strong>HTTP server request handlers</strong> and <strong>HTTP server middleware</strong> components that use HTTP messages as described by <a href="https://www.php-fig.org/psr/psr-7/">PSR-7</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PSR-15: Handler</h2>
+<pre><code data-trim class="php medium-font-code">
+namespace Psr\Http\Server;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+interface RequestHandlerInterface
+{
+    public function handle(
+        ServerRequestInterface $request
+    ): ResponseInterface;
+}
+</code></pre>
+					<p class="fragment">An <strong>handler</strong> returns a response, without delegate</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PSR-15: Middleware</h2>
+<pre><code data-trim class="php medium-font-code">
+namespace Psr\Http\Server;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+interface MiddlewareInterface
+{
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler
+    ): ResponseInterface;
+}
+</code></pre>
+					<p class="fragment"><small>A <strong>middleware</strong> participates in processing an HTTP message, it may deletegate.</small></p>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Expressive</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+						<img src="/img/slides/zendcon2018/expressive_logo.png" width="400" class="noborder">
+						<p>The PHP framework for middleware applications</p>
+						<ul>
+							<li class="fragment">PSR-7 support (using <a href="https://github.com/zendframework/zend-diactoros">zend-diactoros</a>)</li>
+							<li class="fragment">PSR-15 support</li>
+							<li class="fragment">Piping workflow (using <a href="https://github.com/zendframework/zend-stratigility">zend-stratigility</a>)</li>
+							<li class="fragment">Features: routing, dependency injection, templating, error handling</li>
+							<li class="fragment">Last release 3.2.0, 28th September 2018</li>
+							<li class="fragment">Official website: <a href="https://getexpressive.org/">getexpressive.org</a></li>
+						</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Installation</h2>
+					<p>You can install <i>Expressive</i> using <a href="https://getcomposer.org/">composer</a>:</p>
+<pre><code data-trim class="shell">composer create-project zendframework/zend-expressive-skeleton api
+</code></pre></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Routes</h2>
+<pre><code data-trim class="php small-font-code">
+$app->get('/api/ping', function ($request) {
+    return JsonResponse(['ack' => time()])
+});
+
+// or implement a RequestHandlerInterface
+$app->get('/api/ping', App\Handler\PingHandler::class);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PingHandler</h2>
+<pre><code data-trim class="php small-font-code">
+namespace App\Handler;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Zend\Diactoros\Response\JsonResponse;
+
+class PingHandler implements RequestHandlerInterface
+{
+    public function handle(
+        ServerRequestInterface $request
+    ) : ResponseInterface {
+        return new JsonResponse(['ack' => time()]);
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Pipeline</h2>
+<pre><code data-trim class="php medium-font-code">
+$app->pipe(ErrorHandler::class);
+$app->pipe(ServerUrlMiddleware::class);
+$app->pipe(RouteMiddleware::class);
+$app->pipe(ImplicitHeadMiddleware::class);
+$app->pipe(ImplicitOptionsMiddleware::class);
+$app->pipe(MethodNotAllowedMiddleware::class);
+$app->pipe(UrlHelperMiddleware::class);
+$app->pipe(ProblemDetailsMiddleware::class);
+$app->pipe(DispatchMiddleware::class);
+$app->pipe(NotFoundHandler::class);
+</code></pre>
+					<small>/config/pipeline.php</small>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Route a REST API</h2>
+<pre><code data-trim class="php small-font-code">
+$app->route('/api/users[/{id}]', [
+    Authentication\AuthenticationMiddleware::class,
+    Authorization\AuthorizationMiddleware::class,
+    Api\Action\UserAction::class
+], ['GET', 'POST', 'PATCH', 'DELETE'], 'api.users');
+
+// or route each HTTP method
+$app->get('/api/users[/{id}]', ..., 'api.users.get');
+$app->post('/api/users', ..., 'api.users.post');
+$app->patch('/api/users/{id}', ..., 'api.users.patch');
+$app->delete('/api/users/{id}', ..., 'api.users.delete');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Tools for Web API</h2>
+					<ul>
+						<li class="fragment">HAL-JSON: <a href="https://github.com/zendframework/zend-expressive-hal">zend-expressive-hal</a></li>
+						<li class="fragment">Problem details: <a href="https://github.com/zendframework/zend-problem-details">zend-problem-details</a></li>
+						<li class="fragment">Filtering &amp; validation: <a href="https://github.com/zendframework/zend-inputfilter">zend-inputfilter</a></li>
+						<li class="fragment">Authentication (HTTP Basic, OAuth2): <a href="https://github.com/zendframework/zend-expressive-authentication">zend-expressive-authentication</a></li>
+						<li class="fragment">Authorization (ACL, RBAC): <a href="https://github.com/zendframework/zend-expressive-authorization">zend-expressive-authorization</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Hands-on</h2>
+					<p><a href="https://github.com/ezimuel/zend-expressive-api">github.com/ezimuel/zend-expressive-api</a></p>
+				</section>
+
+				<section data-state="roguewave-footer-off">
+					<h2>Thanks!</h2>
+					<p>More info: <a href="http://getexpressive.org">http://getexpressive.org</a></p>
+					<p>Contact me: enrico.zimuel [at] roguewave.com</p>
+					<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/zendcon2018/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<aside id="roguewave-footer">
+			<div style="float:left">
+				<img src="/img/slides/zendcon2018/roguewave-footer.png" width="200">
+			</div>
+			<div style="float:right">
+				&copy; 2018 Rogue Wave Software, Inc. All Rights Reserved.
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('roguewave-footer-on', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('roguewave-footer-off', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
