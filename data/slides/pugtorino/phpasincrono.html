@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.4.1/">
+		<title>Programmazione asincrona in PHP, PUG Torino</title>
+
+		<meta name="description" content="Develop web APIs in PHP, Workshop ApiConf 2018">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/roguewave.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/pugtorino/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="roguewave-footer-off">
+					<h3>Programmazione asincrona in PHP</h3>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="https://www.roguewave.com/">Rogue Wave Software</a> (USA)</small><br /><br />
+						<small><a href="http://torino.grusp.org/">PUG Torino</a>, Torino, 20 Giugno 2018</small>
+					</p>
+					<p><a href="http://torino.grusp.org/"><img src="/img/slides/pugtorino/pugtorino.png" style="border-style:none;" height="200"></a> <a href="http://www.toolboxoffice.it/"><img src="/img/slides/pugtorino/toolbox.png" height="100" style="border-style:none;margin-left:50px;"></a></p>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Programmazione asincrona</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Async programming</h2>
+					<p class="fragment">Nella <strong>programmazione asincrona</strong> l'esecuzione di un'azione avviene senza pause di attesa per la risposta di operazioni di I/O</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Esempio in Js</h2>
+<pre><code data-trim class="js">
+// Example 1 - Synchronous (blocks)
+var result = database.query("SELECT * FROM users");
+console.log("Query finished");
+console.log("Next line");
+
+// Example 2 - Asynchronous (doesn't block)
+database.query("SELECT * FROM users", function(result) {
+    console.log("Query finished");
+});
+console.log("Next line");
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Async in PHP</h2>
+					<ul>
+						<li class="fragment">PHP supporta funzioni async: curl, pthreads, pht (PHP 7.2), libevent, etc</p>
+						<li class="fragment">Librerie:
+							<ul>
+								<li class="fragment"><a href="https://amphp.org/">Amp</a></li>
+								<li class="fragment"><a href="https://reactphp.org/">ReactPHP</a></li>
+								<li class="fragment"><a href="https://www.swoole.co.uk/">Swoole</a> (estensione PECL)</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/pugtorino/swoole.png" class="noborder">
+					<ul>
+						<li class="fragment"><strong>Swoole</strong> è un framework per la programmazione asincrona in PHP 7</li>
+						<li class="fragment">PHP extension, installazione:
+<pre><code class="bash" data-trim>
+pecl install swoole
+</code></pre>
+						</li>
+						<li class="fragment">Licenza Apache 2.0</li>
+						<li class="fragment">Informazioni su <a href="https://www.swoole.co.uk/">swoole.co.uk</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Caratteristiche</h2>
+					<ul>
+						<li class="fragment">Event-driven, asynchronous programming for PHP</li>
+						<li class="fragment">Async TCP / UDP / HTTP / Websocket / HTTP2 client/server side API</li>
+						<li class="fragment">IPv4 / IPv6 / Unixsocket / TCP/ UDP and SSL / TLS support</li>
+						<li class="fragment"><a href="https://www.swoole.co.uk/benchmark">High performance</a>, scalable, support C1000K</li>
+						<li class="fragment">Fast serializer / unserializer</li>
+						<li class="fragment">Milliseconds task scheduler</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Come funziona Swoole</h2>
+					<img src="/img/slides/pugtorino/how-swoole-works.png" class="noborder" width="650">
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Swoole vs. PHP-FPM</h2>
+					<ul>
+						<li class="fragment">Swoole crea (fork) un numero di processi basato sulle CPU core disponibili</li>
+						<li class="fragment">Swoole supporta connessioni <i>long-live</i> per server websocket o TCP/UDP</li>
+						<li class="fragment">Swoole supporta diversi protocolli <i>server-side</i></li>
+						<li class="fragment">Swoole può gestire e riutilizzare lo stato della memoria</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HTTP Server</h2>
+<pre><code class="php small-font-code" data-trim>
+$http = new swoole_http_server("127.0.0.1", 9501);
+
+$http->on("start", function ($server) {
+    echo "Started at http://127.0.0.1:9501\n";
+});
+
+$http->on("request", function ($request, $response) {
+    $response->header("Content-Type", "text/plain");
+    $response->end("Hello World\n");
+});
+
+$http->start();
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>WebSocket Server</h2>
+<pre><code class="php" data-trim>
+$server = new swoole_websocket_server("127.0.0.1", 9501);
+
+$server->on('open', function (swoole_websocket_server $server, $request) {
+    echo "server: handshake success with fd{$request->fd}\n";
+});
+$server->on('message', function (swoole_websocket_server $server, $frame) {
+    echo "receive from {$frame->fd}:{$frame->data},opcode:{$frame->opcode},fin:{$frame->finish}\n";
+    $server->push($frame->fd, "This message is from swoole websocket server.");
+});
+$server->on('close', function ($ser, $fd) {
+    echo "client {$fd} closed\n";
+});
+
+$server->start();
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Async MySQL client</h2>
+				<pre><code class="php" data-trim>
+$db = new swoole_mysql;
+$server = [ 'host' => '', 'port' => 3306, 'user' => '', //... ];
+
+$db->connect($server, function ($db, $result) {
+    if (! $result) {
+        error_mysql($db);
+    }
+    $db->query('SHOW TABLES', function($db, $result) {
+        if (! $result) {
+            error_mysql($db);
+        }
+        printf("Success!\n");
+        $db->close();
+    });
+});
+
+function error_mysql ($db) : void {
+    printf("Error %s %s\n", $db->connect_errno, $db->connect_error);
+    exit(1);
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Approfondimenti</h2>
+					<ul>
+						<li><a href="https://www.phproundtable.com/episode/asynchronous-php">Asynchronous PHP</a>, PHP roundtable podcast, 2016</li>
+						<li><a href="https://sergeyzhuk.me/2018/02/02/why-asynchronous-php/">Asynchronous PHP: Why?</a>, sergeyzhuk.me</li>
+						<li><a href="https://github.com/elazar/asynchronous-php">Asynchronous PHP collection list</a></li>
+						<li><a href="http://blog.teamtreehouse.com/an-introduction-to-websockets">Introduction to websockets</a>, Matt West</li>
+					</ul>
+				</section>
+
+				<section data-state="roguewave-footer-off">
+					<h2>Grazie!</h2>
+					<p>Contatti: enrico.zimuel [at] roguewave.com</p>
+					<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/pugtorino/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<aside id="roguewave-footer">
+			<div style="float:left">
+				<img src="/img/slides/pugtorino/roguewave-footer.png" width="200">
+			</div>
+			<div style="float:right">
+				&copy; 2018 Rogue Wave Software, Inc. All Rights Reserved.
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('roguewave-footer-on', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('roguewave-footer-off', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
