@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.4.1/">
+		<title>Develop microservices in PHP</title>
+
+		<meta name="description" content="Develop microservices in PHP">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/roguewave.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/codemotion2018/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="roguewave-footer-off">
+					<h2>Develop microservices<br />in PHP</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="https://www.roguewave.com">Rogue Wave Software</a> Inc.</small><br /><br />
+						<small><a href="https://milan2018.codemotionworld.com">Codemotion 2018</a>, Milan (Italy), 30th Nov</small>
+					</p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/codemotion2018/roguewave.png" style="border-style:none;margin-right:20px" height="100"></a> <a href="https://milan2018.codemotionworld.com/"><img src="/img/slides/codemotion2018/codemotion.png" style="border-style:none;"></a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>About me</h3>
+					<table style="font-size:30px">
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/codemotion2018/enrico.png">
+							</td>
+							<td>
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Senior Software Engineer at <a href="http://www.roguewave.com/">Rogue Wave Software</a> Inc.</li>
+									<li>Open source contributor <a href="http://apigility.org">Apigility</a>, <a href="https://docs.zendframework.com/zend-expressive/">Expressive</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Professor at <a href="http://www.its-ictpiemonte.it/">ITS-ICT Piemonte</a> and Research Programmer at <a href="http://ivi.uva.nl/">Amsterdam University</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Book: Sviluppare in PHP 7</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/codemotion2018/book.jpg" class="noborder">
+							</td>
+							<td>
+								<br />
+								<p><a href="https://www.sviluppareinphp7.it/">www.sviluppareinphp7.it</a></p>
+								<p>pp. 352, <a href="http://www.tecnichenuove.com/">Tecniche Nuove</a>, 2017<br />ISBN 978-88-481-3120-9</p>
+								<p><i>in Italian</i></p>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Microservice</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<blockquote cite="https://martinfowler.com/articles/microservices.html">...the microservice architectural style is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API</blockquote>
+					<p>- Martin Fowler</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/codemotion2018/monolithic-architecture.png" class="noborder" width="500">
+					<p><small>Source: <a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to microservices</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/codemotion2018/microservices-architecture.png" class="noborder" width="500">
+					<p><small>Source: <a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to microservices</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Benefit</h2>
+					<ul>
+						<li class="fragment">Separation of concerns
+							<ul>
+								<li class="fragment">Modularity</li>
+								<li class="fragment">Encapsulation</li>
+							</ul>
+						</li>
+						<li class="fragment">Scalability
+							<ul>
+								<li class="fragment">Horizontally scaling</li>
+								<li class="fragment">Workload partitioning</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Network latency</li>
+						<li class="fragment">Debugging</li>
+						<li class="fragment">New architecture challenges:
+							<ul>
+								<li class="fragment">Autodiscovery</li>
+								<li class="fragment">Telemetry</li>
+								<li class="fragment">Everything needs to be automated</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">PHP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Microservices in PHP</h2>
+					<ul>
+						<li class="fragment">PHP is easy to deploy</li>
+						<li class="fragment">PHP 7 is super fast!</li>
+						<li class="fragment">Big community</li>
+						<li class="fragment">Libraries/Frameworks</li>
+						<li class="fragment">Async in PHP (Swoole, ReactPHP, ...)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/codemotion2018/expressive_logo.png" class="noborder" width="550">
+					<p>The PHP framework for middleware applications</p>
+					<ul>
+						<li class="fragment">PSR-7 support (using <a href="https://github.com/zendframework/zend-diactoros">zend-diactoros</a>)</li>
+						<li class="fragment">PSR-15 support and piping workflow (using <a href="https://github.com/zendframework/zend-stratigility">zend-stratigility</a>)</li>
+						<li class="fragment">Features: routing, dependency injection, templating, error handling</li>
+						<li class="fragment">Support of <a href="https://www.swoole.co.uk/">Swoole</a> out-of-the-box</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>A basic web API</h2>
+<pre><code class="php small-font-code" data-trim>
+use Zend\Diactoros\Response\JsonResponse;
+use Zend\Expressive\Application;
+
+$container = require 'config/container.php';
+
+$app = $container->get(Application::class);
+$app->pipe('/api/ping', function($request) {
+    return new JsonResponse(['ack' => time()]);
+});
+// $app->pipe('/api/ping', \App\Handler\PingHandler::class);
+$app->run();
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Request Handler</h2>
+<pre><code class="php small-font-code" data-trim>
+use Psr\Http\Message\ResponseInterface as Response; // PSR-7
+use Psr\Http\Message\ServerRequestInterface as Request; // PSR-7
+use Psr\Http\Server\RequestHandlerInterface as Handler; // PSR-15
+use Zend\Diactoros\Response\JsonResponse;
+
+class PingHandler implements Handler
+{
+    public function handle(Request $request) : Response
+    {
+        return new JsonResponse(['ack' => time()]);
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Middleware</h2>
+					<p><img src="/img/slides/codemotion2018/middleware_app.png" width="450" class="noborder"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Middleware</h2>
+					<p><img src="/img/slides/codemotion2018/middleware.png" width="600" class="noborder"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example: Authentication</h2>
+<pre><code class="php" data-trim>
+use Psr\Http\Server\MiddlewareInterface; // PSR-15
+
+class AuthMiddleware implements MiddlewareInterface
+{
+  public function process(Request $request, Handler $handler): Response
+  {
+    $user = $this->auth->authenticate($request);
+    if (null !== $user) {
+      return $handler->handle($request->withAttribute(
+        UserInterface::class,
+        $user
+      ));
+    }
+    return $this->auth->unauthorizedResponse($request);
+  }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example: Routing REST API</h2>
+<pre><code data-trim class="php small-font-code">
+$app->route('/api/users[/{id}]', [
+    Authentication\AuthenticationMiddleware::class,
+    Authorization\AuthorizationMiddleware::class,
+    Api\Action\UserAction::class
+], ['GET', 'POST', 'PATCH', 'DELETE'], 'api.users');
+
+// or route each HTTP method
+$app->get('/api/users[/{id}]', ..., 'api.users.get');
+$app->post('/api/users', ..., 'api.users.post');
+$app->patch('/api/users/{id}', ..., 'api.users.patch');
+$app->delete('/api/users/{id}', ..., 'api.users.delete');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Quick start</h2>
+					<p>You can start using <i>Expressive</i> with <a href="https://getcomposer.org/">composer</a>:</p>
+<pre><code data-trim class="shell">composer create-project zendframework/zend-expressive-skeleton &lt;dir&gt;
+</code></pre></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Libraries for API</h2>
+					<ul>
+						<li class="fragment">HAL-JSON: <a href="https://github.com/zendframework/zend-expressive-hal">zend-expressive-hal</a></li>
+						<li class="fragment">Problem details: <a href="https://github.com/zendframework/zend-problem-details">zend-problem-details</a></li>
+						<li class="fragment">Filtering &amp; validation: <a href="https://github.com/zendframework/zend-inputfilter">zend-inputfilter</a></li>
+						<li class="fragment">Authentication (HTTP Basic, OAuth2): <a href="https://github.com/zendframework/zend-expressive-authentication">zend-expressive-authentication</a></li>
+						<li class="fragment">Authorization (ACL, RBAC): <a href="https://github.com/zendframework/zend-expressive-authorization">zend-expressive-authorization</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Swoole</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/codemotion2018/swoole.png" class="noborder">
+					<ul>
+						<li class="fragment"><strong>Swoole</strong> is an async programming framework for PHP 7</li>
+						<li class="fragment">PHP extension, install:
+<pre><code class="bash" data-trim>
+pecl install swoole
+</code></pre>
+						</li>
+						<li class="fragment">Released under Apache license 2.0</li>
+						<li class="fragment">More info at <a href="https://www.swoole.co.uk/">swoole.co.uk</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Features</h2>
+					<ul>
+						<li class="fragment">Event-driven, asynchronous programming for PHP</li>
+						<li class="fragment">Async TCP / UDP / HTTP / Websocket / HTTP2 client/server side API</li>
+						<li class="fragment">IPv4 / IPv6 / Unixsocket / TCP/ UDP and SSL / TLS support</li>
+						<li class="fragment"><a href="https://www.swoole.co.uk/benchmark">High performance</a> and scalable</li>
+						<li class="fragment">Fast serializer / unserializer</li>
+						<li class="fragment">Milliseconds task scheduler</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Swoole vs. PHP-FPM</h2>
+					<ul>
+						<li class="fragment">Forks a number of worker processes based on CPU core number</li>
+    					<li class="fragment">Fupports Long-live connections</li>
+    					<li class="fragment">Manage and reuse the status in memory</li>
+						<li class="fragment">Executes Non-blocking code (async, coroutine)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>HTTP Server</h2>
+<pre><code class="php medium-font-code" data-trim>
+use Swoole\Http\Server;
+
+$http = new Server("127.0.0.1", 9501);
+
+$http->on("start", function ($server) {
+    echo "Started at http://127.0.0.1:9501\n";
+});
+$http->on("request", function ($request, $response) {
+    $response->header("Content-Type", "text/plain");
+    $response->end("Hello World\n");
+});
+
+$http->start();
+</code></pre>
+					<p class="fragment"><small>Test: <strong>16K req/sec</strong> on CPU i5-2500, 16 GB RAM, PHP 7.2.12, Swoole 4.2.9</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Expressive with Swoole</h2>
+					<p class="fragment">Install:
+<pre class="fragment"><code class="bash" data-trim>
+composer require zendframework/zend-expressive-swoole
+</code></pre>
+					</p>
+					<p class="fragment">Usage:
+<pre class="fragment"><code class="bash" data-trim>
+vendor/bin/zend-expressive-swoole start
+</code></pre>
+					</p>
+					<p class="fragment">Open your browser at <a href="http://localhost:8080">localhost:8080</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>PHP + Expressive + Swoole</h2>
+					<p class="fragment">Run a web application <strong>from CLI</strong></p>
+					<p class="fragment">Simplify the deploy (only 1 container)</p>
+					<p class="fragment">A web server (nginx) can be used as <strong>load balancer</strong></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Benchmark</h2>
+					<p class="fragment"><strong>2-4x faster</strong> than Nginx and Apache</p>
+					<table class="fragment">
+						<tr>
+							<td></td>
+							<td><strong>Req/sec</strong> (mean)</td>
+						</tr>
+						<tr>
+							<td><strong>Nginx</strong></td>
+							<td style="text-align:right">1418.23</td>
+						</tr>
+						<tr>
+							<td><strong>Apache</strong></td>
+							<td style="text-align:right">1915.62</td>
+						</tr>
+						<tr>
+							<td><strong>Swoole</strong></td>
+							<td style="text-align:right">4864.34</td>
+						</tr>
+					</table>
+					<p class="fragment"><small>Testing environment:<br />Ubuntu 18.04, <a href="https://github.com/zendframework/zend-expressive-skeleton/tree/3.2.3">Expressive Skeleton 3.2.3</a>, PHP 7.2.12, Nginx 1.14 + FPM,<br />Apache 2.4.29 + mod_php, Swoole 4.2.9, CPU i5-2500, 16 GB RAM, HD SSD</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>References</h3>
+					<small>
+						<ul>
+							<li>Michael Bryzek, <a href="https://www.youtube.com/watch?v=j6ow-UemzBc">Design Microservice Architectures the Right Way</a>, QCon 2018 talk</li>
+							<li><a href="https://www.youtube.com/watch?v=CZ3wIuvmHeM">Mastering Chaos - A Netflix Guide to Microservices</a>, QCon 2016 talk</li>
+							<li>Martin Fowler, <a href="https://www.youtube.com/watch?v=wgdBVIX9ifA">Microservices</a>, GOTO 2014 talk</li>
+							<li><a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to Microservices</a>, Nginx blog post</li>
+							<li><a href="https://www.nginx.com/resources/library/designing-deploying-microservices/">Designing and Deploying Microservices</a>, Nginx ebook (free)</li>
+							<li>Richard Rodger, <a href="https://www.manning.com/books/the-tao-of-microservices">The Tao of microservices</a>, Manning Pubblications, 2017</li>
+							<li>M.Amundsen, M.McLarty, R.Mitra, I.Nadareishvili, <a href="http://shop.oreilly.com/product/0636920050308.do">Microservice Architecture: Aligning Principles, Practices, and Culture</a>, O'Reilly Media, 2016</li>
+							<li>Sam Newman, <a href="https://www.oreilly.com/library/view/building-microservices/9781491950340/">Building Microservices: Designing Fine-Grained Systems</a>, O'Reilly Media, 2015</li>
+							<li>C.P.Sanchez, P.S.Vilariño, <a href="https://www.packtpub.com/application-development/php-microservices">PHP Microservices</a>, Packt publisher, 2017</li>
+							<li>M.W.O'Phinney, E.Zimuel, <a href="http://www.zend.com/phpcookbooks">Expressive cookbook</a>, Zend ebook (free)</li>
+						</ul>
+					</small>
+				</section>
+
+				<section data-state="roguewave-footer-off">
+					<h2>Thanks!</h2>
+					<p>Contact me: enrico.zimuel (at) roguewave.com</p>
+					<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+					<br /><br />
+					<p><small><a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/codemotion2018/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<aside id="roguewave-footer">
+			<div style="float:left">
+				<img src="/img/slides/codemotion2018/roguewave-footer.png" width="200">
+			</div>
+			<div style="float:right">
+				&copy; 2018 Rogue Wave Software, Inc. All Rights Reserved.
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('roguewave-footer-on', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('roguewave-footer-off', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
