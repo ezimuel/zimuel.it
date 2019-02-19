@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.4.1/">
+		<title>The Sodium crypto library of PHP 7.2 - Sunshine PHP 2019</title>
+
+		<meta name="description" content="The Sodium crypto library of PHP 7.2 - Sunshine PHP 2019">
+		<meta name="author" content="Enrico Zimuel">
+		<meta name="keywords" content="php, sodium, libsodium, cryptography, encrypt, decrypt, applied cryptography, security, secure software, miami, sunshine php">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/roguewave.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body style="background-image: url('/img/slides/sunshinephp2019/background.png'); color: #EEEEEE;">
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="roguewave-footer-off">
+					<h2>The Sodium crypto library of PHP 7.2+</h2>
+					<p>
+						<small>by <a href="http://www.zimuel.it">Enrico Zimuel</a><br />
+							<i>Senior Software Engineer</i><br />
+							<a href="https://www.roguewave.com/">Rogue Wave Software, Inc.</a></small><br /><br />
+						<small><a href="http://2019.sunshinephp.com/">Sunshine PHP 2019</a>, Miami (FL), February 8</small>
+					</p>
+					<p>
+						<a href="https://www.roguewave.com/"><img src="/img/slides/sunshinephp2019/roguewave.png" style="border-style:none;" width="400"></a>
+						<a href="http://2019.sunshinephp.com/"><img src="/img/slides/sunshinephp2019/sunshine.png" style="border-style:none;" height="120"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<img src="/img/slides/sunshinephp2019/enrico.png">
+							</td>
+							<td>
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Senior Software Engineer at <a href="http://www.roguewave.com/">Rogue Wave Software</a> Inc.</li>
+									<li>Core team of <a href="http://apigility.org">Apigility</a>, <a href="https://docs.zendframework.com/zend-expressive/">Expressive</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Research Programmer at <a href="http://ivi.uva.nl/">Amsterdam University</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Cryptography</h2>
+					<p class="fragment" style="color:#c9c9c9">Cryptography is hard. Hard to design, hard to implement, hard to use, and hard to get right.</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>NaCl</h2>
+					<ul>
+						<li class="fragment">NaCl: <strong>Networking and Cryptography library</strong></li>
+						<li class="fragment">High-speed software library for network communication, encryption, decryption, signatures, etc</li>
+						<li class="fragment">by Prof. <a href="http://cr.yp.to/djb.html">Daniel J. Bernstein</a>, and <a href="https://cr.yp.to/highspeed/coolnacl-20120725.pdf">others</a></li>
+						<li class="fragment">Highly-secure primitives and constructions, implemented with extreme care to avoid <a href="https://en.wikipedia.org/wiki/Side-channel_attack">side-channel attacks</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Side-channel attack</h2>
+					<p class="fragment">Attack based on <strong>information gained from the implementation</strong> of a computer system, rather than weaknesses in the implemented algorithm itself</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Decode RSA key using power analysis</h3>
+					<img src="/img/slides/sunshinephp2019/channel_attack.jpg" style="border-style:none;" width="600">
+					<p class="fragment"><small>Source: <a href="https://www.synopsys.com/designware-ip/technical-bulletin/protecting-against-side-channel.html">Protecting Against Side-Channel Attacks with an Ultra-Low Power Processor</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Timing attack</h2>
+					<p class="fragment">An attacker <strong>measures the CPU time</strong> to perform some procedures involving a secret (e.g. encryption key). If this time depends on the secret, the attacker may be able to deduce information about the secret.</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Example in PHP</h2>
+<pre><code class="php" data-trim>
+function compare(string $expected, string $actual): bool
+{
+    $lenExpected = strlen($expected);
+    $lenActual   = strlen($actual);
+    if ($lenExpected !== $lenActual) {
+        return false;
+    }
+    for($i=0; $i < $lenActual; $i++) {
+        if ($expected[$i] !== $actual[$i]) {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+					<p class="fragment">What information an attacker can deduce?</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Prevent timing attack</h2>
+					<p>We need a constant-time string comparision function</p>
+					<ul>
+						<li class="fragment">PHP 5.6+: <strong>hash_equals(string $a, string $b)</strong></li>
+						<li class="fragment">Sodium: <strong>sodium_compare(string $a, string $b)</strong></li>
+						<li class="fragment">Pure PHP: <strong>Utils::compareStrings(string $a, string $b)</strong> in <a href="https://github.com/zendframework/zend-crypt/blob/master/src/Utils.php#L34">zend-crypt</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Best timing attack</h2>
+					<p>In 2006 Adi Shamir, Eran Tromer, and Dag Arne Osvik used a <i>timing attack</i> to discover, in <strong>65 milliseconds</strong>, the secret key used in widely deployed software for hard-disk encryption</p>
+					<p class="fragment"><small>Source: <a href="https://eprint.iacr.org/2005/271.pdf">Cache Attacks and Countermeasures: the Case of AES</a></small></p>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Sodium crypto library</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Sodium</h2>
+					<ul>
+						<li class="fragment"><strong>Sodium</strong> (libsodium) is a fork of NaCl</li>
+						<li class="fragment">A portable, cross-compilable, installable, packageable, API-compatible version of NaCl</li>
+						<li class="fragment">Same implementations of crypto primitives as NaCl</li>
+						<li class="fragment">Shared library and a standard set of headers (portable implementation)</li>
+						<li class="fragment">Official web site: <a href="https://libsodium.org/">libsodium.org</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Features</h2>
+					<ul>
+						<li class="fragment">Authenticated public-key and authenticated shared-key encryption</li>
+						<li class="fragment">Public-key and shared-key signatures</li>
+						<li class="fragment">Hashing</li>
+						<li class="fragment">Keyed hashes for short messages</li>
+						<li class="fragment">Secure pseudo-random numbers generation</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Algorithms in Sodium</h2>
+					<ul>
+						<li class="fragment"><a href="https://en.wikipedia.org/wiki/Curve25519">Curve25519</a> Diffie–Hellman key-exchange function</li>
+						<li class="fragment"><a href="https://en.wikipedia.org/wiki/Salsa20">Salsa20</a>, <a href="https://download.libsodium.org/doc/advanced/chacha20.html">ChaCha20</a> stream ciphers</li>
+						<li class="fragment"><a href="https://en.wikipedia.org/wiki/Poly1305">Poly1305</a> message-authentication code</li>
+						<li class="fragment"><a href="https://ed25519.cr.yp.to/">Ed25519</a> public-key signature system</li>
+						<li class="fragment"><a href="https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html">Argon2</a>, <a href="https://download.libsodium.org/doc/password_hashing/scrypt.html">Scrypt</a> password hashing</li>
+						<li class="fragment"><a href="https://download.libsodium.org/doc/secret-key_cryptography/aes-256-gcm.html">AES-GCM</a> authenticated encryption algorithm</li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Elliptic curves</h2>
+					<p class="fragment"><img src="/img/slides/sunshinephp2019/parental_advisory.png" style="border-style:none;" width="300"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Elliptic curves</h2>
+					<p class="fragment"><img src="/img/slides/sunshinephp2019/equation.png" style="border-style:none"></p>
+					<p class="fragment"><img src="/img/slides/sunshinephp2019/ECClines.png" style="border-style:none;" width="500"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Elliptic curves over &Zopf;<sub style="text-transform: lowercase">n</sub></h3>
+					<p class="fragment"><img src="/img/slides/sunshinephp2019/elliptic_curve_integer.png" style="border-style:none" width="450"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Add 2 points</h2>
+					<img id="add-point" src="/img/slides/sunshinephp2019/dot_operator_1.gif" style="border-style:none;" onclick="changeImage()">
+					<p>
+						<small>A + B = C, A + C = D, A + D = E</small>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Scalar multiplication</h2>
+					<p class="fragment">
+						<img src="/img/slides/sunshinephp2019/scalar_multiplication.png" style="border-style:none;vertical-align:middle;" width="300">
+						<span style="margin-left:50px">P + P = 2P </span>
+					</p>
+					<p class="fragment">Given <i>P</i> and <i>Q</i> find <strong>k</strong> such that <i>Q</i> = <strong>k</strong><i>P</i> is hard!</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<img src="/img/slides/sunshinephp2019/elliptic-curve-cryptography.png" style="border-style:none;">
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Sodium in PHP</h2>
+					<ul>
+						<li class="fragment">Available (as standard library) from <strong>PHP 7.2</strong></li>
+						<li class="fragment">PECL extension (<a href="https://pecl.php.net/package/libsodium">libsodium</a>) for PHP 7.0/7.1</li>
+						<li class="fragment">85 functions with prefix <strong>sodium_</strong><br />e.g. <i>sodium_crypto_box_keypair()</i></li>
+					</ul>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 1:</h2>
+					<h3 style="color:white">encrypt with a shared-key</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Symmetric encryption</h3>
+<pre><code class="php" data-trim>
+// code1.php at https://github.com/ezimuel/sodium-php-talk
+$msg = 'This is a super secret message!';
+
+// Generating an encryption key and a nonce
+$key   = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
+$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES); // 24 bytes
+
+// Encrypt
+$ciphertext = sodium_crypto_secretbox($msg, $nonce, $key);
+// Decrypt
+$plaintext = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+
+echo $plaintext === $msg ? 'Success' : 'Error';
+</code></pre>
+					<small>
+						<p class="fragment"><strong>Note</strong>: the encryption is always authenticated, you need to store also <i>nonce</i> + <i>ciphertext</i></p>
+						<p class="fragment"><strong>Algorithms</strong>: <a href="https://download.libsodium.org/doc/advanced/xsalsa20.html">XSalsa20</a> to encrypt and <a href="https://en.wikipedia.org/wiki/Poly1305">Poly1305</a> for MAC</p>
+					</small>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 2:</h2>
+					<h3 style="color:white">authenticate with a shared-key</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Symmetric authentication</h3>
+<pre><code class="php" data-trim>
+// code2.php at https://github.com/ezimuel/sodium-php-talk
+$msg = 'This is the message to authenticate!';
+$key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES); // 256 bit
+
+// Generate the Message Authentication Code
+$mac = sodium_crypto_auth($msg, $key);
+
+// Altering $mac or $msg, verification will fail
+echo sodium_crypto_auth_verify($mac, $msg, $key) ? 'Success' : 'Error';
+</code></pre>
+					<small>
+						<p class="fragment"><strong>Note</strong>: the message is not encrypted</p>
+						<p class="fragment"><strong>Algorithm</strong>: <a href="https://en.wikipedia.org/wiki/HMAC">HMAC-SHA512</a></p>
+					</small>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 3:</h2>
+					<h3 style="color:white">sending secret messages</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Public-key encryption</h3>
+<pre><code class="php" data-trim>
+// code3.php at https://github.com/ezimuel/sodium-php-talk
+$aliceKeypair = sodium_crypto_box_keypair();
+$alicePublicKey = sodium_crypto_box_publickey($aliceKeypair);
+$aliceSecretKey = sodium_crypto_box_secretkey($aliceKeypair);
+
+$bobKeypair = sodium_crypto_box_keypair();
+$bobPublicKey = sodium_crypto_box_publickey($bobKeypair); // 32 bytes
+$bobSecretKey = sodium_crypto_box_secretkey($bobKeypair); // 32 bytes
+
+$msg = 'Hi Bob, this is Alice!';
+$nonce = random_bytes(SODIUM_CRYPTO_BOX_NONCEBYTES); // 24 bytes
+
+$keyEncrypt = $aliceSecretKey . $bobPublicKey;
+$ciphertext = sodium_crypto_box($msg, $nonce, $keyEncrypt);
+
+$keyDecrypt = $bobSecretKey . $alicePublicKey;
+$plaintext = sodium_crypto_box_open($ciphertext, $nonce, $keyDecrypt);
+echo $plaintext === $msg ? 'Success' : 'Error';
+</code></pre>
+					<small>
+						<p class="fragment"><strong>Note</strong>: it provides confidentiality, integrity and non-repudiation</p>
+						<p class="fragment"><strong>Algorithms</strong>: <a href="https://download.libsodium.org/doc/advanced/xsalsa20.html">XSalsa20</a> to encrypt, <a href="https://en.wikipedia.org/wiki/Poly1305">Poly1305</a> for MAC, and <a href="https://en.wikipedia.org/wiki/Curve25519">XS25519</a> for key exchange</p>
+					</small>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 4:</h2>
+					<h3 style="color:white">Digital signature</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Digital signature</h3>
+<pre><code class="php" data-trim>
+// code4.php at https://github.com/ezimuel/sodium-php-talk
+$keypair = sodium_crypto_sign_keypair();
+$publicKey = sodium_crypto_sign_publickey($keypair); // 32 bytes
+$secretKey = sodium_crypto_sign_secretkey($keypair); // 64 bytes
+
+$msg = 'This message is from Alice';
+// Sign a message
+$signedMsg = sodium_crypto_sign($msg, $secretKey);
+// Or generate only the signature (detached mode)
+$signature = sodium_crypto_sign_detached($msg, $secretKey); // 64 bytes
+
+// Verify the signed message
+$original = sodium_crypto_sign_open($signedMsg, $publicKey);
+echo $original === $msg ? 'Signed msg ok' : 'Error signed msg';
+// Verify the signature
+echo sodium_crypto_sign_verify_detached($signature, $msg, $publicKey) ?
+     'Signature ok' : 'Error signature';
+</code></pre>
+					<small>
+						<p class="fragment"><strong>Note</strong>: the message is not encrypted, <i>signedMsg</i> includes <i>signature</i> + <i>msg</i></p>
+						<p class="fragment"><strong>Algorithm</strong>: <a href="https://ed25519.cr.yp.to/">Ed25519</a></p>
+					</small>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 5:</h2>
+					<h3 style="color:white">AES-GCM</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>AEAD AES-256-GCM</h3>
+<pre><code class="php" data-trim>
+// code5.php at https://github.com/ezimuel/sodium-php-talk
+if (! sodium_crypto_aead_aes256gcm_is_available()) {
+    throw new \Exception("AES-GCM is not supported on this platform");
+}
+$msg = 'Super secret message!';
+$key = random_bytes(SODIUM_CRYPTO_AEAD_AES256GCM_KEYBYTES);
+$nonce = random_bytes(SODIUM_CRYPTO_AEAD_AES256GCM_NPUBBYTES);
+
+// AEAD encryption
+$ad = 'Additional public data';
+$ciphertext = sodium_crypto_aead_aes256gcm_encrypt(
+    $msg,
+    $ad,
+    $nonce,
+    $key
+);
+// AEAD decryption
+$decrypted = sodium_crypto_aead_aes256gcm_decrypt(
+    $ciphertext,
+    $ad,
+    $nonce,
+    $key
+);
+if ($decrypted === false) {
+    throw new \Exception("Decryption failed");
+}
+echo $decrypted === $msg ? 'OK' : 'Error';
+</code></pre>
+					<p class="fragment"><small><strong>Note</strong>: you need to store also <i>ad</i> and <i>nonce</i> + <i>ciphertext</i></small></p>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 6:</h2>
+					<h3 style="color:white">store passwords safely</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Argon2i</h3>
+<pre><code class="php" data-trim>
+// code6.php at https://github.com/ezimuel/sodium-php-talk
+$password = 'password';
+
+$hash = sodium_crypto_pwhash_str(
+    $password,
+    SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+    SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+); // 97 bytes
+
+echo sodium_crypto_pwhash_str_verify($hash, $password) ?
+     'OK' : 'Error';
+</code></pre>
+					<p class="fragment">An example of Argon2i hash:<pre class="fragment"><code data-trim>$argon2id$v=19$m=65536,t=2,p=1$EF1BpShRmCYHN7ryxlhtBg$zLZO4IWjx3E...</code></pre></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Argon2 in PHP 7.2</h3>
+<pre><code class="php" data-trim>
+// code7.php at https://github.com/ezimuel/sodium-php-talk
+$password = 'password';
+
+// Argon2i without Sodium
+$hash = password_hash($password, PASSWORD_ARGON2I); // 95 bytes
+// Argon2id with PHP 7.3+
+$hash2 = password_hash($password, PASSWORD_ARGON2ID); // 96 bytes
+
+echo password_verify($password, $hash) ? 'OK' : 'Error';
+echo password_verify($password, $hash2) ? 'OK' : 'Error';
+</code></pre>
+					<p class="fragment">Comparing with Sodium:
+<pre class="fragment"><code data-trim>
+$argon2id$v=19$m=65536,t=2,p=1$EF1BpShRmCYH... // 97 bytes, Sodium
+$argon2id$v=19$m=1024,t=2,p=2$R3ZTLktFd1Shp..  // 96 bytes, PHP 7.3
+$argon2i$v=19$m=1024,t=2,p=2$Y3pweEtMdS82SG... // 95 bytes, PHP 7.2
+</code></pre>
+					</p>
+					<p class="fragment"><small><strong>Note</strong>: <i>password_hash()</i> is not compatible with <i>sodium_crypto_pwhash_str()</i></small></p>
+				</section>
+
+				<section data-background="#255c8c" data-state="roguewave-footer-off">
+					<h2 style="color:white">Example 7:</h2>
+					<h3 style="color:white">Derive a key from a user's password</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>Password are bad</h2>
+					<ul>
+						<li class="fragment">Not random</li>
+						<li class="fragment">Predictable (most of the time)</li>
+						<li class="fragment">Only a subset of ASCII codes (typically 68 vs 256)</li>
+						<li class="fragment"><strong>Never use it as encryption/authentication key!</strong></li>
+						<li class="fragment">Use <strong>KDF</strong> to derive a key from a password</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h3>Derive a key using Argon2i</h3>
+					<p class="fragment">Example: generating a binary key of 32 bytes</p>
+<pre class="fragment"><code class="php" data-trim>
+// code8.php at https://github.com/ezimuel/sodium-php-talk
+$password = 'password';
+$salt = random_bytes(SODIUM_CRYPTO_PWHASH_SALTBYTES);
+
+$key = sodium_crypto_pwhash(
+    32,
+    $password,
+    $salt,
+    SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
+    SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE
+);
+</code></pre>
+					<p class="fragment"><small><strong>Note</strong>: you need to store also the <strong>salt</strong> to generate the same key from password</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="roguewave-footer-on">
+					<h2>References</h2>
+					<small>
+						<ul>
+							<li><i>Jean-Philippe Aumasson</i>, <a href="https://nostarch.com/seriouscrypto">Serious Cryptography</a>, no starch press, 2017. ISBN 978-1-59327-826-7</li>
+							<li><i>D.J. Bernstein, T.Lange, and P.Schwabe</i>, <a href="https://cr.yp.to/highspeed/coolnacl-20120725.pdf">The security impact of a new cryptographic library</a>, Lecture Notes in Computer Science 7533, Springer, 2012. ISBN 978-3-642-33480-1</li>
+							<li><i>Daniel J. Bernstein</i>, <a href="https://cr.yp.to/highspeed/naclcrypto-20090310.pdf">Cryptography in NaCl</a></li>
+							<li><i>OpenDNS Security Research</i>, <a href="https://umbrella.cisco.com/blog/2013/03/06/announcing-sodium-a-new-cryptographic-library/">Introducing Sodium, a new cryptographic library</a>, March 6, 2013</li>
+							<li><i>D.A. Osvik, A.Shamir, E.Tromer</i>, <a href="https://eprint.iacr.org/2005/271.pdf">Cache Attacks and Countermeasures: the Case of AES</a>, Lecture Notes in Computer Science, vol 3860. Springer, 2006</li>
+							<li><i>Anthony Ferrara</i>, <a href="https://blog.ircmaxell.com/2014/11/its-all-about-time.html">It's All About Time</a>, 2014</li>
+							<li><i>Eric Sesterhenn</i>, <a href="https://www.x41-dsec.de/lab/blog/memcmpbench/">Benchmarking memcmp() for timing attacks</a>, 2017</li>
+							<li><i>Angela Raucher</i>, <a href="https://www.synopsys.com/designware-ip/technical-bulletin/protecting-against-side-channel.html">Protecting Against Side-Channel Attacks with an Ultra-Low Power Processor</a>, Synopsys</li>
+							<li><i>Willy Raedy</i>, <a href="https://www.youtube.com/watch?v=gAtBM06xwaw">Elliptic Curve Cryptography Tutorial</a>, Full Stack Academy of Code</li>
+							<li><i>Scott Arciszewski</i>, <a href="https://dev.to/paragonie/libsodium-quick-reference">Libsodium Quick Reference</a>, Paragonie, 2017</li>
+						</ul>
+					</small>
+				</section>
+
+				<section data-state="roguewave-footer-off">
+					<h2>Thanks!</h2>
+					<p>Source code in this presentation:<br /><a href="https://github.com/ezimuel/sodium-php-talk">ezimuel/sodium-php-talk</a></p>
+					<p>Contact me: enrico [at] zimuel.it</p>
+					<p>Follow me: <a href="https://twitter.com/ezimuel">@ezimuel</a></p>
+					<p style="height:70px"></p>
+					<p><a href="https://www.roguewave.com/"><img src="/img/slides/sunshinephp2019/roguewave.png" class="noborder" width="400"></a></p>
+				</section>
+			</div>
+		</div>
+
+		<aside id="roguewave-footer">
+			<div style="float:left">
+				<img src="/img/slides/sunshinephp2019/roguewave-footer.png" width="200">
+			</div>
+			<div style="float:right">
+				&copy; 2018 Rogue Wave Software, Inc. All Rights Reserved.
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+		<script src="js/clickgif.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				math: {
+					// mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+					config: 'TeX-AMS_HTML-full'
+				},
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('roguewave-footer-on', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('roguewave-footer-off', function() {
+				document.getElementById('roguewave-footer').style.visibility = 'hidden';
+			}, false);
+
+			function changeImage() {
+				var point = document.getElementById('add-point');
+    			var img = point.attributes.src.value;
+				switch (img) {
+					case '/img/slides/sunshinephp2019/dot_operator_1.gif':
+						point.attributes.src.value = '/img/slides/sunshinephp2019/dot_operator_2.gif';
+						break;
+					case '/img/slides/sunshinephp2019/dot_operator_2.gif':
+						point.attributes.src.value = '/img/slides/sunshinephp2019/dot_operator_3.gif';
+						break;
+					case '/img/slides/sunshinephp2019/dot_operator_3.gif':
+						point.attributes.src.value = '/img/slides/sunshinephp2019/dot_operator_4.gif';
+						break;
+					case '/img/slides/sunshinephp2019/dot_operator_4.gif':
+						point.attributes.src.value = '/img/slides/sunshinephp2019/dot_operator_5.gif';
+						break;
+				}
+				console.log(img);
+			}
+
+		</script>
+
+	</body>
+</html>
