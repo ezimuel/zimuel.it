@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+    <base href="/lib/reveal.js-3.4.1/">
+		<title>Develop microservices (and web APIs) in PHP, Workshop at CloudConf 2019</title>
+
+		<meta name="description" content="Develop microservices (and web APIs) in PHP">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/elastic.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="elastic-footer-off">
+					<h3 style="color:white;" align="left">Workshop</h3>
+					<h4 style="color:white;" align="left"><strong>Develop microservices (and web APIs) in PHP</strong></h4>
+					<br />
+					<p style="color:white;" align="left">
+						<small>by <a href="http://www.zimuel.it" style="color:yellow">Enrico Zimuel</a><br />
+							<i>Principal Software Engineer</i> &#64; <a href="https://www.elastic.co" style="color:yellow">Elastic</a></small><br /><br />
+						<small><a href="https://2019.cloudconf.it" style="color:yellow">Cloud Conf</a>, Turin, 27th March 2019</small>
+					</p>
+					<p align="left">
+						<a href="https://www.elastic.co"><img src="/img/slides/cloudconf2019/elastic.png" style="border:none;background:none;box-shadow:none" height="60"></a>
+						<a href="https://2019.cloudconf.it/"><img src="/img/slides/cloudconf2019/cloudconf.png" height="60" style="border:none;background:none;box-shadow:none;margin-left:50px;"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+				<h3>About me</h3>
+				<table>
+					<tr>
+						<td width="35%" style="padding-right:0;vertical-align: top">
+							<img src="/img/slides/cloudconf2019/sviluppareinphp7.jpg" class="noborder">
+						</td>
+						<td>
+							<ul>
+								<li>Developer since 1996</li>
+								<li><i>Principal Software Engineer</i> at <a href="" target="_blank">Elasticsearch B.V.</a></li>
+								<li><i>Open source contributor</i>: <a href="http://apigility.org">Apigility</a>, <a href="http://getexpressive.org" target="_blank">Expressive</a> and <a href="http://framework.zend.com" target="_blank">Zend Framework</a></li>
+								<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+								<li><i>Research Programmer</i> at <a href="http://ivi.uva.nl/">UvA</a></li>
+								<li>Author of <a href="https://www.sviluppareinphp7.it/">Sviluppare in PHP 7</a></li>
+								<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a></li>
+							</ul>
+						</td>
+					</tr>
+				</table>
+			</section>
+
+			<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Microservice</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<blockquote cite="https://martinfowler.com/articles/microservices.html">...the microservice architectural style is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API</blockquote>
+					<p>- Martin Fowler</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/cloudconf2019/monolithic-architecture.png" class="noborder" width="500">
+					<p><small>Source: <a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to microservices</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/cloudconf2019/microservices-architecture.png" class="noborder" width="500">
+					<p><small>Source: <a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to microservices</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Benefit</h2>
+					<ul>
+						<li class="fragment">Separation of concerns
+							<ul>
+								<li class="fragment">Modularity</li>
+								<li class="fragment">Encapsulation</li>
+							</ul>
+						</li>
+						<li class="fragment">Scalability
+							<ul>
+								<li class="fragment">Horizontally scaling</li>
+								<li class="fragment">Workload partitioning</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Network latency</li>
+						<li class="fragment">Debugging</li>
+						<li class="fragment">New architecture challenges:
+							<ul>
+								<li class="fragment">Autodiscovery</li>
+								<li class="fragment">Telemetry</li>
+								<li class="fragment">Everything needs to be automated</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">PHP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Microservices in PHP</h2>
+					<ul>
+						<li class="fragment">PHP is easy to deploy</li>
+						<li class="fragment">PHP 7 is super fast!</li>
+						<li class="fragment">Big community</li>
+						<li class="fragment">Libraries/Frameworks</li>
+						<li class="fragment">Async in PHP (Swoole, ReactPHP, ...)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PHP 7 speed</h2>
+<pre><code data-trim lang="php">
+$a = [];
+for ($i = 0; $i < 1000000; $i++) {
+  $a[$i] = ["hello"];
+}
+echo memory_get_usage(true);
+</code></pre>
+					<table class="fragment">
+						<tr>
+							<td></td>
+							<td><strong>PHP 5.6</strong></td>
+							<td><strong>PHP 7.2</strong></td>
+						</tr>
+						<tr>
+							<td><strong>Memory</strong></td>
+							<td>428 MB</td>
+							<td>34 MB</td>
+						</tr>
+						<tr>
+							<td><strong>Execution time</strong></td>
+							<td>0.59 sec</td>
+							<td>0.06 sec</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>Other languages</h3>
+					<img src="/img/slides/cloudconf2019/bench_lang.png" style="border-style:none">
+					<small>PHP 7 is faster than <a href="http://benchmarksgame.alioth.debian.org/u64q/php.html">Python 3</a>!</small>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>PHP 7 migration: case sudy</h3>
+					<ul>
+						<li class="fragment"><strong>Badoo</strong> saves 1 million dollars per year (<a href="https://techblog.badoo.com/blog/2016/03/14/how-badoo-saved-one-million-dollars-switching-to-php7/">source</a>)</li>
+						<li class="fragment"><strong>Tumblr</strong> reduced the latency and CPU load by half  (<a href="https://engineering.tumblr.com/post/152998126990/php-7-at-tumblr">source</a>)</li>
+						<li class="fragment"><strong>Dailymotion</strong> handles twice more traffic with same infrastructure (<a href="http://engineering.dailymotion.com/php-7-deployment-at-dailymotion/">source</a>)</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Web APIs</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+						<h2>HTTP IN &amp; OUT</h2>
+						<p><img src="/img/slides/cloudconf2019/webapp.png" class="noborder" width="700"></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example</h2>
+					<p class="fragment">HTTP Request:</p>
+<pre class="fragment"><code data-trim class="medium-font-code">
+GET /api/version
+</code></pre>
+					<p class="fragment">HTTP Response:</p>
+<pre class="fragment"><code data-trim class="medium-font-code">
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 17
+Content-Type: application/json
+
+{
+  "version": "1.0"
+}
+	</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Building a Web API</h2>
+					<ul>
+						<li class="fragment">Managing the HTTP request and response</li>
+						<li class="fragment">Choosing a representation format</li>
+						<li class="fragment">Choosing an error format</li>
+						<li class="fragment">Filtering &amp; validating input data</li>
+						<li class="fragment">Authenticating HTTP requests</li>
+						<li class="fragment">Authorizing HTTP requests</li>
+						<li class="fragment">Documentation</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>HTTP Methods (REST approach)</h3>
+					  <ul>
+						  <li class="fragment"><strong>GET</strong>: read a resource</li>
+						  <li class="fragment"><strong>HEAD</strong>: read without <i>body</i></li>
+						  <li class="fragment"><strong>POST</strong>: create a resource</li>
+						  <li class="fragment"><strong>PUT</strong>: replace a resource</li>
+						  <li class="fragment"><strong>PATCH</strong>: update a resource</li>
+						  <li class="fragment"><strong>DELETE</strong>: delete a resource</li>
+						  <li class="fragment"><strong>OPTIONS</strong>: information about a resource</li>
+					  </ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP Status-code</h2>
+					<ul>
+						<li class="fragment"><strong>Informational 1xx</strong>: 100 Continue</li>
+						<li class="fragment"><strong>Successful 2xx</strong>: 200 OK, 201 Created, 202 Accepted</li>
+						<li class="fragment"><strong>Redirection 3xx</strong>: 301 Moved Permanently, 307 Temporary Redirect</li>
+						<li class="fragment"><strong>Client Error 4xx</strong>: 401 Unauthorized, 404 Not Found, 405 Method Not Allowed</li>
+						<li class="fragment"><strong>Server Error 5xx</strong>: 500 Internal Server Error, 503 Service Unavailable</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Representation format</h2>
+					<ul>
+						<li class="fragment"><strong>JSON</strong> (JavaScript Object Notation)<br />in PHP json_encode(), json_decode()</li>
+						<li class="fragment"><strong>XML</strong> (eXtensible Markup Language)<br />in PHP SimpleXML, libxml, DOM, etc</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HAL-JSON</h2>
+					<p class="fragment"><strong>HAL-JSON</strong> (Hypertext Application Language JSON), <a href="https://datatracker.ietf.org/doc/draft-kelly-json-hal/">Internet-Draft</a></p>
+<pre class="fragment"><code data-trim class="">
+GET /api/user/ezimuel
+{
+    "_links": {
+        "self": {
+            "href": "http://domain/api/user/ezimuel"
+        },
+        "contacts": [
+            { "href": "http://domain/api/user/mwop" },
+            { "href": "http://domain/api/user/zeevs" }
+        ]
+    },
+    "id": "ezimuel",
+    "name": "Enrico Zimuel"
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Error format</h2>
+					<p class="fragment">Problem Details (<a href="https://tools.ietf.org/html/rfc7807">RFC 7807</a>)</p>
+<pre class="fragment"><code data-trim class="">
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Content-Language: en
+
+{
+    "type": "https://example.net/validation-error",
+    "title": "Your request parameters didn't validate.",
+    "invalid-params": [
+        {
+            "name": "age",
+            "reason": "must be a positive integer"
+        },
+    ]
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Authentication</h2>
+					<ul>
+						<li class="fragment"><a href="https://it.wikipedia.org/wiki/Basic_access_authentication">Basic/Digest access authentication</a></li>
+						<li class="fragment"><a href="https://oauth.net/2/">OAuth2</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Documentation</h2>
+					<ul>
+						<li class="fragment"><a href="https://swagger.io/docs/">Swagger</a></li>
+						<li class="fragment"><a href="http://apidocjs.com">APIDOC</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">HTTP in PHP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP message in PHP</h2>
+					<p>Global variables:</p>
+					<ul>
+						<li class="fragment">$_SERVER</li>
+						<li class="fragment">$_POST</li>
+						<li class="fragment">$_GET</li>
+						<li class="fragment">$_FILES</li>
+						<li class="fragment">$_COOKIE</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP functions in PHP</h2>
+					<ul>
+						<li class="fragment">http_response_code()</li>
+						<li class="fragment">header(), header_remove(), headers_list(), headers_sent()</li>
+						<li class="fragment">setcookie(), setrawcookie()</li>
+						<li class="fragment">gethostname(), etc</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Manage HTTP in PHP</h2>
+					<ul>
+						<li class="fragment">PHP does not offer an object representation of HTTP request/response</li>
+						<li class="fragment">Unfortunately, It's quite hard to manage HTTP messages in PHP!</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">PHP-FIG</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PHP FIG</h2>
+					<ul>
+						<li class="fragment"><strong>PHP Framework Interop Group</strong> (PHP FIG)</li>
+						<li class="fragment">A working group for defining common standards to interop between PHP frameworks/libraries</li>
+						<li class="fragment"><strong>PHP Standards Recommendations</strong> (PSR)</li>
+						<li class="fragment">More information at <a href="https://www.php-fig.org">php-fig.org</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-7</h2>
+					<p class="fragment">Common interfaces for <strong>representing HTTP messages</strong> as described in <a href="https://tools.ietf.org/html/rfc7230">RFC 7230</a> and <a href="https://tools.ietf.org/html/rfc7231">RFC 7231</a>, and URIs for use with HTTP messages as described in <a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-7 interfaces</h2>
+					<ul>
+						<li class="fragment">github: <a href="https://github.com/php-fig/http-message">psr/http-message</a></li>
+						<li class="fragment">Psr\Http\Message\MessageInterface</li>
+						<li class="fragment">Psr\Http\Message\RequestInterface</li>
+						<li class="fragment">Psr\Http\Message\ResponseInterface</li>
+						<li class="fragment">Psr\Http\Message\ServerRequestInterface</li>
+						<li class="fragment">Psr\Http\Message\StreamInterface</li>
+						<li class="fragment">Psr\Http\Message\UploadedFileInterface</li>
+						<li class="fragment">Psr\Http\Message\UriInterface</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+// Returns an empty array if not found:
+$header = $message->getHeader('Accept');
+// Returns an empty string if not found:
+$header = $message->getHeaderLine('Accept');
+// Test for a header:
+if (! $message->hasHeader('Accept')) {
+}
+// If the header has multiple values, fetch them
+// as an array:
+$values = $message->getHeader('X-Foo');
+// Or as a comma-separated string:
+$values = $message->getHeaderLine('X-Foo');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Immutability</h2>
+					<ul>
+						<li class="fragment">PSR-7 Request and Response model <strong>immutability</strong></li>
+						<li class="fragment">Messages are modeled as value objects; a change to any value results in a new instance</li>
+						<li class="fragment">PSR-7 Stream does not model immutability</li>
+					</ul>
+					<p class="fragment"><small><a href="https://github.com/zendframework/zend-diactoros">zendframework/zend-diactoros</a> implements PSR-7</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+$response = $response->withStatus(418, "I'm a teapot");
+
+$query   = $request->getQueryParams();
+$body    = $request->getBodyParams();
+
+$request = $request->withBodyParams(json_decode($body));
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-7 implementation</h2>
+					<ul>
+						<li class="fragment"><a href="https://github.com/guzzle/psr7">guzzle/psr7</a></li>
+						<li class="fragment"><a href="https://github.com/zendframework/zend-diactoros">zendframework/zend-diactoros</a></li>
+						<li class="fragment"><a href="https://github.com/slimphp/Slim">slim/slim</a></li>
+						<li class="fragment"><a href="https://github.com/Nyholm/psr7">nyholm/psr7</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Swoole</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/cloudconf2019/swoole.png" class="noborder">
+					<ul>
+						<li class="fragment"><strong>Swoole</strong> is an async programming framework for PHP 7</li>
+						<li class="fragment">PHP extension, install:
+<pre><code class="bash" data-trim>
+pecl install swoole
+</code></pre>
+						</li>
+						<li class="fragment">Released under Apache license 2.0</li>
+						<li class="fragment">More info at <a href="https://www.swoole.co.uk/">swoole.co.uk</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Features</h2>
+					<ul>
+						<li class="fragment">Event-driven, asynchronous programming for PHP</li>
+						<li class="fragment">Async TCP / UDP / HTTP / Websocket / HTTP2 client/server side API</li>
+						<li class="fragment">IPv4 / IPv6 / Unixsocket / TCP/ UDP and SSL / TLS support</li>
+						<li class="fragment"><a href="https://www.swoole.co.uk/benchmark">High performance</a> and scalable</li>
+						<li class="fragment">Fast serializer / unserializer</li>
+						<li class="fragment">Milliseconds task scheduler</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Swoole vs. PHP-FPM</h2>
+					<ul>
+						<li class="fragment">Forks a number of worker processes based on CPU core number</li>
+    					<li class="fragment">Fupports Long-live connections</li>
+    					<li class="fragment">Manage and reuse the status in memory</li>
+						<li class="fragment">Executes Non-blocking code (async, coroutine)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP Server</h2>
+<pre><code class="php medium-font-code" data-trim>
+use Swoole\Http\Server;
+
+$http = new Server("127.0.0.1", 9501);
+
+$http->on("start", function ($server) {
+    echo "Started at http://127.0.0.1:9501\n";
+});
+$http->on("request", function ($request, $response) {
+    $response->header("Content-Type", "text/plain");
+    $response->end("Hello World\n");
+});
+
+$http->start();
+</code></pre>
+					<p class="fragment"><small>Test: <strong>16K req/sec</strong> on CPU i5-2500, 16 GB RAM, PHP 7.2.12, Swoole 4.2.9</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Event loop</h2>
+					<img src="/img/slides/cloudconf2019/event-loop.jpg" style="border:none">
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Middleware</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+						<h2>Middleware</h2>
+						<p>A function that gets a request and generates a response</p>
+<pre><code data-trim class="php big-font-code">
+function ($request)
+{
+    // do something with $request
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Delegating middleware</h2>
+<pre><code data-trim class="php medium-font-code">
+function ($request, callable $delegate)
+{
+    // delegating $request to another middleware
+    $response = $delegate($request);
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Middleware onion</h2>
+					<img src="/img/slides/cloudconf2019/middleware.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Execution pipeline</h2>
+					<img src="/img/slides/cloudconf2019/middleware_app.png" style="border-style:none" height="450">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example: cache</h2>
+<pre><code data-trim class="php medium-font-code">
+function ($request, callable $delegate) use ($cache)
+{
+    if ($cache->has($request)) {
+        return $cache->get($request);
+    }
+    $response = $delegate($request);
+    $cache->set($request, $response);
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-15</h2>
+					<p class="fragment">Common interfaces for <strong>HTTP server request handlers</strong> and <strong>HTTP server middleware</strong> components that use HTTP messages as described by <a href="https://www.php-fig.org/psr/psr-7/">PSR-7</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-15: Handler</h2>
+<pre><code data-trim class="php medium-font-code">
+namespace Psr\Http\Server;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+interface RequestHandlerInterface
+{
+    public function handle(
+        ServerRequestInterface $request
+    ): ResponseInterface;
+}
+</code></pre>
+					<p class="fragment">An <strong>handler</strong> returns a response, without delegate</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-15: Middleware</h2>
+<pre><code data-trim class="php medium-font-code">
+namespace Psr\Http\Server;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+interface MiddlewareInterface
+{
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler
+    ): ResponseInterface;
+}
+</code></pre>
+					<p class="fragment"><small>A <strong>middleware</strong> participates in processing an HTTP message, it may deletegate.</small></p>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Expressive</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+						<img src="/img/slides/cloudconf2019/expressive_logo.png" width="400" class="noborder">
+						<p>The PHP framework for middleware applications</p>
+						<ul>
+							<li class="fragment">PSR-7 support (using <a href="https://github.com/zendframework/zend-diactoros">zend-diactoros</a>)</li>
+							<li class="fragment">PSR-15 support</li>
+							<li class="fragment">Piping workflow (using <a href="https://github.com/zendframework/zend-stratigility">zend-stratigility</a>)</li>
+							<li class="fragment">Features: routing, dependency injection, templating, error handling</li>
+							<li class="fragment">Last release 3.2.3, 5th Nov 2018</li>
+							<li class="fragment">Official website: <a href="https://getexpressive.org/">getexpressive.org</a></li>
+						</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Installation</h2>
+					<p>You can install <i>Expressive</i> using <a href="https://getcomposer.org/">composer</a>:</p>
+<pre><code data-trim class="shell">composer create-project zendframework/zend-expressive-skeleton api
+</code></pre></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Routes</h2>
+<pre><code data-trim class="php small-font-code">
+$app->get('/api/ping', function ($request) {
+    return JsonResponse(['ack' => time()])
+});
+
+// or implement a RequestHandlerInterface
+$app->get('/api/ping', App\Handler\PingHandler::class);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PingHandler</h2>
+<pre><code data-trim class="php small-font-code">
+namespace App\Handler;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Zend\Diactoros\Response\JsonResponse;
+
+class PingHandler implements RequestHandlerInterface
+{
+    public function handle(
+        ServerRequestInterface $request
+    ) : ResponseInterface {
+        return new JsonResponse(['ack' => time()]);
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Pipeline</h2>
+<pre><code data-trim class="php medium-font-code">
+$app->pipe(ErrorHandler::class);
+$app->pipe(ServerUrlMiddleware::class);
+$app->pipe(RouteMiddleware::class);
+$app->pipe(ImplicitHeadMiddleware::class);
+$app->pipe(ImplicitOptionsMiddleware::class);
+$app->pipe(MethodNotAllowedMiddleware::class);
+$app->pipe(UrlHelperMiddleware::class);
+$app->pipe(ProblemDetailsMiddleware::class);
+$app->pipe(DispatchMiddleware::class);
+$app->pipe(NotFoundHandler::class);
+</code></pre>
+					<small>/config/pipeline.php</small>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Route a REST API</h2>
+<pre><code data-trim class="php small-font-code">
+$app->route('/api/users[/{id}]', [
+    Authentication\AuthenticationMiddleware::class,
+    Authorization\AuthorizationMiddleware::class,
+    Api\Action\UserAction::class
+], ['GET', 'POST', 'PATCH', 'DELETE'], 'api.users');
+
+// or route each HTTP method
+$app->get('/api/users[/{id}]', ..., 'api.users.get');
+$app->post('/api/users', ..., 'api.users.post');
+$app->patch('/api/users/{id}', ..., 'api.users.patch');
+$app->delete('/api/users/{id}', ..., 'api.users.delete');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Tools for Web API</h2>
+					<ul>
+						<li class="fragment">HAL-JSON: <a href="https://github.com/zendframework/zend-expressive-hal">zend-expressive-hal</a></li>
+						<li class="fragment">Problem details: <a href="https://github.com/zendframework/zend-problem-details">zend-problem-details</a></li>
+						<li class="fragment">Filtering &amp; validation: <a href="https://github.com/zendframework/zend-inputfilter">zend-inputfilter</a></li>
+						<li class="fragment">Authentication (HTTP Basic, OAuth2): <a href="https://github.com/zendframework/zend-expressive-authentication">zend-expressive-authentication</a></li>
+						<li class="fragment">Authorization (ACL, RBAC): <a href="https://github.com/zendframework/zend-expressive-authorization">zend-expressive-authorization</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Expressive with Swoole</h2>
+					<p class="fragment">Install:
+<pre class="fragment"><code class="bash" data-trim>
+composer require zendframework/zend-expressive-swoole
+</code></pre>
+					</p>
+					<p class="fragment">Usage:
+<pre class="fragment"><code class="bash" data-trim>
+vendor/bin/zend-expressive-swoole start
+</code></pre>
+					</p>
+					<p class="fragment">Open your browser at <a href="http://localhost:8080">localhost:8080</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PHP + Expressive + Swoole</h2>
+					<p class="fragment">Run a web application <strong>from CLI</strong></p>
+					<p class="fragment">Simplify the deploy (only 1 container)</p>
+					<p class="fragment">A web server (nginx) can be used as <strong>load balancer</strong></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Benchmark</h2>
+					<p class="fragment"><strong>2-4x faster</strong> than Nginx and Apache</p>
+					<table class="fragment">
+						<tr>
+							<td></td>
+							<td><strong>Req/sec</strong> (mean)</td>
+						</tr>
+						<tr>
+							<td><strong>Nginx</strong></td>
+							<td style="text-align:right">1418.23</td>
+						</tr>
+						<tr>
+							<td><strong>Apache</strong></td>
+							<td style="text-align:right">1915.62</td>
+						</tr>
+						<tr>
+							<td><strong>Swoole</strong></td>
+							<td style="text-align:right">4864.34</td>
+						</tr>
+					</table>
+					<p class="fragment"><small>Testing environment:<br />Ubuntu 18.04, <a href="https://github.com/zendframework/zend-expressive-skeleton/tree/3.2.3">Expressive Skeleton 3.2.3</a>, PHP 7.2.12, Nginx 1.14 + FPM,<br />Apache 2.4.29 + mod_php, Swoole 4.2.9, CPU i5-2500, 16 GB RAM, HD SSD</small></p>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Elasticsearch</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/cloudconf2019/elasticsearch.png" width="600" style="border:none;background:none;box-shadow:none;">
+					<ul>
+						<li class="fragment"><strong>Elasticsearch</strong> is a highly scalable open-source full-text search and analytics engine</li>
+						<li class="fragment">Near Realtime (NRT)</li>
+						<li class="fragment">Designed for scale (horizontally)</li>
+						<li class="fragment">REST API</li>
+						<li class="fragment">Based on <a href="http://lucene.apache.org/">Lucene</a></li>
+						<li class="fragment">More information <a href="https://www.elastic.co/products/elasticsearch">here</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Elasticsearch & PHP</h2>
+					<ul>
+						<li class="fragment"><a href="https://github.com/elastic/elasticsearch-php">elastic/elasticsearch-php</a></li>
+						<li class="fragment"><a href="https://elastica.io/">Elastica</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php small-font-code">
+use Elasticsearch\ClientBuilder;
+
+$client = ClientBuilder::create()->build();
+$params = [
+    'index' => 'my_index',
+    'type' => 'my_type',
+    'id' => 'my_id',
+    'body' => ['testField' => 'abc']
+];
+$response = $client->index($params);
+print_r($response);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/cloudconf2019/kibana-logo.png" height="150" style="border:none;background:none;box-shadow:none;">
+					<ul>
+						<li class="fragment"><strong>Kibana</strong> is an open source data visualization plugin for Elasticsearch</li>
+						<li class="fragment">It provides visualization capabilities on top of the content indexed on an Elasticsearch cluster</li>
+						<li class="fragment">More information <a href="https://www.elastic.co/products/kibana">here</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/cloudconf2019/kibana.jpg" style="border:none" width="800">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Hands-on</h2>
+					<p><a href="https://github.com/ezimuel/php-microservices-workshop">github.com/ezimuel/php-microservices-workshop</a></p>
+				</section>
+
+
+				<section data-background="#ffffff" data-state="elastic-footer-off">
+					<h3>References</h3>
+					<small>
+					<ul>
+						<li>Michael Bryzek, <a href="https://www.youtube.com/watch?v=j6ow-UemzBc">Design Microservice Architectures the Right Way</a>, QCon 2018 talk</li>
+						<li><a href="https://www.youtube.com/watch?v=CZ3wIuvmHeM">Mastering Chaos - A Netflix Guide to Microservices</a>, QCon 2016 talk</li>
+						<li>Martin Fowler, <a href="https://www.youtube.com/watch?v=wgdBVIX9ifA">Microservices</a>, GOTO 2014 talk</li>
+						<li><a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to Microservices</a>, Nginx blog post</li>
+						<li><a href="https://www.nginx.com/resources/library/designing-deploying-microservices/">Designing and Deploying Microservices</a>, Nginx ebook (free)</li>
+						<li>Richard Rodger, <a href="https://www.manning.com/books/the-tao-of-microservices">The Tao of microservices</a>, Manning Pubblications, 2017</li>
+						<li>M.Amundsen, M.McLarty, R.Mitra, I.Nadareishvili, <a href="http://shop.oreilly.com/product/0636920050308.do">Microservice Architecture: Aligning Principles, Practices, and Culture</a>, O'Reilly Media, 2016</li>
+						<li>Sam Newman, <a href="https://www.oreilly.com/library/view/building-microservices/9781491950340/">Building Microservices: Designing Fine-Grained Systems</a>, O'Reilly Media, 2015</li>
+						<li>C.P.Sanchez, P.S.Vilariño, <a href="https://www.packtpub.com/application-development/php-microservices">PHP Microservices</a>, Packt publisher, 2017</li>
+						<li>M.W.O'Phinney, E.Zimuel, <a href="http://www.zend.com/phpcookbooks">Expressive cookbook</a>, Free ebook</li>
+						<li>M.W.O'Phinney, <a href="https://slides.mwop.net/2019-03-08-Async-Middleware">Async Middleware</a>, MidwestPHP 2019</li>
+						<li>Elastic, <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html">Getting started with ElasticSearch</a></li>
+					</ul>
+				  </small>
+				</section>
+
+				<section data-state="elastic-footer-off" style="color:white">
+					<h2 style="color:white">Thanks!</h2>
+					<p style="color:white">Contact me: enrico.zimuel [at] elastic.co</p>
+					<p style="color:white">Follow me: <a href="https://twitter.com/ezimuel" style="color:yellow">@ezimuel</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" style="color:yellow"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/cloudconf2019/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" style="color:yellow">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js" style="color:yellow">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<aside id="elastic-footer">
+			<div style="float:left" id="twitter">
+				<a href="https://twitter.com/ezimuel">&#64;ezimuel</a>
+			</div>
+			<div style="float:right">
+				<a href="https://www.elastic.co/" style="border:none;background:none;box-shadow:none"><img src="/img/slides/cloudconf2019/elastic-footer.png" width="150" style="vertical-align:middle"></a>
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('elastic-footer-on', function() {
+				document.getElementById('elastic-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('elastic-footer-off', function() {
+				document.getElementById('elastic-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
