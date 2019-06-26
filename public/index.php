@@ -29,7 +29,6 @@ $app->pipe(Helper\BodyParams\BodyParamsMiddleware::class);
 // Routes
 $app->get('/', Middleware\HomePage::class, 'home');
 $app->get('/about-me', Middleware\StaticPage::class, 'about-me');
-$app->get('/projects', Middleware\StaticPage::class, 'projects');
 $app->get('/books', Middleware\StaticPage::class, 'books');
 $app->get('/publications', Middleware\StaticPage::class, 'publications');
 $app->get('/conferences', Middleware\StaticPage::class, 'conferences');
