@@ -1,0 +1,135 @@
+<post date="2019-09-18" img="benchmarking.jpg" title="Benchmarking PHP 7.4" sub="PHP is faster than ever">
+
+<p>I did some benchmarking of <a href="">PHP 7.4RC1</a> compared with the previous versions of PHP.<p>
+<p>I used the <a href="https://github.com/php/php-src/blob/master/Zend/bench.php">Zend/bench.php</a> script to run the experiment, getting the total execution times. This script is included with the PHP source code and it was created for testing the language using some math operators, nested loops, array, strings and recursive functions.</p>
+<p>I used the latest PHP versions available, as follows:</p>
+
+<ul>
+    <li>PHP <a href="https://www.php.net/downloads.php#v7.1.32">7.1.32</a></li>
+    <li>PHP <a href="https://www.php.net/downloads.php#v7.2.22">7.2.22</a></li>
+    <li>PHP <a href="https://www.php.net/downloads.php#v7.3.9">7.3.9</a></li>
+    <li>PHP <a href="https://www.php.net/archive/2019.php#2019-09-05-1">7.4RC1</a></li>
+</ul>
+
+<p>I executed the experiment using an Intel(R) Core(TM) i9-8950HK CPU @ 2.90GHz, with 32GB RAM, HD SSD running Linux Ubuntu <a href="https://ubuntu.com/download/desktop/thank-you?version=18.04.3&architecture=amd64">18.04.3 LTS</a>.</li>
+
+<h2>Results</h2>
+
+<p>Here the results (in seconds) for each PHP versions:</p>
+
+<h3>PHP 7.1.32</h3>
+
+<pre>
+simple             0.026
+simplecall         0.006
+simpleucall        0.018
+simpleudcall       0.019
+mandel             0.069
+mandel2            0.069
+ackermann(7)       0.019
+ary(50000)         0.005
+ary2(50000)        0.003
+ary3(2000)         0.041
+fibo(30)           0.063
+hash1(50000)       0.012
+hash2(500)         0.007
+heapsort(20000)    0.024
+matrix(20)         0.020
+nestedloop(12)     0.037
+sieve(30)          0.013
+strcat(200000)     0.003
+------------------------
+Total              0.455
+</pre>
+
+<h3>PHP 7.2.22</h3>
+
+<pre>
+simple             0.020
+simplecall         0.006
+simpleucall        0.016
+simpleudcall       0.016
+mandel             0.100
+mandel2            0.074
+ackermann(7)       0.014
+ary(50000)         0.004
+ary2(50000)        0.003
+ary3(2000)         0.035
+fibo(30)           0.050
+hash1(50000)       0.008
+hash2(500)         0.006
+heapsort(20000)    0.020
+matrix(20)         0.019
+nestedloop(12)     0.032
+sieve(30)          0.011
+strcat(200000)     0.003
+------------------------
+Total              0.437
+</pre>
+
+<h3>PHP 7.3.9</h3>
+
+<pre>
+simple             0.018
+simplecall         0.006
+simpleucall        0.012
+simpleudcall       0.014
+mandel             0.075
+mandel2            0.068
+ackermann(7)       0.012
+ary(50000)         0.004
+ary2(50000)        0.003
+ary3(2000)         0.029
+fibo(30)           0.043
+hash1(50000)       0.008
+hash2(500)         0.005
+heapsort(20000)    0.019
+matrix(20)         0.016
+nestedloop(12)     0.029
+sieve(30)          0.010
+strcat(200000)     0.003
+------------------------
+Total              0.373
+</pre>
+
+<h3>PHP 7.4RC1</h3>
+
+<pre>
+simple             0.013
+simplecall         0.005
+simpleucall        0.013
+simpleudcall       0.013
+mandel             0.053
+mandel2            0.061
+ackermann(7)       0.012
+ary(50000)         0.004
+ary2(50000)        0.005
+ary3(2000)         0.028
+fibo(30)           0.043
+hash1(50000)       0.007
+hash2(500)         0.005
+heapsort(20000)    0.016
+matrix(20)         0.016
+nestedloop(12)     0.025
+sieve(30)          0.010
+strcat(200000)     0.003
+------------------------
+Total              0.334
+</pre>
+
+<p>I put the total execution time on a chart for each PHP versions (lower is better):</p>
+
+<img src="/img/post/benchmark_php74.png" width="750">
+
+<p>As you can see, <strong>PHP 7.4RC1 is the fastest</strong> (0.334 sec) and PHP 7.1.32 is the slowest (0.455 sec).</p>
+<p>
+    If we compare PHP 7.4 with other versions, we discover that is:
+    <ul>
+        <li>26% faster than PHP 7.1.32;</li>
+        <li>22% faster than PHP 7.2.22;</li>
+        <li>10% faster than PHP 7.3.9;</li>
+    </ul>
+</p>
+
+<p>The result of 7.4 is very good and it shows that the PHP team is doing a great job improving the speed of the language version after version.</p>
+<p>Of course, we cannot expect a (huge) impact like the one that we had from PHP 5 to PHP 7 but these latest improvements are very significant.</p>
