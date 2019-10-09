@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.4.1/">
+		<title>Web API security: strategies and critical points</title>
+
+		<meta name="description" content="Web API security: strategies and critical points">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/elastic.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="elastic-footer-off">
+					<h3 style="color:white;" align="left">Web API security:<br />strategies and critical points</h3>
+					<br />
+					<p style="color:white;" align="left">
+						<small>by <a href="http://www.zimuel.it" style="color:yellow">Enrico Zimuel</a><br />
+							<i>Principal Software Engineer</i> &#64; <a href="https://www.elastic.co" style="color:yellow">Elastic</a></small><br /><br />
+						<small><a href="https://fullstackconf.it" style="color:yellow">FullStackConf 2019</a>, Oct 10, Turin (Italy)</small>
+					</p>
+					<p align="left">
+						<a href="https://www.elastic.co"><img src="/img/slides/fullstackconf2019/elastic.png" style="border:none;background:none;box-shadow:none" height="60"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Anand Prakash</h2>
+					<img src="/img/slides/fullstackconf2019/anand.jpg" class="noborder" width="450">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Facebook hack</h2>
+					<ul>
+						<li class="fragment">In 2016, Anand <a href="http://www.anandpraka.sh/2016/03/how-i-could-have-hacked-your-facebook.html">discovered a vulnerability</a> in Facebook</li>
+						<li class="fragment">In Facebook you can reset your password using email or mobile phone</li>
+						<li class="fragment">A random code of <strong>6 digits</strong> is sent to the email/phone</li>
+						<li class="fragment">You can try <strong>10-12 time</strong> to insert this secret code</li>
+						<li class="fragment">After these attemps, Facebook blocks you</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Facebook hack (2)</h2>
+					<ul>
+						<li class="fragment">Anand found that <strong>beta.facebook.com</strong> and <strong>mbasic.beta.facebook.com</strong> were missing the rate limit protection</li>
+						<li class="fragment">He was able to brute force the 6 digits code</li>
+						<li class="fragment">Anand received $15,000 from <a href="https://www.facebook.com/whitehat">Facebook Bug Bounty program</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Web API</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>From web application</h2>
+					<img src="/img/slides/fullstackconf2019/web_application.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>To web API</h2>
+					<img src="/img/slides/fullstackconf2019/web_api.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Security implications</h2>
+					<ul>
+						<li class="fragment">A web API introduces more:
+							<ul>
+								<li class="fragment">Endpoints: more URLs to call</li>
+								<li class="fragment">Traffic: machine to machine</li>
+								<li class="fragment">Technologies: RPC, REST, SOAP, etc</li>
+								<li class="fragment">Formats: JSON, XML, etc</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Defense layers</h2>
+					<img src="/img/slides/fullstackconf2019/defense.png" class="noborder" width="500">
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Logging & Monitoring</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Logging & Monitoring</h2>
+					<ul>
+						<li class="fragment">Logging is foundamental for security (and not only)</li>
+						<li class="fragment">Monitoring is the only way to catch real-time threats, user access violations, and network anomalies</li>
+						<li class="fragment">Monitoring provides a method for forensic analysis in the event of a security breach</li>
+						<li class="fragment">Examples: <a href="https://www.fluentd.org">Fluentd</a>, <a href="https://www.graylog.org/">Graylog</a>, <a href="https://www.elastic.co/products/logstash">Logstash</a>, <a href="https://www.nagios.org">Nagios</a>, etc</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>GDPR</h2>
+					<ul>
+						<li class="fragment"><strong>Detecting data leakage and alert users and controllers</strong>
+							<ul class="fragment">
+								<li>Art. 33, Notification of a personal data breach to the supervisory authority</li>
+								<li>Art. 34, Communication of a personal data breach to the data subject</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/fullstackconf2019/monitoring_api.png" class="noborder">
+					<p><small>Source: <a href="https://smartbear.com/SmartBearBrand/media/pdf/SmartBear_State_of_API_2019.pdf">The State of API 2019</a> by SmartBear</small></p>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Transport encryption</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>TLS</h2>
+					<ul>
+						<li class="fragment">All the web APIs must use HTTPS (TLS)</li>
+						<li class="fragment"><a href="https://letsencrypt.org/">Let's Encrypt</a> (open source):
+							<ul class="fragment">
+								<li>Domain Validation (DV)</li>
+								<li>lifetime 90 day (automatic renew system)</li>
+							</ul>
+						</li>
+						<li class="fragment">Paid certificates:
+							<ul class="fragment">
+								<li>DV, Organization Validation (OV), Extended Validation (EV)</li>
+								<li>lifetime 1 yr and more</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTPS vulnerabilities</h2>
+					<ul>
+						<li><a href="https://drownattack.com/">DROWN attack</a>, March 2016</li>
+						<li><a href="https://en.wikipedia.org/wiki/Logjam_(computer_security)">Logjam attack</a>, May 2015</li>
+						<li><a href="https://en.wikipedia.org/wiki/FREAK">FREAK attack</a>, March 2015</li>
+						<li><a href="https://www.openssl.org/~bodo/ssl-poodle.pdf">PODDLE attack</a>, September 2014</li>
+						<li><a href="http://heartbleed.com/">Heartbleed</a>, April 2014</li>
+						<li><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security#BEAST_attack">BEAST attack</a>, September 2011</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Authentication &<br />Access Control</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Authentication</h2>
+					<ul>
+						<li class="fragment"><a href="https://en.wikipedia.org/wiki/Basic_access_authentication">HTTP Basic Authentication</a></li>
+						<li class="fragment"><a href="https://en.wikipedia.org/wiki/Application_programming_interface_key">API Key</a></li>
+						<li class="fragment"><a href="https://oauth.net/2/">OAuth 2.0</a> (also authorization)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Authorization</h2>
+					<ul>
+						<li class="fragment">Authentication is not enough. We need to know who you are!</li>
+						<li class="fragment">OAuth 2.0 provides access control using:
+							<ul>
+								<li class="fragment"><strong>scope</strong>: the subset of information or actions accessible by the key (token)</li>
+								<li class="fragment"><strong>validity</strong>: a key (token) doesn’t have to be purposely revoked by the system, it will automatically become deprecated in time</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>Broken Object Level Authorization</h3>
+					<ul>
+						<li class="fragment">Object-level authorization should be performed for any data coming from API input</li>
+						<li class="fragment">Es. In a blog API, do I have the right to change the title of a post?
+<pre><code data-trim>
+PUT /api/post/1234567890
+Authorization: Bearer abcdefghi
+
+{ "title": "Fake title!" }
+</code></pre>
+						</li>
+						<li class="fragment">This is considered the most frequent vulnerability in <a href="https://www.owasp.org/index.php/OWASP_API_Security_Project">API Security Top 10</a> by OWASP</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>429</h2>
+					<ul>
+						<li class="fragment">429 Too Many Requests
+<pre><code data-trim>
+HTTP/1.1 429 Too Many Requests
+Retry-After: 3600
+</code></pre>
+						</li>
+						<li class="fragment">Use rate limit to maintain control</li>
+						<li class="fragment">Mitigate (Distributed) Denial-of-service attacks</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example: nginx rate limit</h2>
+<pre class="fragment"><code data-trim>
+limit_req_zone $binary_remote_addr zone=mylimit:10m rate=10r/s;
+
+server {
+    location /login/ {
+        limit_req zone=mylimit;
+
+        proxy_pass http://my_upstream;
+    }
+}
+</code></pre>
+					<p class="fragment"><small>Source: <a href="https://www.nginx.com/blog/rate-limiting-nginx/">Rate Limiting with NGINX and NGINX Plus</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>API gateway</h2>
+					<img src="/img/slides/fullstackconf2019/api_gateway.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>API gateway (2)</h2>
+					<ul>
+						<li class="fragment">Manage authentication & authorization</li>
+						<li class="fragment">Rate limit</li>
+						<li class="fragment">API inventory</li>
+						<li class="fragment">Caching</li>
+						<li class="fragment">Examples: <a href="http://www.apiman.io/latest/">Apiman</a>, <a href="https://apiumbrella.io/">API Umbrella</a>, <a href="https://gravitee.io/">Gravitee</a>, <a href="https://konghq.com/kong/">Kong</a>, <a href="https://tyk.io/">Tyk</a>, <a href="https://wso2.com/api-management/">WSO2 API Management</a>, etc</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Storage encryption</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Confidential</h2>
+					<ul>
+						<li class="fragment">Reduce the information to be exposed in API (especially for sensitive data)</li>
+						<li class="fragment">Under <a href="https://eugdpr.org">GDPR</a> email addresses are considered confidential and must be used and stored within strict privacy and security guidelines</li>
+						<li class="fragment">Encrypt confidential data using standard algorithm (es. AES-GCM-256)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Encryption</h2>
+					<ul>
+						<li class="fragment">Use high level crypto libraries (es. <a href="https://github.com/jedisct1/libsodium">libsodium</a>)</li>
+						<li class="fragment">Avoid the usage of low level crypto libraries (es. <a href="https://www.openssl.org/">OpenSSL</a>)</li>
+						<li class="fragment">Many databases and storage services offer data encryption at rest (es. <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html">AWS S3</a>)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Password</h2>
+					<ul>
+						<li class="fragment">Never store user password in plaintext</li>
+						<li class="fragment">Never store encrypted user password</li>
+						<li class="fragment">Use a password hashing algorithm: <a href="https://en.wikipedia.org/wiki/Argon2">argon2</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>GDPR</h2>
+					<ul>
+						<li class="fragment"><strong>Responsibly store and process data according to risks</strong>
+							<ul class="fragment">
+								<li>Art. 32, Security of processing</li>
+								<li>Art. 35, Data protection impact assessment</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-state="elastic-footer-off" style="color:white">
+					<h2 style="color:white">Thanks!</h2>
+					<p style="color:white">Contact me: enrico.zimuel [at] elastic.co</p>
+					<p style="color:white">Follow me: <a href="https://twitter.com/ezimuel" style="color:yellow">@ezimuel</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" style="color:yellow"><img alt="Creative Commons License" style="border-width:0" src="/img/slides/fullstackconf2019/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" style="color:yellow">Attribution-NonCommercial 4.0 International</a>.<br />I used <a href="http://lab.hakim.se/reveal-js" style="color:yellow">reveal.js</a> to make this presentation.</small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<aside id="elastic-footer">
+			<div style="float:left" id="twitter">
+				<a href="https://twitter.com/ezimuel">&#64;ezimuel</a>
+			</div>
+			<div style="float:right">
+				<!--<a href="https://www.elastic.co/" style="border:none;background:none;box-shadow:none"><img src="/img/slides/fullstackconf2019/elastic-footer.png" width="150" style="vertical-align:middle"></a>-->
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('elastic-footer-on', function() {
+				document.getElementById('elastic-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('elastic-footer-off', function() {
+				document.getElementById('elastic-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
