@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.4.1/">
+		<title>Develop microservices in PHP</title>
+
+		<meta name="description" content="Develop microservices in PHP">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/elastic.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="elastic-footer-off">
+					<h2 style="color:white;" align="left">Develop microservices<br />in PHP</h2>
+					<br />
+					<p style="color:white;" align="left">
+						<small>by <a href="http://www.zimuel.it" style="color:yellow">Enrico Zimuel</a><br />
+							<i>Principal Software Engineer</i> &#64; <a href="https://www.elastic.co" style="color:yellow">Elastic</a></small><br /><br />
+						<small><a href="https://php.barcelona" style="color:yellow">PHP Barcelona</a>, 13th November 2019</small>
+					</p>
+					<p align="left">
+						<a href="https://www.elastic.co"><img src="/img/slides/phpbarcelona2019/elastic.png" style="border:none;background:none;box-shadow:none" height="60"></a>
+						<a href="https://php.barcelona"><img src="/img/slides/phpbarcelona2019/php-barcelona.svg" height="60" style="border:none;background:none;box-shadow:none;margin-left:50px;"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+				<h3>About me</h3>
+				<table>
+					<tr>
+						<td width="35%" style="padding-right:0;vertical-align: top">
+							<img src="/img/slides/phpbarcelona2019/enrico.png" class="noborder">
+						</td>
+						<td>
+							<ul>
+								<li>Developer since 1996</li>
+								<li><i>Principal Engineer</i> at <a href="https://www.elastic.co/" target="_blank">Elastic</a></li>
+								<li><i>Open source contributor</i>: <a href="https://github.com/elastic/elasticsearch-php/">Elasticsearch-php</a>, <a href="http://getexpressive.org" target="_blank">Expressive</a>, <a href="http://framework.zend.com" target="_blank">Zend Framework</a>, <a href="https://github.com/ezimuel">etc</a></li>
+								<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+								<li>Member of Linux Foundation for <a href="https://getlaminas.org/">Laminas</a> project</li>
+								<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a> (Italy)</li>
+							</ul>
+						</td>
+					</tr>
+				</table>
+			</section>
+
+			<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Microservice</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<blockquote cite="https://martinfowler.com/articles/microservices.html">...the microservice architectural style is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API</blockquote>
+					<p>- Martin Fowler</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/phpbarcelona2019/monolithic-architecture.png" class="noborder" width="500">
+					<p><small>Source: <a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to microservices</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/phpbarcelona2019/microservices-architecture.png" class="noborder" width="500">
+					<p><small>Source: <a href="https://www.nginx.com/blog/introduction-to-microservices/">Introduction to microservices</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Separation of concerns
+							<ul>
+								<li class="fragment">Modularity</li>
+								<li class="fragment">Encapsulation</li>
+							</ul>
+						</li>
+						<li class="fragment">Scalability
+							<ul>
+								<li class="fragment">Horizontally scaling</li>
+								<li class="fragment">Workload partitioning</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Service latency (Docker, Kubernetes)</li>
+						<li class="fragment">Debugging</li>
+						<li class="fragment">New architecture challenges:
+							<ul>
+								<li class="fragment">Autodiscovery</li>
+								<li class="fragment">Telemetry</li>
+								<li class="fragment">Everything needs to be automated</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">HTTP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP & microservices</h2>
+					<ul>
+						<li class="fragment">HTTP is used everywhere</li>
+						<li class="fragment">REST API with JSON</li>
+						<li class="fragment">Error management is critical, use a standard (e.g. <a href="https://tools.ietf.org/html/rfc7807">application/problem+json</a>)</li>
+						<li class="fragment">Authentication & authorization (e.g. <a href="https://oauth.net/2/">OAuth2</a>)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP is slow?</h2>
+					<ul>
+						<li class="fragment">Internal networks often use 1 Gbps connections, or faster</li>
+						<li class="fragment">E.g. JSON of 5 KB = 26K responses/sec</li>
+						<li class="fragment">Network connection is usually not the bottleneck</li>
+						<li class="fragment">Forget about speed, think about scalability</li>
+					</ul>
+				</section>
+				
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">HTTP in PHP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP message in PHP</h2>
+					<p>Global variables:</p>
+					<ul>
+						<li class="fragment">$_SERVER</li>
+						<li class="fragment">$_POST</li>
+						<li class="fragment">$_GET</li>
+						<li class="fragment">$_FILES</li>
+						<li class="fragment">$_COOKIE</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP functions in PHP</h2>
+					<ul>
+						<li class="fragment">http_response_code()</li>
+						<li class="fragment">header(), header_remove(), headers_list(), headers_sent()</li>
+						<li class="fragment">setcookie(), setrawcookie()</li>
+						<li class="fragment">gethostname(), etc</li>
+						<li class="fragment"><font color="red">It's a mess!</font></li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">PSR-7</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PHP FIG</h2>
+					<ul>
+						<li class="fragment"><strong>PHP Framework Interop Group</strong> (<a href="https://www.php-fig.org/">PHP FIG</a>)</li>
+						<li class="fragment"><strong>PHP Standards Recommendations</strong> (PSR)</li>
+						<li class="fragment">PSR-7 are common interfaces for <strong>representing HTTP messages</strong> (<a href="https://tools.ietf.org/html/rfc7230">RFC 7230</a>, <a href="https://tools.ietf.org/html/rfc7231">7231</a>, <a href="https://tools.ietf.org/html/rfc3986">3986</a>)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-7 interfaces</h2>
+					<ul>
+						<li class="fragment">github: <a href="https://github.com/php-fig/http-message">psr/http-message</a></li>
+						<li class="fragment">Psr\Http\Message\MessageInterface</li>
+						<li class="fragment">Psr\Http\Message\RequestInterface</li>
+						<li class="fragment">Psr\Http\Message\ResponseInterface</li>
+						<li class="fragment">Psr\Http\Message\ServerRequestInterface</li>
+						<li class="fragment">Psr\Http\Message\StreamInterface</li>
+						<li class="fragment">Psr\Http\Message\UploadedFileInterface</li>
+						<li class="fragment">Psr\Http\Message\UriInterface</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php">
+// Returns an empty array if not found:
+$header = $request->getHeader('Accept');
+
+// Testing an header
+if ($request->hasHeader('Accept')) {
+    /* ... */
+}
+
+// Get query string parameters
+$query = $request->getQueryParams();
+</code></pre>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Swoole</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/phpbarcelona2019/swoole.png" class="noborder">
+					<ul>
+						<li class="fragment"><strong>Swoole</strong> is an async programming framework for PHP 7</li>
+						<li class="fragment">PHP extension, install:
+<pre><code class="bash" data-trim>
+pecl install swoole
+</code></pre>
+						</li>
+						<li class="fragment">Released under Apache license 2.0</li>
+						<li class="fragment">More info at <a href="https://www.swoole.co.uk/">swoole.co.uk</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Features</h2>
+					<ul>
+						<li class="fragment">Event-driven, asynchronous programming for PHP</li>
+						<li class="fragment">Async TCP / UDP / HTTP / Websocket / HTTP2 client/server side API</li>
+						<li class="fragment">IPv4 / IPv6 / Unixsocket / TCP/ UDP and SSL / TLS support</li>
+						<li class="fragment"><a href="https://www.swoole.co.uk/benchmark">High performance</a> and scalable</li>
+						<li class="fragment">Fast serializer / unserializer</li>
+						<li class="fragment">Milliseconds task scheduler</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>Swoole: how it works</h3>
+					<img src="/img/slides/phpbarcelona2019/how-swoole-works.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>HTTP Server</h2>
+<pre><code class="php small-font-code" data-trim>
+use Swoole\Http\Server;
+
+$http = new Server("127.0.0.1", 9501);
+
+$http->on("start", function ($server) {
+    echo "Started at http://127.0.0.1:9501\n";
+});
+$http->on("request", function ($request, $response) {
+    $response->header("Content-Type", "text/plain");
+    $response->end("Hello World\n");
+});
+
+$http->start();
+</code></pre>
+					<p class="fragment"><small>Test: <strong>16K req/sec</strong> on CPU i5-2500, 16 GB RAM, PHP 7.2.12, Swoole 4.2.9</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Event loop</h2>
+					<img src="/img/slides/phpbarcelona2019/event-loop.jpg" style="border:none">
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Middleware</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+						<h2>Middleware</h2>
+						<p>A function that gets a request and generates a response</p>
+<pre><code data-trim class="php big-font-code">
+function ($request)
+{
+    // do something with $request
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Delegating middleware</h2>
+<pre><code data-trim class="php medium-font-code">
+function ($request, callable $delegate)
+{
+    // delegating $request to another middleware
+    $response = $delegate($request);
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Middleware onion</h2>
+					<img src="/img/slides/phpbarcelona2019/middleware.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example: cache</h2>
+<pre><code data-trim class="php medium-font-code">
+function ($request, callable $delegate) use ($cache)
+{
+    if ($cache->has($request)) {
+        return $cache->get($request);
+    }
+    $response = $delegate($request);
+    $cache->set($request, $response);
+    return $response;
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PSR-15</h2>
+					<p class="fragment">Common interfaces for <strong>HTTP server request handlers</strong> and <strong>HTTP server middleware</strong> components that use HTTP messages as described by <a href="https://www.php-fig.org/psr/psr-7/">PSR-7</a></p>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">Expressive</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+						<img src="/img/slides/phpbarcelona2019/laminas.png" width="400" class="noborder">
+						<ul>
+							<li class="fragment"><a href="https://getexpressive.org/">Expressive</a> is part of <a href="https://getlaminas.org/">Laminas</a> project (ex Zend Framework)</li>
+							<li class="fragment">PHP framework for middleware applications</li>
+							<li class="fragment">PSR-7 and PSR-15 support</li>
+							<li class="fragment">Features: routing, dependency injection, templating, error handling</li>
+						</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example</h2>
+<pre><code data-trim class="php small-font-code">
+$app->get('/api/ping', function ($request) {
+    return JsonResponse(['ack' => time()])
+});
+
+// or implement a RequestHandlerInterface
+$app->get('/api/ping', App\Handler\PingHandler::class);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PingHandler</h2>
+<pre><code data-trim class="php small-font-code">
+namespace App\Handler;
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Zend\Diactoros\Response\JsonResponse;
+
+class PingHandler implements RequestHandlerInterface
+{
+    public function handle(
+        ServerRequestInterface $request
+    ) : ResponseInterface {
+        return new JsonResponse(['ack' => time()]);
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Route a REST API</h2>
+<pre><code data-trim class="php small-font-code">
+$app->route('/api/users[/{id}]', [
+    Authentication\AuthenticationMiddleware::class,
+    Authorization\AuthorizationMiddleware::class,
+    Api\Action\UserAction::class
+], ['GET', 'POST', 'PATCH', 'DELETE'], 'api.users');
+
+// or route each HTTP method
+$app->get('/api/users[/{id}]', ..., 'api.users.get');
+$app->post('/api/users', ..., 'api.users.post');
+$app->patch('/api/users/{id}', ..., 'api.users.patch');
+$app->delete('/api/users/{id}', ..., 'api.users.delete');
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Expressive with Swoole</h2>
+					<p class="fragment">Install:
+<pre class="fragment"><code class="bash" data-trim>
+composer require zendframework/zend-expressive-swoole
+</code></pre>
+					</p>
+					<p class="fragment">Usage:
+<pre class="fragment"><code class="bash" data-trim>
+vendor/bin/zend-expressive-swoole start
+</code></pre>
+					</p>
+					<p class="fragment">Open your browser at <a href="http://localhost:8080">localhost:8080</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PHP + Expressive + Swoole</h2>
+					<p class="fragment">Run a web application <strong>from CLI</strong></p>
+					<p class="fragment">Simplify the deploy (only PHP no web server)</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Benchmark</h2>
+					<p class="fragment"><strong>2-4x faster</strong> than Nginx and Apache</p>
+					<table class="fragment">
+						<tr>
+							<td></td>
+							<td><strong>Req/sec</strong> (mean)</td>
+						</tr>
+						<tr>
+							<td><strong>Nginx</strong></td>
+							<td style="text-align:right">1418.23</td>
+						</tr>
+						<tr>
+							<td><strong>Apache</strong></td>
+							<td style="text-align:right">1915.62</td>
+						</tr>
+						<tr>
+							<td><strong>Swoole</strong></td>
+							<td style="text-align:right">4864.34</td>
+						</tr>
+					</table>
+					<p class="fragment"><small>Testing environment:<br />Ubuntu 18.04, <a href="https://github.com/zendframework/zend-expressive-skeleton/tree/3.2.3">Expressive Skeleton 3.2.3</a>, PHP 7.2.12, Nginx 1.14 + FPM,<br />Apache 2.4.29 + mod_php, Swoole 4.2.9, CPU i5-2500, 16 GB RAM, HD SSD</small></p>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-off">
+					<h2 style="color:white">A microservice<br />is more than just an API</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>Microservices needs</h3>
+					<ul>
+						<li class="fragment">Logging: aggregation</li>
+						<li class="fragment">Monitoring: telemetry, metrics</li>
+						<li class="fragment">Debugging: APM, distributed tracing</li>
+					</ul>
+				</section>
+				
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>3 pillars of observability</h3>
+					<img src="/img/slides/phpbarcelona2019/observability.png" class="noborder">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/phpbarcelona2019/elasticsearch.png" width="600" style="border:none;background:none;box-shadow:none;">
+					<ul>
+						<li class="fragment"><a href="https://www.elastic.co/products/elasticsearch">Elasticsearch</a> is a highly scalable open-source full-text search and analytics engine</li>
+						<li class="fragment">Near Realtime (NRT)</li>
+						<li class="fragment">Designed for scale (horizontally)</li>
+						<li class="fragment"><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs.html">REST API</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example in PHP</h2>
+					<p class="fragment">Using <a href="https://github.com/elastic/elasticsearch-php">elastic/elasticsearch-php</a>:</p>
+<pre class="fragment"><code data-trim class="php small-font-code">
+use Elasticsearch\ClientBuilder;
+
+$client = ClientBuilder::create()->build();
+$params = [
+    'index' => 'my_index',
+    'type'  => 'my_type',
+    'id'    => 'my_id',
+    'body'  => ['testField' => 'abc']
+];
+$response = $client->index($params);
+print_r($response);
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2><a href="https://www.elastic.co/products/kibana">Kibana</a></h2>
+					<p class="fragment">Your window into the Elastic Stack</p>
+					<img class="fragment" src="/img/slides/phpbarcelona2019/kibana.png" style="border:none" width="600">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Machine learning</h2>
+					<p class="fragment">Detect the anomalies hiding in your Elasticsearch data</p>
+					<img class="fragment" src="/img/slides/phpbarcelona2019/kibana-machine-learning.jpg" style="border:none" width="600">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>ELK stack</h2>
+					<img src="/img/slides/phpbarcelona2019/elk_stack.png" class="noborder" width="600">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>APM</h2>
+					<img src="/img/slides/phpbarcelona2019/apm.png" class="noborder" width="600">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>APM & PHP</h2>
+					<ul>
+						<li class="fragment">REST API: <a href="https://www.elastic.co/guide/en/apm/server/current/intake-api.html">Intake API</a></li>
+						<li class="fragment">Community APM agent: <a href="https://github.com/philkra/elastic-apm-php-agent">philkra/elastic-apm-php-agent</a></li>
+						<li class="fragment">We are working on the official APM agent for PHP (as extension and library)</li>
+					</ul>
+				</section>
+
+				<section data-background="#1f2c33" data-state="elastic-footer-on" style="color:white">
+					<h2 style="color:white">Thanks!</h2>
+					<p style="color:white">Follow me: <a href="https://twitter.com/ezimuel" style="color:yellow">@ezimuel</a></p>
+					<a href="https://www.elastic.co/"><img src="/img/slides/phpbarcelona2019/elk-stack-social.svg" class="noborder" width="700"></a>
+				</section>
+
+			</div>
+
+		</div>
+
+		<aside id="elastic-footer">
+			<div style="float:left" id="twitter">
+				<!--<a href="https://twitter.com/ezimuel">&#64;ezimuel</a>-->
+			</div>
+			<div style="float:right">
+				<!--<a href="https://www.elastic.co/" style="border:none;background:none;box-shadow:none"><img src="/img/slides/phpbarcelona2019/elastic-footer.png" width="150" style="vertical-align:middle"></a>-->
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('elastic-footer-on', function() {
+				document.getElementById('elastic-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('elastic-footer-off', function() {
+				document.getElementById('elastic-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
