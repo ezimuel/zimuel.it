@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.8.0/">
+		<title>Refactoring legacy code in PHP</title>
+
+		<meta name="description" content="Refactoring legacy code in PHP">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/svilupparephp7.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="elastic-footer-off">
+					<h2  align="left">Refactoring legacy PHP</h2>
+					<br />
+					<p  align="left">
+						<small>by <a href="http://www.zimuel.it" >Enrico Zimuel</a><br />
+							<i>Principal Software Engineer</i> &#64; <a href="https://www.elastic.co" >Elastic</a></small><br /><br />
+						<small><a href="http://torino.grusp.org/" >PUG Torino</a>, Feb. 19, 2020</small>
+					</p>
+					<p align="left">
+                        <a href="http://torino.grusp.org/"><img src="/img/slides/pugtorino/logo_pugtorino.png" height="60" style="border:none;background:none;box-shadow:none;"></a>
+                        <a href="https://www.toolboxoffice.it/en/"><img src="/img/slides/pugtorino/toolbox.png" style="border:none;background:none;box-shadow:none; margin-left: 60px" height="60"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<a href="https://www.sviluppareinphp7.it/"><img src="/img/slides/pugtorino/sviluppareinphp7_ii_edizione.jpg" class="noborder"></a>
+							</td>
+							<td style="vertical-align: middle">
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Principal Engineer at <a href="https://www.elastic.co/" target="_blank">Elastic</a></li>
+									<li><a href="https://github.com/ezimuel/">Open source contributor</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Teaching at <a href="http://www.its-ictpiemonte.it/">ITS ICT Piemonte</a></li>
+									<li>Author of <a href="https://www.sviluppareinphp7.it/">Sviluppare in PHP 7</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a></li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Refactoring legacy applications</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Refactoring</h2>
+					<p>Refactoring is the process of changing the structure of code without changing its behavior</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Legacy code</h2>
+					<blockquote class="fragment" cite="Wikipedia">Legacy code is source code that relates to a no-longer supported or manufactured operating system or other computer technology</blockquote>
+					<blockquote class="fragment" cite="Eli Lopian">Code that developers are afraid to change</blockquote>
+				</section>
+				
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">PHP</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Unit test</h2>
+					<p class="fragment">Never refactor a production code that does not have unit tests</p>
+					<p class="fragment">Tool: <a href="https://phpunit.de/">PHPUnit</a></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Mock</h2>
+					<p>For example, using the following class:</p>
+<pre class="fragment"><code data-trim class="php">
+class Foo
+{
+    public function __construct(BarInterface $bar)
+    {
+        $this->bar = $bar;
+    }
+
+    public function baz()
+    {
+        return $this->bar->doSomething(/* ... */);
+    }
+}
+</code></pre>				
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Mock (2)</h2>
+<pre class="fragment"><code data-trim class="php">
+use PHPUnit\Framework\TestCase;
+
+class StubTest extends TestCase
+{
+    public function testStub()
+    {
+        $stub = $this->getMockBuilder(BarInterface::class)
+            ->getMock();
+
+        $stub->method('doSomething')
+            ->willReturn('foo');
+
+        $foo = new Foo($stub);
+        $this->assertSame('foo', $foo->baz());
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Mockery</h2>
+					<ul>
+						<li class="fragment">Mockery is an advanced mock object framework for PHPUnit, PHPSpec, etc</li>
+						<li class="fragment"><a href="https://github.com/mockery/mockery">github.com/mockery/mockery</a></li>
+						<li class="fragment">Some features:
+							<ul>
+								<li><a href="https://github.com/mockery/mockery#method-stubs-">Method Stubs</a></li>
+								<li><a href="https://github.com/mockery/mockery#method-call-expectations-">Method Call Expectations</a></li>
+								<li><a href="https://github.com/mockery/mockery#test-spies-%EF%B8%8F">Test Spies</a></li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Method Stubs</h2>
+<pre class="fragment"><code data-trim class="php">
+class Book {}
+
+interface BookRepository {
+    function find($id): Book;
+    function findAll(): array;
+    function add(Book $book): void;
+}
+	
+$double = Mockery::mock(BookRepository::class);
+
+$double->allows()->find(123)->andReturns(new Book());
+$book = $double->find(123);
+</code></pre>	
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Call Expectations</h2>
+<pre class="fragment"><code data-trim class="php">
+class Temperature
+{
+    private $service;
+
+    public function __construct($service)
+    {
+        $this->service = $service;
+    }
+    public function average()
+    {
+        $total = 0;
+        for ($i=0; $i<3; $i++) {
+            $total += $this->service->readTemp();
+        }
+        return $total/3;
+    }
+}
+</code></pre>	
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Call Expectations (2)</h2>
+<pre class="fragment"><code data-trim class="php">
+class TemperatureTest extends \PHPUnit\Framework\TestCase
+{
+    public function tearDown()
+    {
+        Mockery::close();
+    }
+    public function testGetsAvgTemperatureFrom3ServiceReadings()
+    {
+        $service = Mockery::mock('service');
+        $service->shouldReceive('readTemp')
+            ->times(3)
+            ->andReturn(10, 12, 14);
+
+        $temperature = new Temperature($service);
+        $this->assertEquals(12, $temperature->average());
+    }
+}
+</code></pre>					
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Test Spies</h2>
+<pre class="fragment"><code data-trim class="php">
+$spy = \Mockery::spy('MyDependency');
+$sut = new MyClass($spy);
+
+// act
+$sut->callFoo();
+
+// assert
+$spy->shouldHaveReceived()
+	->foo()
+	->with('bar');	
+</code></pre>	
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Code coverage</h2>
+					<p>Feature of PHPUnit to measure how much code is covered by the unit test</p>
+					<img src="/img/slides/pugtorino/phpcodecoverage.png" class="noborder">
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Autoloading</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Composer</h2>
+					<p>Many options for legacy code (not PSR-4)</p>
+					<ul>
+						<li class="fragment"><a href="https://getcomposer.org/doc/04-schema.md#classmap">classmap</a> and <a href="https://getcomposer.org/doc/04-schema.md#files">files</a></li>
+						<li class="fragment"><a href="https://getcomposer.org/doc/04-schema.md#include-path">include-path</a>* and <a href="https://getcomposer.org/doc/04-schema.md#target-dir">target-dir</a>*</li>
+					</ul>
+					<p class="fragment"><small>* deprecated, but still useful</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Classmap example</h2>
+<pre class="fragment"><code data-trim class="json">
+{
+    "autoload": {
+        "classmap": ["src/", "lib/", "Something.php"]
+    }
+}	
+</code></pre>	
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Tools for refactoring</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Some tools</h2>
+					<ul>
+						<li class="fragment"><a href="https://github.com/sebastianbergmann/phpcpd">PHPCPD</a>, Copy & Paste detector</li>
+						<li class="fragment"><a href="https://github.com/sebastianbergmann/phploc">PHPLOC</a>, measuring and analyzing PHP project</li>
+						<li class="fragment"><a href="https://github.com/rectorphp/rector">Rector</a>, reconstructor tool, it does instant upgrades and instant refactoring of your code</li>
+						<li class="fragment"><a href="https://github.com/phpstan/phpstan">PHPStan</a>, static analysis tool</li>
+						<li class="fragment"><a href="https://github.com/phan/phan">Phan</a>, static analyzer for PHP</li>
+						<li class="fragment"><a href="https://github.com/exakat/exakat">Exakat</a>, automated code reviewing engine for PHP</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-off">
+					<h3>References</h3>
+					<small>
+					<ul>
+						<li>Martin Fowler, <i>Refactoring: Improving the Design of Existing Code</i>, second edition, Addison-Wesley Professional, 2018</li>
+						<li>Michael Feathers, <i>Working Effectively with Legacy Code</i>, Prentice Hall, 2004</li>
+						<li>Francesco Trucchia, Jacopo Romei, <i>Pro PHP Refactoring</i>, Apress, 2010</li>
+						<li>Paul M. Jones, <a href="https://leanpub.com/mlaphp">Modernizing Legacy Applications In PHP</a></li>
+						<li>John Mertic, <a href="https://www.ibm.com/developerworks/library/os-refactoringphp/index.html">Strategies for refactoring untestable PHP code</a></li>
+						<li>Mohamed Aladdin, <a href="https://hackernoon.com/refactor-your-php-legacy-code-real-projects-examples-da9edf03ff4b">Refactor Your PHP legacy Code (real projects examples)</a></li>
+						<li>Gilbert Pellegrom, <a href="https://deliciousbrains.com/refactoring-php-code-better-readability/">Examples of Refactoring PHP Code for Better Readability </a></li>
+						<li>Matthias Noback, <a href="https://matthiasnoback.nl/2019/09/using-phploc-for-quick-code-quality-estimation-part-1/">Using phploc for a quick code quality estimation</a></li>
+					</ul>
+					</small>
+				</section>
+
+				<section data-state="elastic-footer-off">
+					<h2>Thanks!</h2>
+					<p>Follow me: <a href="https://twitter.com/ezimuel" >@ezimuel</a></p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" ><img alt="Creative Commons License" style="border-width:0" src="/img/slides/pugtorino/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+			</div>
+		</div>
+
+		<aside id="elastic-footer">
+			<div style="float:left" id="twitter">
+				<img src="/img/slides/pugtorino/twitter.png"> <a href="https://twitter.com/ezimuel" style="text-decoration:none">&#64;ezimuel</a>
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('elastic-footer-on', function() {
+				document.getElementById('elastic-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('elastic-footer-off', function() {
+				document.getElementById('elastic-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
