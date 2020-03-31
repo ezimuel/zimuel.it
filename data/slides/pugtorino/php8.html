@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.8.0/">
+
+		<title>8 is coming: the new PHP</title>
+
+		<meta name="description" content="8 is coming: the new PHP">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/svilupparephp7.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="elastic-footer-off">
+					<h2  align="left">8 is coming:<br />the new PHP</h2>
+					<br />
+					<p  align="left">
+						<small>by <a href="http://www.zimuel.it" >Enrico Zimuel</a><br />
+							<i>Principal Software Engineer</i> &#64; <a href="https://www.elastic.co" >Elastic</a></small><br /><br />
+						<small><a href="http://torino.grusp.org/" >PUG Torino</a>, Mar. 31, 2020</small>
+					</p>
+					<p align="left">
+						<a href="https://www.grusp.org/it/"><img src="/img/slides/pugtorino/grusp.png" class="noborder" height="100"></a>
+						<a href="http://torino.grusp.org/"><img src="/img/slides/pugtorino/logo_pugtorino.png" height="85" class="noborder" style="margin-left:45px;"></a>
+						<a href="https://www.toolboxoffice.it/en/"><img src="/img/slides/pugtorino/toolbox.png" height="85" class="noborder" style="margin-left:40px"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<a href="https://www.sviluppareinphp7.it/"><img src="/img/slides/pugtorino/sviluppareinphp7_ii_edizione.jpg" class="noborder"></a>
+							</td>
+							<td style="vertical-align: middle">
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Principal Engineer at <a href="https://www.elastic.co/" target="_blank">Elastic</a></li>
+									<li><a href="https://github.com/ezimuel/">Open source contributor</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Teaching at <a href="http://www.its-ictpiemonte.it/">ITS ICT Piemonte</a></li>
+									<li>Author of <a href="https://www.sviluppareinphp7.it/">Sviluppare in PHP 7</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a></li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<img src="/img/slides/pugtorino/logo_pugtorino.png" class="noborder" height="100">
+					<ul>
+						<li class="fragment">Part of <a href="http://www.grusp.org/it/">GrUSP</a> association</li>
+						<li class="fragment">Founded in <a href="http://torino.grusp.org/2011/06/e-nato-il-pug-torino/">2011</a></li>
+						<li class="fragment">440+ members on <a href="https://www.meetup.com/it-IT/pugTO-PHP-User-Group-Torino/">meetup.com</a></li>
+						<li class="fragment">Meetup every month (or two)</li>
+						<li class="fragment">Sponsor: <a href="https://www.toolboxoffice.it/en/">Toolbox Coworking</a> Torino</li>
+					</ul>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">PHP 8</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>New features* (some)</h2>
+					<ul>
+						<li class="fragment">JIT compiler (<a href="https://wiki.php.net/rfc/jit" target="_blank">RFC</a>)</li>
+						<li class="fragment">Union types (<a href="https://wiki.php.net/rfc/union_types_v2" target="_blank">RFC</a>)</li>
+						<li class="fragment">Static return type (<a href="https://wiki.php.net/rfc/static_return_type" target="_blank">RFC</a>)</li>
+						<li class="fragment">Weak maps (<a href="https://wiki.php.net/rfc/weak_maps" target="_blank">RFC</a>)</li>
+						<li class="fragment">::class on objects (<a href="https://wiki.php.net/rfc/class_name_literal_on_object" target="_blank">RFC</a>)</li>
+						<li class="fragment">Stringable interface (<a href="https://wiki.php.net/rfc/stringable">RFC</a>)</li>
+					</ul>
+					<p><small>* accepted</small></p>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">JIT</h2>
+				</section>
+				
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>What's JIT?</h2>
+					<ul>
+						<p class="fragment">A <strong>Just-In-Time (JIT)</strong> compiler is a feature of the <strong>run-time interpreter</strong>, that instead of interpreting <strong>bytecode</strong> every time a method is invoked, will compile the bytecode into <strong>machine code</strong>, and then invoke this object code instead</p>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>PHP execution</h3>
+					<img src="/img/slides/pugtorino/php_execution.png" class="noborder" height="500">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>Example</h3>
+<pre><code class="php" data-trim>
+for ($i=0; $i<100; $i++) {
+    echo $i;
+}	
+</code></pre>
+<p class="fragment">Opcode:</p>
+<pre class="fragment"><code data-trim>
+L0 (2):     ASSIGN CV0($i) int(0)
+L1 (2):     JMP L4
+L2 (3):     ECHO CV0($i)
+L3 (2):     PRE_INC CV0($i)
+L4 (2):     T1 = IS_SMALLER CV0($i) int(100)
+L5 (2):     JMPNZ T1 L2
+L6 (5):     RETURN int(1)
+</code></pre>
+					<p class="fragment"><small>php -d opcache.opt_debug_level=0x20000 -d opcache.enable_cli=1 test.php</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>Opcache</h3>
+					<img src="/img/slides/pugtorino/php_opcache.png" class="noborder" height="500">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>JIT</h3>
+					<img src="/img/slides/pugtorino/php_jit.png" class="noborder" height="500">
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h3>JIT machine code</h3>
+<pre class="fragment"><code data-trim>
+	sub $0x10, %rsp
+	lea 0x50(%r14), %rdi
+	cmp $0xa, 0x8(%rdi)
+	jnz .L1
+	mov (%rdi), %rdi
+	cmp $0x0, 0x18(%rdi)
+	jnz .L6
+	add $0x8, %rdi
+.L1:
+	test $0x1, 0x9(%rdi)
+	jnz .L7
+	mov $0x0, (%rdi)
+	mov $0x4, 0x8(%rdi)
+.L2:
+	mov $EG(exception), %rax
+	cmp $0x0, (%rax)
+	jnz JIT$$exception_handler
+	jmp .L4
+.L3:
+	mov $0x7fcc67e2e630, %r15
+	mov $0x561f82773690, %rax
+	call *%rax
+	mov $EG(exception), %rax
+	cmp $0x0, (%rax)
+	jnz JIT$$exception_handler
+	cmp $0x4, 0x58(%r14)
+	jnz .L9
+	add $0x1, 0x50(%r14)
+.L4:
+	mov $EG(vm_interrupt), %rax
+	cmp $0x0, (%rax)
+	jnz .L11
+	cmp $0x4, 0x58(%r14)
+	jnz .L12
+	cmp $0x64, 0x50(%r14)
+	jl .L3
+.L5:
+	mov $0x7fcc67e2e6b0, %r15
+	add $0x10, %rsp
+	mov $ZEND_RETURN_SPEC_CONST_LABEL, %rax
+	jmp *%rax
+	sub $0x10, %rsp
+	jmp .L4
+.L6:
+	mov $0x7fcc67e2e5c0, %rsi
+	mov %r15, (%r14)
+	mov $zend_jit_assign_const_to_typed_ref, %rax
+	call *%rax
+	jmp .L2
+.L7:
+	mov (%rdi), %rax
+	mov %rax, (%rsp)
+	mov $0x0, (%rdi)
+	mov $0x4, 0x8(%rdi)
+	mov (%rsp), %rdi
+	sub $0x1, (%rdi)
+	jnz .L8
+	mov %r15, (%r14)
+	mov $rc_dtor_func, %rax
+	call *%rax
+	jmp .L2
+.L8:
+	mov 0x4(%rdi), %eax
+	and $0xfffffc10, %eax
+	cmp $0x10, %eax
+	jnz .L2
+	mov $gc_possible_root, %rax
+	call *%rax
+	jmp .L2
+.L9:
+	mov %r15, (%r14)
+	lea 0x50(%r14), %rdi
+	cmp $0xa, 0x8(%rdi)
+	jnz .L10
+	mov (%rdi), %rsi
+	cmp $0x0, 0x18(%rsi)
+	lea 0x8(%rsi), %rdi
+	jz .L10
+	mov $0x0, %rdx
+	mov $zend_jit_pre_inc_typed_ref, %rax
+	call *%rax
+	mov $EG(exception), %rax
+	cmp $0x0, (%rax)
+	jnz JIT$$exception_handler
+	jmp .L4
+.L10:
+	mov $increment_function, %rax
+	call *%rax
+	jmp .L4
+.L11:
+	mov $0x7fcc67e2e670, %r15
+	jmp JIT$$interrupt_handler
+.L12:
+	cmp $0x5, 0x58(%r14)
+	jnz .L13
+	mov $0x64, %rax
+	vcvtsi2sd %rax, %xmm0, %xmm0
+	vucomisd 0x50(%r14), %xmm0
+	ja .L3
+	jmp .L5
+.L13:
+	mov $0x7fcc67e2e670, %rax
+	mov %rax, (%r14)
+	lea 0x50(%r14), %rsi
+	mov $0x7fcc67e2e5d0, %rdx
+	lea 0x60(%r14), %rdi
+	mov $compare_function, %rax
+	call *%rax
+	mov $EG(exception), %rax
+	cmp $0x0, (%rax)
+	jnz JIT$$exception_handler_undef
+	cmp $0x0, 0x60(%r14)
+	jl .L3
+	jmp .L5
+</code></pre>
+					<p class="fragment"><small>php -d opcache.enable_cli=1 -d opcache.jit=1235 <br />-d opcache.jit_buffer_size=64M -d opcache.jit_debug=1 test.php</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>JIT in PHP 8</h2>
+					<ul>
+						<li class="fragment">JIT is an extension of Opcode Cache</li>
+						<li class="fragment">How does JIT choose to generate machine code?</li>
+						<li class="fragment">How can JIT generate machine code for all the CPUs?</li>
+					</ul>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h3 style="color:white">How does JIT choose to generate machine code?</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>JIT configuration (CRTO)</h2>
+					<ul>
+						<li class="fragment"><strong>opcache.jit</strong> consists of 4 decimal digits, e.g 1235</strong></li>
+						<li class="fragment">1 = use <a href="https://en.wikipedia.org/wiki/Advanced_Vector_Extensions">AVX</a> instructions (<strong>C</strong>PU optimization)</li>
+						<li class="fragment">2 = <strong>R</strong>egister allocation</li>
+						<li class="fragment">3 = profile on the fly and compile hot functions (<strong>T</strong>rigger)</li>
+						<li class="fragment">5 = type inference & procedure analysis (<strong>O</strong>ptimization level)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>CPU Optimization</h2>
+					<ul>
+						<li class="fragment">0 = none</li>
+						<li class="fragment">1 = enable AVX instruction generation</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Register allocation</h2>
+					<ul>
+						<li class="fragment">0 = don't perform register allocation</li>
+						<li class="fragment">1 = use local liner-scan register allocator</li>
+						<li class="fragment">2 = use global liner-scan register allocator</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>JIT Trigger</h2>
+					<ul>
+						<li class="fragment">0 = JIT all functions on first script load</li>
+						<li class="fragment">1 = JIT functions on first execution</li>
+						<li class="fragment">2 = Profile on first request and compile hot functions on second request</li>
+						<li class="fragment">3 = Profile on the fly and compile hot functions</li>
+						<li class="fragment">4 = Compile functions with @jit tag in doc-comments</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Optimization level</h2>
+					<ul>
+						<li class="fragment">0 = don't JIT</li>
+						<li class="fragment">1 = minimal JIT (call standard VM handlers)</li>
+						<li class="fragment">2 = selective VM handler inlining</li>
+						<li class="fragment">3 = optimized JIT based on static type inference of individual function</li>
+						<li class="fragment">4 = optimized JIT based on static type inference and call tree</li>
+						<li class="fragment">5 = optimized JIT based on static type inference and inner procedure analyses</li>
+					</ul>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h3 style="color:white">How can JIT generate machine code?</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>DynASM</h2>
+					<ul>
+						<li class="fragment">PHP 8 JIT uses <a href="https://luajit.org/dynasm.html">DynASM</a> to generate machine code</li>
+						<li class="fragment">Dynamic Assembler for code generation engines</li>
+						<li class="fragment">Developed as tool of <a href="https://luajit.org/">LuaJIT</a></li>
+						<li class="fragment">CPU support: x86, x64, ARM, PowerPC and MIPS</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>JIT benchmark</h2>
+					<img src="/img/slides/pugtorino/jit_bench.png" class="noborder">
+					<p class="fragment"><small>Execution time (sec) of Zend/bench.php, using PHP 7.4.4 (Zend Engine 3.4.0)<br />and PHP 8.0.0-dev (Zend Engine 4.0.0-dev)</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>JIT on WordPress</h2>
+					<ul>
+						<li class="fragment">PHP 8 no JIT: 190 req/sec</li>
+						<li class="fragment">PHP 8 + JIT (CTRO 1235): 160 req/sec</li>
+						<li class="fragment">PHP 8 + JIT (CTRO 1225): 189 req/sec</li>
+					</ul>
+					<p class="fragment"><small>Source: <a href="https://www.youtube.com/watch?v=g3RPYtwP1jk">PHP 8 et Just In Time Compilation</a></small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>IO Bound vs. CPU Bound</h2>
+					<ul>
+						<li class="fragment">JIT is useful for <strong>CPU intensive</strong> application (machine learning, image manipulation, etc).</li>
+						<li class="fragment">JIT does not offer improvement for <strong>IO Bound</strong> application</li>
+					</ul>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Union types</h2>
+				</section>
+				
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Union types (<a href="https://wiki.php.net/rfc/union_types_v2" target="_blank">RFC</a>)</h2>
+<pre><code class="php" data-trim>
+class Number {
+    private int|float $number;
+	
+    public function setNumber(int|float $number): void {
+        $this->number = $number;
+    }
+	
+    public function getNumber(): int|float {
+        return $this->number;
+    }
+}
+</code></pre>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Static return type</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Static return type (<a href="https://wiki.php.net/rfc/static_return_type" target="_blank">RFC</a>)</h2>
+<pre><code class="php" data-trim>
+class Foo {
+    public function __construct($params = [])
+    {
+        $this->params = $params;
+    }
+
+    public function createFromWhatever($whatever): static {
+        return new static($whatever);
+    }
+}
+	
+$foo = new Foo();
+var_dump($foo); // object(Foo)#1 { ["params"]=> [] }
+
+$bar = $foo->createFromWhatever(['x' => 'y']);
+var_dump($bar);	// object(Foo)#2 { ["params"]=> ["x" => "y"]}
+</code></pre>				
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Fluent interfaces</h2>
+<pre><code class="php" data-trim>
+class Test {
+    public function doWhatever(): static {
+        // Do whatever.
+        return $this;
+    }
+}	
+</code></pre>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Weak maps</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Weak maps (<a href="https://wiki.php.net/rfc/weak_maps" target="_blank">RFC</a>)</h2>
+					<p>To provide "weakly referenced" map objects</p>
+<pre><code class="php" data-trim>
+$map = new WeakMap;
+$obj = new stdClass;
+$map[$obj] = 42;
+var_dump($map);
+// object(WeakMap)#1 (1) {
+//   [0]=> [ 
+//     "key" => object(stdClass)#2,
+//     "value" => int(42)
+//   ]
+// }
+	
+// The object is destroyed here, key automatically removed
+unset($obj);
+var_dump($map);
+// object(WeakMap)#1 (0) { }	
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Weakmap class</h2>
+<pre><code class="php" data-trim>
+final class WeakMap implements ArrayAccess, Countable, Traversable {
+    public function offsetGet($object);
+    public function offsetSet($object, $value): void;
+    public function offsetExists($object): bool;
+    public function offsetUnset($object): void;
+    public function count(): int;
+}	
+</code></pre>					
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Example: caching objects</h2>
+<pre><code class="php" data-trim>
+class Foo {
+    private WeakMap $cache;
+	
+    public function getSomethingWithCaching(object $obj) {
+        return $this->cache[$obj] ??= $this->somethingExpensive($obj);
+    }
+	
+    // ...
+}
+</code></pre>
+					<p class="fragment"><small>??= <a href="null_coalesce_equal_operator">Null Coalescing Assignment</a> (PHP 7.4+)</small></p>					
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">::class on objects</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>::class on objects (<a href="https://wiki.php.net/rfc/class_name_literal_on_object" target="_blank">RFC</a>)</h2>
+<pre><code class="php" data-trim>
+$object = new stdClass;
+var_dump($object::class); // "stdClass"
+	
+$object = null;
+var_dump($object::class); // TypeError
+</code></pre>		
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">Stringable interface</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>Stringable interface (<a href="https://wiki.php.net/rfc/stringable">RFC</a>)</h2>
+<pre><code class="php" data-trim>					
+interface Stringable
+{
+    public function __toString(): string;
+}
+</code></pre>
+					<p class="fragment"><strong>Stringable</strong> interface is automatically added to classes that implement the <strong>__toString()</strong> method</p>
+				</section>
+
+				<section data-background="#378135" data-state="elastic-footer-off">
+					<h2 style="color:white">PHP 8</h2>
+					<h3 style="color:white">BC breaks</h3>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>BC breaks</h2>
+					<ul>
+						<li class="fragment">Reclassified engine warnings (<a href="https://wiki.php.net/rfc/engine_warnings" target="_blank">RFC</a>)</li>
+						<li class="fragment">E_ALL as default (now is everything but E_NOTICE and E_DEPRECATED)</li>
+						<li class="fragment">The @ operator no longer silences fatal errors</li>
+						<li class="fragment">Concatenation precedence (<a href="https://wiki.php.net/rfc/concatenation_precedence" target="_blank">RFC</a>)</li>
+						<li class="fragment"><a href="https://github.com/php/php-src/blob/master/UPGRADING" target="_blank">Others...</a></li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-on">
+					<h2>PHP 8 Release date</h2>
+					<p>PHP 8 should be released on December 2020<br />(maybe Q1 2021)</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="elastic-footer-off">
+					<h3>References</h3>
+					<small>
+					<ul>
+						<li><a href="https://wiki.php.net/rfc">PHP RFC</a> official page</li>
+						<li><a href="https://php-rfc-watch.beberlei.de/">PHP RFC Watch</a></li>
+						<li>Brent Roose, <a href="https://stitcher.io/blog/new-in-php-8">New in PHP 8</a></li>
+						<li>Arkadiusz Kondas, <a href="https://arkadiuszkondas.com/compiling-php-8-from-source-with-jit-support/">Compiling PHP 8 from source with JIT support</a></li>
+						<li>Níckolas Da Silva, <a href="https://thephp.website/en/issue/php-8-jit/">Understanding PHP 8's JIT</a></li>
+						<li>Benoit Jacquemont, <a href="https://www.youtube.com/watch?v=g3RPYtwP1jk">PHP 8 et Just In Time Compilation</a>, PHPForum 2019</li>
+						<li>Nikita Popov, <a href="https://nikic.github.io/2017/04/14/PHP-7-Virtual-machine.html">PHP 7 Virtual Machine</a></li>
+						<li>Anthony Ferrara, <a href="https://blog.ircmaxell.com/2019/04/compilers-ffi.html">A PHP Compiler, aka The FFI Rabbit Hole</a></li>
+					</ul>
+					</small>
+				</section>
+
+				<section data-state="elastic-footer-off">
+					<h2>Thanks!</h2>
+					<p>Follow me: <a href="https://twitter.com/ezimuel" >@ezimuel</a></p>
+					<p>Subscribe to PUG Torino on <a href="https://www.meetup.com/it-IT/pugTO-PHP-User-Group-Torino/">Meetup</a>!</p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" ><img alt="Creative Commons License" style="border-width:0" src="/img/slides/pugtorino/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+			</div>
+		</div>
+
+		<aside id="elastic-footer">
+			<div style="float:left" id="twitter">
+				<img src="/img/slides/pugtorino/twitter.png"> <a href="https://twitter.com/pugtorino" style="text-decoration:none">&#64;pugtorino</a>
+			</div>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+			Reveal.addEventListener('elastic-footer-on', function() {
+				document.getElementById('elastic-footer').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('elastic-footer-off', function() {
+				document.getElementById('elastic-footer').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
