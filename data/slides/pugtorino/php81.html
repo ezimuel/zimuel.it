@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+        <base href="/lib/reveal.js-3.8.0/">
+		<title>The new features of PHP 8.1</title>
+
+		<meta name="description" content="The new features of PHP 8.1">
+		<meta name="author" content="Enrico Zimuel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/php8.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-state="phpday-footer-off" data-background-image="/img/slides/pugtorino/background2.jpg">
+					<h2 align="left" style="color:white">The new features of PHP 8.1</h2>
+					<p  align="left">
+						<small>by <a href="http://www.zimuel.it" >Enrico Zimuel</a><br />
+						<i>Principal Software Engineer</i> &#64; <a href="https://www.elastic.co" >Elastic</a></small><br /><br />
+						<br />
+						<small><a href="http://torino.grusp.org/" >PUG Torino</a>, Jun 23, 2021</small>
+					</p>
+					<p align="left">
+						<a href="https://www.grusp.org/it/"><img src="/img/slides/pugtorino/grusp.png" height="83" class="noborder"></a>
+						<a href="http://torino.grusp.org/"><img src="/img/slides/pugtorino/logo_pugtorino.png" height="83" class="noborder" style="margin-left:45px;"></a>
+						<a href="https://www.toolboxoffice.it/en/"><img src="/img/slides/pugtorino/toolbox.png" height="83" class="noborder" style="margin-left:40px"></a>
+					</p>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="35%" style="padding-right:0;vertical-align: top">
+								<a href="https://www.sviluppareinphp7.it/"><img src="/img/slides/pugtorino/sviluppareinphp7_ii_edizione.jpg" class="noborder"></a>
+							</td>
+							<td style="vertical-align: middle">
+								<ul>
+									<li>Developer since 1996</li>
+									<li>Principal Engineer at <a href="https://www.elastic.co/" target="_blank">Elastic</a></li>
+									<li><a href="https://github.com/ezimuel/">Open source contributor</a></li>
+									<li><a href="https://www.youtube.com/watch?v=SienrLY40-w">TEDx</a> and international speaker</li>
+									<li>Teaching at <a href="http://www.its-ictpiemonte.it/">ITS ICT Piemonte</a></li>
+									<li>Author of <a href="https://www.sviluppareinphp7.it/">Sviluppare in PHP 7</a></li>
+									<li>Co-founder of <a href="http://torino.grusp.org" target="_blank">PUG Torino</a></li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<img src="/img/slides/pugtorino/logo_pugtorino.png" class="noborder" height="100">
+					<ul>
+						<li class="fragment">Part of <a href="http://www.grusp.org/it/">GrUSP</a> association</li>
+						<li class="fragment">Founded in <a href="http://torino.grusp.org/2011/06/e-nato-il-pug-torino/">2011</a></li>
+						<li class="fragment">560+ members on <a href="https://www.meetup.com/it-IT/pugTO-PHP-User-Group-Torino/">meetup.com</a></li>
+						<li class="fragment">Meetup approximately every two months</li>
+						<li class="fragment">Sponsor: <a href="https://www.toolboxoffice.it/en/">Toolbox Coworking</a> Torino</li>
+					</ul>
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">PHP 8.1</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>New features (some)</h2>
+					<ul>
+						<li class="fragment">Enums (<a href="https://wiki.php.net/rfc/enumerations" target="_blank">RFC</a>)</li>
+						<li class="fragment">Fibers (<a href="https://wiki.php.net/rfc/fibers" target="_blank">RFC</a>)</li>
+						<li class="fragment">Never type (<a href="https://wiki.php.net/rfc/noreturn_type" target="_blank">RFC</a>)</li>
+						<li class="fragment">array_is_list (<a href="https://wiki.php.net/rfc/is_list" target="_blank">RFC</a>)</li>
+						<li class="fragment">fsync and fdatasync (<a href="https://wiki.php.net/rfc/fsync_function" target="_blank">RFC</a>)</li>
+						<li class="fragment">Final class constant (<a href="https://wiki.php.net/rfc/final_class_const">RFC</a>)</li>
+						<li class="fragment">Static variables in inheritance methods (<a href="https://wiki.php.net/rfc/static_variable_inheritance">RFC</a>)</li>
+						<li class="fragment">New in initializers* (<a href="https://wiki.php.net/rfc/new_in_initializers">RFC</a>)</li>
+					</ul>
+					<p class="fragment"><small>* under discussion</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>PHP 8.1 schedule</h2>
+					<img src="/img/slides/pugtorino/release_php81.png" class="noborder" width="50%">
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">Enums</h2>
+				</section>
+				
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Enums</h2>
+					<p>Enum represents a collection of constant values</p>
+<pre><code class="php" data-trim>
+enum Currency {
+    case GBP;
+    case EUR;
+}
+
+class Product {
+    function __construct(
+        private string $name, 
+        private float $amount, 
+        private Currency $currency) {
+            var_dump($currency);
+    }
+}
+
+$a = new Product('Green', 5.50, Currency::EUR); // enum(Currency::EUR)
+$b = new Product('Red', 6.20, "EUR"); // Fatal error
+</code></pre>					
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h3>Enums values (Backed enums)</h3>
+<pre><code class="php" data-trim>
+enum Currency: string {
+    case GBP = '£'; // string or int
+    case EUR = '€';
+}
+
+$currency = Currency::EUR;
+
+var_dump($currency->value); // €
+var_dump($currency->name); // EUR
+var_dump(Currency::from('€')); // enum(Currency::EUR)
+var_dump(Currency::tryFrom('$')); // NULL
+</code></pre>					
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Enums value listing</h2>
+<pre><code class="php" data-trim>
+enum Currency: string {
+    case GBP = '£';
+    case EUR = '€';
+}
+
+var_dump(Currency::cases());
+/*
+array(2) {
+    [0]=>
+    enum(Currency::GBP)
+    [1]=>
+    enum(Currency::EUR)
+}
+*/
+</code></pre>					
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Enums functions</h2>
+<pre><code class="php" data-trim>
+enum Currency: string {
+    case GBP = '£';
+    case EUR = '€';
+
+    public function format (float $amount)
+    {
+        $pattern = match ($this) {
+            Currency::GBP => "{$this->value} %.2f",
+            Currency::EUR => "%.2f {$this->value}",
+        };
+        return sprintf($pattern, $amount);
+    }
+}
+
+$cur = Currency::GBP;
+echo $cur->format(42.75); // £ 42.75
+</code></pre>					
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h3>Enums static functions</h3>
+<pre><code class="php" data-trim>
+enum Currency: string {
+    case GBP = '£'; // string or int
+    case EUR = '€';
+
+    static public function fromLocale (string $locale)
+    {
+        return match($locale) {
+            'nl_NL' => static::EUR,
+            'it_IT' => static::EUR,
+            'en_GB' => static::GBP,
+        };
+    }
+}
+
+$cur = Currency::fromLocale('it_IT');
+echo $cur->value; // €
+</code></pre>					
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">Fibers</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Fibers</h2>
+					<ul>
+						<li class="fragment"><strong>Fibers</strong> implement <a href="https://en.wikipedia.org/wiki/Cooperative_multitasking">cooperative multitasking</a> in PHP</li>
+						<li class="fragment">A <strong>Fiber</strong> is a code block that maintains its own stack (variables and state), that can be started, suspended, or terminated cooperatively by the main code and the Fiber</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Cooperative multitasking</h2>
+					<img src="/img/slides/pugtorino/cooperative_vs_preemptive.png" class="noborder" width="80%">
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Concurrent execution</h2>
+					<img src="/img/slides/pugtorino/fiber-concurrency.svg" class="noborder" height="60%">
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Not executed in parallel</h2>
+					<ul>
+						<li class="fragment">The Fiber and the main execution flow <u>does not happen at the same time</u></li>
+						<li class="fragment">It is up to the main execution flow to start a Fiber, and when it starts, the Fiber is executed exclusively</li>
+						<li class="fragment">Only one Fiber can be executed at time</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Fiber class</h2>
+<pre><code class="php" data-trim>					
+final class Fiber
+{
+    public function __construct(callable $callback) {}
+    public function start(mixed ...$args): mixed {}
+    public function resume(mixed $value = null): mixed {}
+    public function getReturn(): mixed {}
+    public function throw(Throwable $exception): mixed {}
+    public function isStarted(): bool {}
+    public function isSuspended(): bool {}
+    public function isRunning(): bool {}
+    public function isTerminated(): bool {}
+
+    public static function suspend(mixed $value = null): mixed {}
+    public static function getCurrent(): ?self {}
+}
+</code></pre>		
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Basic Example</h2>
+<pre><code class="php" data-trim>					
+$fiber = new Fiber(function (): void {
+    $value = Fiber::suspend('fiber');
+    echo "Value used to resume fiber: ", $value, "\n";
+});
+	
+$value = $fiber->start();
+echo "Value from fiber suspending: ", $value, "\n";
+$fiber->resume('test');
+
+// Value from fiber suspending: fiber
+// Value used to resume fiber: test
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Example (1)</h2>
+<pre><code class="php" data-trim>						
+$files = [
+    'source/1.png' => 'dest/a.png',
+    'source/2.png' => 'dest/b.png',
+    'source/3.png' => 'dest/c.png',
+];
+
+$fiber = new Fiber(function(array $files): void {
+    foreach($files as $source => $destination) {
+        copy($source, $destination);
+        Fiber::suspend([$source, $destination]);
+    }
+});
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Example (2)</h2>
+<pre><code class="php" data-trim>						
+$copied = $fiber->start($files); // [$source, $destination]
+$copied_count = 1;
+$total_count  = count($files);
+
+while(!$fiber->isTerminated()) {
+    $perc = round($copied_count / $total_count, 2) * 100;
+    printf("[%d%%]: '%s' to '%s'\n", $perc, $copied[0], $copied[1]);
+    $copied = $fiber->resume();
+    ++$copied_count;
+}
+printf("Completed\n");
+
+// [33%]: 'source/1.png' to 'dest/a.png'
+// [67%]: 'source/2.png' to 'dest/b.png'
+// [100%]: 'source/3.png' to 'dest/c.png'
+// Completed
+</code></pre>
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">Never type</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Never type</h2>
+					<ul>
+						<li class="fragment"><strong>never</strong> is a new return type</li>
+						<li class="fragment">a function that is declared with the never return type indicates that it will never return a value, and always throws an exception or terminates with a die/exit call</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Example</h2>
+<pre><code class="php" data-trim>
+function redirect(string $uri): never {
+    header ('Location: ' . $uri);
+    exit();
+}
+
+redirect('Test');
+echo "This will never be executed!";
+</code></pre>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Example with error</h2>
+<pre><code class="php" data-trim>
+function redirect(string $uri): never {
+    header ('Location: ' . $uri);
+}
+
+redirect('Test'); 
+// Fatal error: never-returning function must not implicitly return
+echo "This will never be executed!";
+</code></pre>
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">array_is_list</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">					
+					<h2>array_is_list</h2>
+					<p><strong>array_is_list()</strong> returns whether a given array is an array with all sequential integers starting from 0</p>
+<pre class="fragment"><code class="php" data-trim>					
+$array = [4, 12, 3];
+var_dump(array_is_list($array)); // true
+
+$array = [0 => 'a', 1 => 'b'];
+var_dump(array_is_list($array)); // true
+
+$array = [ 'foo' => 'bar', 'baz' => 'bad'];
+var_dump(array_is_list($array)); // false
+
+$array = [0 => 'apple', 2 => 'bar'];
+var_dump(array_is_list($array)); // false
+</code></pre>
+				</section>
+				
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">fsync and fdatasync</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>fsync</h2>
+					<ul>
+						<li class="fragment"><strong>Fsync</strong> synchronizes changes to the file, including its meta-data. This is similar to <a href="https://www.php.net/manual/en/function.fflush.php">fflush</a>, but it also instructs the operating system to write to the storage media</li>
+						<li class="fragment">Can be useful in applications that consistent and persistent storage is important</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>fdatasync</h2>
+					<ul>
+						<li class="fragment"><strong>Fdatasync</strong> The fdatasync function synchronizes stream contents to storage media, just like <strong>fsync</strong> does, but it does not synchronize file meta-data</li>
+						<li class="fragment">This function is only effectively different in POSIX systems (e.g. in Windows, this function is aliased to <strong>fsync</strong>)</li>
+					</ul>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Example</h2>
+<pre><code class="php" data-trim>
+$file = 'test.txt';
+
+$fh = fopen($file, 'w');
+fwrite($fh, 'test data');
+fwrite($fh, "\r\n");
+fwrite($fh, 'additional data');
+
+fsync($fh);
+fclose($fh);
+</code></pre>
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">Final class constant</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>Final class constant*</h2>
+<pre><code class="php" data-trim>
+class Universe 
+{
+    final public const SPEED_OF_LIGHT = 299_458_792;
+}
+
+class RingSpace extends Universe
+{
+    public const SPEED_OF_LIGHT = 12_758;
+}
+
+// Fatal error: RingSpace::SPEED_OF_LIGHT cannot override
+//     final constant Universe::SPEED_OF_LIGHT	
+</code></pre>
+					<p><small>* Not available in PHP 8.1.0alpha1</small></p>
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">New in Initializers*</h2>
+					<p><small style="color:white">* under discussion</small></p>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>New in Initializers</h2>
+					<p class="fragment">In PHP 8.0</p>
+<pre class="fragment"><code class="php" data-trim>
+class Foo {
+  private Logger $logger;
+
+  public function __construct(?Logger $logger = null)
+  {
+    $this->logger = $logger ?? new NullLogger;
+  }
+}
+</code></pre>					
+					<p class="fragment">In PHP 8.1</p>
+<pre class="fragment"><code class="php" data-trim>
+class Foo {
+  public function __construct(private Logger $logger = new NullLogger)
+  {}
+}
+</code></pre>						
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h2>New in Initializers</h2>
+					<p class="fragment">Static variables</p>
+<pre class="fragment"><code class="php" data-trim>
+function counter() {
+    static $i = new Counter;
+}
+</code></pre>
+					<p class="fragment">Constants</p>
+<pre class="fragment"><code class="php" data-trim>
+class Repository {
+    const DB = new Database(dsn: 'sqlite://:memory:');
+}
+</code></pre>
+				</section>
+
+				<section data-background="#3774a4" data-state="phpday-footer-off">
+					<h2 style="color:white">Static variables in inheritance methods</h2>
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-on">
+					<h3>Static variables in inheritance methods</h3>
+<pre><code class="php" data-trim>
+class A {
+    public static function counter() {
+        static $i = 0;
+        return ++$i;
+    }
+}
+class B extends A {}
+
+printf ("%d %d %d %d",
+    A::counter(),
+    A::counter(),
+    B::counter(),
+    B::counter()
+);
+// PHP <= 8.0, 1 2 1 2
+// PHP >= 8.1, 1 2 3 4	
+</code></pre>						
+				</section>
+
+				<section data-background="#ffffff" data-state="phpday-footer-off">
+					<h3>References</h3>
+					<small>
+					<ul>
+						<li>PHP.Watch, <a href="https://php.watch/versions/8.1">PHP 8.1: What's New and Changed</a></li>
+						<li>Brent Roose, <a href="https://stitcher.io/blog/new-in-php-81">What's new in PHP 8.1</a></li>
+						<li>Italo Baeza Cabrera, <a href="https://betterprogramming.pub/a-look-at-the-new-php-8-1-fibers-feature-979489399918">A Look at the New PHP 8.1 Fibers Feature</a></li>
+						<li>Oleg Melnic, <a href="https://hackernoon.com/php-81-new-features-you-need-to-know-about-snz33bk">PHP 8.1: New Features You Need To Know About</a></li>
+						<li>Hatem Ben Yacoub, <a href="https://phpmagazine.net/2021/03/php-fibers-new-php-8-1-feature.html">PHP Fibers, the New Controversial PHP 8.1 Feature Not For You!</a></li>
+						<li>Sakis Bal, <a href="https://dev.to/thanasismpalatsoukas/php-8-1-on-new-heights-with-amazing-new-additions-1gcg">PHP 8.1 On New Heights With Amazing New Additions </a></li>
+						<li>RVxLab, <a href="https://dev.to/rvxlab/my-opinion-on-the-php-8-1-enum-rfc-1dkf">My opinion on the PHP 8.1 Enum RFC</a></li>
+						<li>Milan Latinovic, <a href="https://www.milanlatinovic.com/enumerations-in-php-8-1-rfc/">Enumerations in PHP 8.1 RFC</a></li>
+					</ul>
+					</small>
+				</section>
+
+				<section data-state="phpday-footer-off" data-background-image="/img/slides/pugtorino/background2.jpg">
+					<h2 style="color:white">Thanks!</h2>
+					<p>Follow me: <a href="https://twitter.com/ezimuel" >@ezimuel</a></p>
+					<p>Subscribe to PUG Torino on <a href="https://www.meetup.com/it-IT/pugTO-PHP-User-Group-Torino/">Meetup</a>!</p>
+					<p><small><br /><br />
+					<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" ><img alt="Creative Commons License" style="border-width:0" src="/img/slides/pugtorino/license.png" /></a><br />This work is licensed under a<br /> <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br />I used <a href="http://lab.hakim.se/reveal-js">reveal.js</a> to make this presentation.</small></p>
+				</section>
+			</div>
+		</div>
+
+        <aside id="phpday-footer">
+			<p><a href="https://twitter.com/pugtorino">@PUGtorino</a></p>
+		</aside>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+        			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+				]
+			});
+
+            Reveal.addEventListener('phpday-footer-on', function() {
+				document.getElementById('phpday-footer').style.visibility = 'visible';
+				document.getElementById('phpday-header').style.visibility = 'visible';
+			}, false);
+
+			Reveal.addEventListener('phpday-footer-off', function() {
+				document.getElementById('phpday-footer').style.visibility = 'hidden';
+				document.getElementById('phpday-header').style.visibility = 'hidden';
+			}, false);
+		</script>
+
+	</body>
+</html>
