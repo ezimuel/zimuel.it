@@ -24,8 +24,8 @@ class HomePage
     {
         $data = [
             'posts'  => $this->post->getItems(0,4),
-            'events' => $this->config['events'],
-            'book'   => $this->config['book']
+            'events' => $this->config['events'] ?? '',
+            'book'   => $this->config['book'] ?? ''
         ];
         return new HtmlResponse($this->template->render('app::home', $data));
     }

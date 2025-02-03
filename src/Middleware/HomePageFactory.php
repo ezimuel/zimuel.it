@@ -16,6 +16,6 @@ class HomePageFactory
         $config = $container->get('config');
         $post   = new Post('data/posts');
 
-        return new HomePage($config['home'], $post, $template);
+        return new HomePage($config['home'] ?? [], $post, $template);
     }
 }
