@@ -1,0 +1,181 @@
+<post date="2025-06-28" img="background_function_call.jpg" title="Tools calling in Agentic AI" sub="How LLMs power Agentic AI systems">
+
+<p>One of the most fascinating developments of Large Language Models (LLMs) is their ability to <strong>call tools</strong>, meaning generating structured function calls when they realize they need external data or actions to complete a task.</p>
+<p>Even more remarkable, this wasn't originally a feature anyone designed for.
+Tool calling emerged unexpectedly</strong> as a byproduct of scaling up language models.</p>
+
+<h2>An emergent property</h2>
+
+<p>The concept of emerging properties is well known in philosophy, systems theory, science, and art. <a href="https://en.wikipedia.org/wiki/Philip_W._Anderson">Philip W. Anderson</a>, who won the Nobel Prize in Physics in 1977, defined emergence as follows:
+<blockquote>Emergence is when quantitative changes in a system result in qualitative changes in behavior.</blockquote>
+</p>
+
+<p>The term <i>"quantitative changes"</i> in the context of Artificial Intelligence (AI) refers to changing the size of the model. For large language models (LLMs), this size is typically measured by the number of parameters. When we increase the number of parameters from 3 billion to 175 billion or more, we can expect new properties to emerge (GPT-4 has about <a href="https://explodingtopics.com/blog/gpt-parameters">1.76 trillion</a> parameters!).</p>
+<p>Research by <a href="https://openai.com/">OpenAI</a> and others (like in <a href="https://arxiv.org/abs/2112.09332">WebGPT</a> and <a href="https://arxiv.org/abs/2302.04761">Toolformer</a>) showed that as LLMs grew, they started to <strong>implicitly learn how to use external tools</strong> such as calculators, search engines, or APIs—just by observing how those tools were described in training data.</p>
+
+<p>LLMs learned patterns like:
+
+<pre>
+To get weather data, call get_weather("New York").
+</pre>
+
+<p>This ability wasn't manually engineered. It was the result of exposure to enough examples in their training corpus. Over time, the models learned not just how to generate natural language—but also how to generate the <strong>correct shape of structured calls</strong>.</p>
+<p>There are many other emergent properties in LLMs, like Question Answering, Summarization, In-Context Learning, Coding, etc.</p>
+<p>In this article we will focus on <strong>Tool calling</strong> (or Function calling), to learn more about other properties you can read the <a href="">Emergent Abilities of Large Language Models</a> article by Jason Wei et al. in 2022.</p>
+
+<h2>The tool calling feature</h2>
+
+<p>Recognizing the power of this emergent behavior, OpenAI formalized it in mid-2023 with the release of <a href="https://openai.com/index/function-calling-and-other-api-updates/">function calling support</a> in its Chat Completions API.</p>
+
+<p>While the original behavior emerged naturally, turning it into a reliable feature required <strong>fine-tuning and alignment</strong>.</p>
+<p>These are some of the techniques used to refine tool calling:</p>
+
+<ul>
+    <li><strong>Instruction Fine-Tuning</strong>: they fine-tuned LLMs on curated examples of tool usage, reinforcing how and when to trigger a function call. This improved the model's consistency, especially in distinguishing when to generate natural language vs. structured calls.</li>
+    <li><strong>System Message Priming</strong>: models are given special system-level prompts that describe the tools they can access—similar to giving an assistant a toolbox and a manual before they begin work.</li>
+    <li><strong>Schema Enforcement</strong>: tools are described using JSON Schema, allowing the model to understand not only what functions exist but also what arguments are required and in what format.</li>
+    <li><strong>Reinforcement Learning from Human Feedback (RLHF)</strong>: human feedback helped align the model's decision-making, making it better at choosing <strong>when</strong> to use a tool and <strong>what</strong> data to request.</li>
+    <li><strong>Guardrails and Delegation</strong>: the model only suggests the function call—the execution happens externally. This keeps the model secure and reduces hallucination risks.</li>
+</ul>
+
+<h2>How tool calling works</h2>
+
+<p>Let's focus on how tool calling works with an example. We want to extend the knowledge of an LLM with a tool, called <i>get_weather</i>, that is able to retrieve the real-time temperature of a city.</p>
+<p>The process to instruct the LLM how to use this tool is formalized using a JSON structure. We need to interact with the LLM sending two requests (see diagram below):
+    <ul>
+        <li>the first request contains the tool to be used (<font color="#1b71c1">step 1</font> in the diagram);</li>
+        <li>the second request sends the content result of the tool execution (<font color="#1b71c1">step 5</font>).</li>
+    </ul>
+</p>
+<p>The details of the procedure requires the execution of 6 steps. Below we reported the diagram of these steps with some Python code with the details.</p>
+<img src="/img/post/function_call.gif" width="100%">
+
+<p>Steps of the tool calling:</p>
+<ol>
+    <li>We send the question <i>What's the temperature now in Milan?</i> with the tools specification in JSON format for the <strong>get_weather</strong> function to the LLM (in this example we use OpenAI with <a href="https://platform.openai.com/docs/models/gpt-4o-mini">gpt-4o-mini</a>)
+<p><pre><code class="python">from openai import OpenAI
+
+client = OpenAI()
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Get current temperature for a given location.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "City and country e.g. Rome, Italy"
+                }
+            },
+            "required": [
+                "location"
+            ],
+            "additionalProperties": False
+        },
+        "strict": True
+    }
+}]
+messages = [{
+    "role": "user", 
+    "content": "What's the temperate now in Milan?"
+}]
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=messages,
+    tools=tools
+)
+</code></pre></p>
+    <a name="tools"></a>
+    In the tools parameter of client.chat.completions.create() function, we specify <strong>when</strong> the LLM should request the tool and <strong>how</strong> it should do so.<br />
+    The <strong>when</strong> is defined using the <strong>description</strong> of the function, which in this case is <i>"Get current temperature for a given location."</i><br />
+    The <strong>how</strong> is specified through the <strong>parameters</strong> property. In our case, we have only one parameter: <strong>location</strong>.<br />
+    The descriptions of the function and its parameters play a critical role. If we don't use clear and accurate descriptions, the LLM may become confused and fail to trigger the function call.
+    </li>
+    <li>
+        LLM replies with a <strong>function_call</strong> response; it basically recognize the need to execute the tool (function). The response contains a <strong>call_id</strong>, an identifier needed to match the function call in the next steps.
+<p><pre><code class="json">[{
+    "type": "function_call",
+    "id": "fc_12345xyz",
+    "call_id": "call_12345xyz",
+    "name": "get_weather",
+    "arguments": "{\"location\":\"Milan, Italy\"}"
+}]
+</code></pre></p>
+    <p>The LLM is able to extract the proper data for the function arguments, in this case <i>"Milan, Italy"</i> for the <strong>location</strong>.</p>
+    </li>
+    <li>
+        We can extract the function parameter using the <strong>kwargs</strong> variable and passing to <strong>get_weather(**kwargs)</strong>, using the <a href="https://www.educative.io/answers/what-are-keyword-arguments-in-python">arbitrary arguments feature</a> of Python.<br />
+<p><pre><code class="python">tool_call = response.choices[0].message.tool_calls[0]
+kwargs = json.loads(tool_call.function.arguments)
+
+# Execute the function
+content = get_weather(**kwargs)
+print(f"Response from get_weather(): {content}")
+</code></pre></p>
+    <p>The function <strong>get_weather()</strong> is implemented as follows (we omitted the actual API call, <a href="https://gist.github.com/ezimuel/3625dbbfeeb0a1776eb4bdf78df86737">here</a> you can see a real example of implementation using <a href="https://open-meteo.com/">Open-meteo</a>:</p>
+<p><pre><code class="python">import requests
+
+def get_weather(location: str)-> str:
+    """
+    Get current temperature for a given location.
+
+    Args:
+        location (str): City and country e.g. Rome, Italy
+    """
+    response = requests.get(f"https://someapi?location={location}")
+    data = response.json()
+    return f"{data['temperature']} °C"
+</code></pre></p>
+        This step of the function execution is very important from an architectural point of view. Here we can add all the logic that we want. This part is deterministic since it is executed by a CPU and not by an LLM.<br />
+        For instance, we can insert a human feedback in the loop, check the validation of the input parameters or decide to do not execute the tool for a security reason, etc.<br />
+    </li>
+
+    <li>The weather API responds with a simple string with the temparature in celsius degree, e.g. <i>"32 °C"</i></li>
+    <li>We resends the question + the temperature (the content) to the LLM.
+<p><pre><code class="python"># append the previous function call message
+messages.append(response.choices[0].message)
+# append result message
+messages.append({
+    "role": "tool",
+    "tool_call_id": tool_call.id,
+    "content": content
+})
+
+response2 = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=messages,
+    tools=tools,
+)
+print(f"Response from LLM: {response2.choices[0].message.content}")
+</code></pre></p>
+
+    </li>
+    <li>Finally, the LLM is able to give a response to the question with the output <strong>"The current temperature in Milan, Italy is 32 °C."</strong></li>
+</ol>
+
+<h2>Choosing the right model</h2>
+
+<p>If you want to use the function call, you need to check if the LLM that you want to use offers this feature. For instance, using OpenAI the model that performs better is GPT-4o (also in the mini version with <a href="https://platform.openai.com/docs/models/gpt-4o-mini">gpt-4o-mini</a>).</p>
+<p>There are many others LLM that you can use, even running locally using <a href="https://ollama.com/">Ollama</a> or <a href="https://localai.io/">LocalAI</a>.</p>
+<p>You need to check the model specification to understand if the Function call is present. For instance, Llama3.2 at 1B parameters <a href="https://ollama.com/library/llama3.2:1b">has not been fine-tuned for function call</a>.</p>
+<p>If you want to know what LLM is the best for function call, you can have a look at the <a href="https://gorilla.cs.berkeley.edu/leaderboard.html">Berkeley Function-Calling Leaderboard</a> page.</p>
+<img src="/img/post/berkeley_function_call_bench.png" width="100%">
+<p>At the moment of writing this article, the best LLM for function-calling is <a href="https://huggingface.co/Salesforce/Llama-xLAM-2-70b-fc-r">xLAM-2 at 70B</a> with an overall accuracy of <strong>78.45%</strong> (GPT-4o is around 71%). <a href="https://github.com/SalesforceAIResearch/xLAM">xLAM</a> is a family of Large Action Models based on Llama and developed by <a href="https://www.salesforce.com/agentforce/large-action-models/">Salesforce</a>.</p>
+
+<h2>A Gateway to Autonomous AI</h2>
+
+<p>Today, tool calling powers everything from simple weather bots to <strong>fully autonomous agents</strong> that can reason, act, and interact with APIs in loops. It's the cornerstone of systems like:</p>
+
+<ul>
+    <li><strong>Agentic AI</strong>, e.g. assistants that book flights, summarize PDFs, or automate workflows;</li>
+    <li><strong>Multi-agent ecosystems</strong>, collaborating models that divide and conquer tasks;</li>
+    <li><strong>Context-aware applications</strong> using standards like the <a href="https://modelcontextprotocol.io/introduction">Model Context Protocol (MCP)</a>.</li>  
+</ul> 
+
+<h2>Conclusion</h2>
+
+<p>Tool calling started as a surprise. No one explicitly programmed it. But like many of the most powerful features in modern AI, it <strong>emerged</strong>—and was then <strong>refined</strong> into a reliable, developer-friendly capability through fine-tuning and structured integration.</p>
+
+<p>As tool calling continues to evolve, it blurs the line between language understanding and software execution—transforming LLMs from chatbots into autonomous digital workers.</p>
