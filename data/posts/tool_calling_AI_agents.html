@@ -114,7 +114,7 @@ kwargs = json.loads(tool_call.function.arguments)
 content = get_weather(**kwargs)
 print(f"Response from get_weather(): {content}")
 </code></pre></p>
-    <p>The function <strong>get_weather()</strong> is implemented as follows (we omitted the actual API call, <a href="https://gist.github.com/ezimuel/3625dbbfeeb0a1776eb4bdf78df86737">here</a> you can see a real example of implementation using <a href="https://open-meteo.com/">Open-meteo</a>:</p>
+    <p>The function <strong>get_weather()</strong> is implemented as follows (we omitted the actual API call, <a href="https://gist.github.com/ezimuel/3625dbbfeeb0a1776eb4bdf78df86737">here</a> you can see a real example of implementation using <a href="https://open-meteo.com/">Open-meteo</a>):</p>
 <p><pre><code class="python">import requests
 
 def get_weather(location: str)-> str:
