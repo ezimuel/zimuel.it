@@ -164,6 +164,16 @@ print(f"Response from LLM: {response2.choices[0].message.content}")
 <p>If you want to find out which LLM performs best for function calling, you can refer to the <a href="https://gorilla.cs.berkeley.edu/leaderboard.html">Berkeley Function-Calling Leaderboard</a> page.</p>
 <img src="/img/post/berkeley_function_call_bench.png" width="100%">
 <p>At the time of writing this article, the best LLM for function-calling is <a href="https://huggingface.co/Salesforce/Llama-xLAM-2-70b-fc-r">xLAM-2 at 70B</a> with an overall accuracy of <strong>78.45%</strong> (GPT-4o is around 71%). <a href="https://github.com/SalesforceAIResearch/xLAM">xLAM</a> is a family of Large Action Models based on Llama and developed by <a href="https://www.salesforce.com/agentforce/large-action-models/">Salesforce</a>.</p>
+<p>Moreover, selecting the right model also involves considering resource usage. If we want to deploy Agentic AI systems in production, we cannot expect to run every workflow using a Large Language Model (LLM).</p>
+<p>There are two main problems with this approach:
+    <ul>
+        <li>high resource consumption;</li>
+        <li>latency in response time.</li>
+    </ul>
+</p>
+<p>Today, LLMs consume significant resources, and an Agentic AI system multiplies this usage by <a href="https://www.anthropic.com/engineering/built-multi-agent-research-system#benefits-of-a-multi-agent-system">4 to 15 times the tokens used in a single LLM interaction</a>.</p>
+<p>Regarding latency, the issue is even more evident: we cannot expect Agentic AI systems to provide answers in tens of seconds when responses are needed within milliseconds.</p>
+<p>These points were highlighted in a recent article <a href="https://arxiv.org/pdf/2506.02153">Small Language Models are the Future of Agentic AI</a> by Peter Belcak et al. from NVIDIA Research.</p>
 
 <h2>A Gateway to Autonomous AI</h2>
 
