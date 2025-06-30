@@ -133,8 +133,8 @@ def get_weather(location: str)-> str:
         For instance, we can insert a human feedback in the loop, check the validation of the input parameters or decide to do not execute the tool for a security reason, etc.<br />
     </li>
 
-    <li>The weather API responds with a simple string with the temparature in celsius degree, e.g. <i>"32 °C"</i></li>
-    <li>We resends the question + the temperature (the content) to the LLM.
+    <li>The weather API responds with a simple string with the temperature in celsius degree, e.g. <i>"32 °C"</i></li>
+    <li>We resend the question + the temperature (the content) to the LLM.
 <p><pre><code class="python"># append the previous function call message
 messages.append(response.choices[0].message)
 # append result message
