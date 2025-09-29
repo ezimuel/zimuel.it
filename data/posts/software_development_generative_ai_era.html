@@ -1,25 +1,92 @@
-<post date="2025-09-24" img="background_function_call.jpg" title="Software Development in the GenAI Era" sub="Governing Probability and New Agentic Architectures">
+<post date="2025-09-29" img="background_probability_llm.jpg" title="Software Engineering in the Age of Generative AI" sub="Managing Uncertainty and Agentic Design">
 
-<p>The advent of Generative AI (GenAI) is triggering a paradigm shift in software engineering. We are moving from a world dominated by deterministic logic, where every line of code executes a precise instruction, to an ecosystem where we integrate components based on probabilistic models. This transition forces us to radically rethink architectures, patterns, and best practices, especially as we put AI agents into production without a solid understanding of how they work and how to control them. The risk of exposing critical decision points to a non-deterministic system without adequate control mechanisms is one of the greatest challenges we face.</p>
+<p>The advent of Generative AI (GenAI) is triggering a paradigm shift in software engineering. We are moving from a world dominated by deterministic logic, where every line of code executes a precise instruction, to an ecosystem where we integrate components based on <strong>probabilistic models</strong>.</p>
+<p>This transition forces us to radically rethink architectures, patterns, and best practices, especially as we put AI agents into production without a solid understanding of how they work and how to control them. The risk of exposing critical decision points to a non-deterministic system without adequate control mechanisms is one of the greatest challenges we face.</p>
+
+<h2>Probability</h2>
+<p>
+<strong>Probability</strong> quantifies uncertainty: it assigns a number between 0 and 1 to how likely an event is.
+<ul>
+    <li><strong>0</strong> = impossible</li>
+    <li><strong>1</strong> = certain</li>
+    <li>Values in between compare relative likelihoods</li>
+</ul>
+Formally, given a set of all possible outcomes (the <em>sample space</em>), probabilities over outcomes sum to 1.
+</p>
+
+<h3>Example with a dice</h3>
+<p>
+<img src="/img/post/dice.png" alt="dice" style="float: right; margin: 0 0 10px 20px; width: 150px;"/>
+Roll a fair six-sided dice. The possible results are {1, 2, 3, 4, 5, 6}, this is called the <em>sample space</em>.
+The probability of each outcome is 1/6, since the dice is fair and all outcomes are equally likely.
+We can indicate the probability as a function with the letter P, as follows:
+</p>
+<ul>
+<li>P(roll = 3) = 1/6</li>
+<li>P(roll is even) = P(roll = {2, 4, 6}) = 3/6 = 1/2</li>
+</ul>
+<p>From this example, we can define the probability as the number of possible events over the number of total events.</p>
+<p>The probability can be also expressed using percentage, for example P(roll is even) = 50% that means we expect half of the rolls to be even (in a long running).</p>
+
+<p>
+    Probability can change if we know extra information. This is called <strong>conditional probability</strong>.
+    For example, what is the probability of an even result <strong>given</strong> the roll is &gt; 3?
+  </p>
+  <ul>
+    <li>Outcomes &gt; 3: {4, 5, 6}</li>
+    <li>Even among these: {4, 6}</li>
+    <li><strong>P(even | roll &gt; 3) = 2/3</strong></li>
+  </ul>
+<p>We use the symbol pipe <strong>|</strong> to indicate conditional probability. It reads as "the probability of even given roll > 3".</p>
+
+<p>For a great introduction about probability, I suggest this free course from Coursera, <a href="https://www.coursera.org/learn/introductiontoprobability">An Intuitive Introduction to Probability</a> by Prof. Karl Schmedders.</p> 
 
 <h2>Probabilistic models</h2>
 
-<p>Unlike traditional software, GenAI models like Large Language Models (LLMs) are inherently probabilistic. They do not provide a single, certain result but instead assign a probability to every possible outcome. For LLMs, this probability is associated with generating "tokens" (words or parts of words) in sequence, based on the preceding context</p>
+<p>Unlike traditional software, Generative AI models like Large Language Models (LLMs) are inherently probabilistic. Instead of producing a single, certain result, they assign probabilities to all possible outcomes. In the case of LLMs, these probabilities determine how "tokens" (words or parts of words) are generated in sequence, based on the preceding context.</p>
+<p>LLMs generate sentences by completing a given text, known as a prompt. For example, with the prompt "The cat is", an LLM might predict the token "eating", resulting in the sentence "The cat is eating".</p>
+<p>The choice of the next token depends on the probabilities assigned to each candidate token, given both the prompt and the tokens generated so far. This is often represented as a probability distribution over the model’s vocabulary, where each token has a specific likelihood of being selected as the next word in the sequence.</p>
 
-<p>This means that <strong>error is an intrinsic feature of the model</strong>. An LLM might generate a plausible but incorrect answer, or even "hallucinate" information. The challenge for developers is no longer just preventing logical bugs, but estimating and managing this probability of error. Some approaches to estimation include:</p>
+<p><img src="/img/post/llm.png" alt="llm" style="float: center;width:100%"/></p>
+
+<p>In the figure above, the LLM generates a distribution of probabilities for each token. Applying different strategies for choosing the next token, we can <strong>generate</strong> different sentences. For instance:<br />
+<ul>
+    <li>The cat is eating</li>
+    <li>The cat is playing</li>
+    <li>The cat is sleeping</li>
+    <li>...</li>
+</ul>
+</p>
+<p>The most probable token is “eating”, but the model can also generate “playing” or “sleeping” with lower probabilities. Typically, LLMs use the top-p sampling algorithm, which selects tokens from the smallest set whose cumulative probability is at least p.
+In our example, if p = 0.9, the smallest set of tokens is { “eating”, “playing”, “sleeping” }, since their combined probability reaches 0.9. This means the model may choose any of these three tokens.
+</p>
+<p>To generate a complete output, the algorithm repeatedly takes the generated text as input and continues producing tokens until it reaches a predefined length or meets a stopping criterion.</p>
+
+<p><img src="/img/post/llm_loopback.png" alt="llm loopback" style="float: center;width:100%"/></p>
+
+<h2>Managing uncertainty</h2>
+
+<p>The accuracy of modern LLMs  <a href="https://llm-stats.com/">has improved in recent years</a>, but sometimes the answers they generate can still be incorrect. But what exactly do we mean by an “incorrect” answer? After all, the output is just a sentence—so how do we decide whether it’s correct or not? The answer depends on context. An LLM might produce a response that sounds plausible but is factually wrong, or it may even <strong>hallucinate</strong> information.</p>
+<p>The model itself has no awareness of whether its answer is correct. It simply follows probabilistic patterns that guide how a sentence is completed.</p>
+<p>For example, the best LLMs achieve about <a href="https://artificialanalysis.ai/evaluations/gpqa-diamond">87% accuracy on the GPQA benchmark</a>, which means they fail in around 13% of cases. And that is only for one specific benchmark. LLMs will never achieve 100% accuracy across all possible use cases.</p>
+<p>This means that <strong>error is an intrinsic feature of these models</strong>. The challenge for developers is no longer just preventing logical bugs, but estimating and managing this probability of error. Some approaches to estimation include:</p>
 
 <ul>
-    <li><strong>Benchmarks</strong>: standardized question-and-answer sets, like the GPQA (Graduate-Level Google-Proof Q&A Benchmark), can be used to measure a model's accuracy on complex tasks</li> 
-    <li><strong>LLM as a judge</strong>: a second LLM can be used to evaluate the quality and correctness of the answer generated by the first, often against a pre-made set of questions and answers</li>
-    <li><strong>Verifying the output</strong>: if the output is a code, it can be executed to check its correctness.</li>
+    <li><p><strong>Benchmarks</strong>: standardized question-and-answer sets, like the <a href="https://arxiv.org/abs/2311.12022">GPQA (Graduate-Level Google-Proof Q&A Benchmark)</a>, can be used to measure a model's accuracy on complex tasks.</p></li> 
+    <li><p><strong>LLM as a judge</strong>: a second LLM can be used to evaluate the quality and correctness of the answer generated by the first, often against a pre-made set of questions and answers.</p></li>
+    <li><p><strong>Verifying the output</strong>: if the output is a code, it can be executed to check its correctness. For instance, if we generated a SQL statement from a natural language query, we can run the query and in case of errors, we can apply a retry mechanism, asking the LLM to rewrite the original question to get another chance.</p></li>
  </ul>
+</p>
 
-This probabilistic nature introduces new risks, such as "vibe coding". This is an iterative development practice where a developer prompts a model to generate and fix code without a deep understanding of the output. While useful for prototypes, this approach tends to generate architecturally complex ("spaghetti code") and risky code to put into production without rigorous human oversight
-.
 <h2>The New Architecture: Pillars of AI Agents</h2>
 
 <p>Modern software architectures are evolving to leverage LLMs not just as text generators, but as reasoning engines for autonomous agents.</p>
-<p>These "Agentic AI" systems can orchestrate complex, multi-step tasks and interact with the outside world. Their capabilities are founded on a few key (emergent) properties of large-scale language models:</p>
+<p><a href="https://karpathy.ai/">Andrej Karpathy</a> recently highlighted the importance the importance of these advancements in the presentation <a href="https://www.youtube.com/watch?v=LCEmiRjPEtQ">Software in the era of AI</a>. He introduced the concept of <strong>LLM OS</strong>, a new architecture in which the LLM functions as the CPU, the central component responsible for managing both data and computation.</p>
+<p><img src="/img/post/llm_os.png" alt="llm os" style="float: center;width:100%"/></p>
+
+<p>This idea forms the foundation of <strong>Agentic AI</strong> systems, which can orchestrate complex, multi-step tasks and interact with the outside world. In an Agentic AI application, we delegate the decision-making around task execution to an LLM. A key challenge is determining how and to what degree of autonomy we want to delegate control to the LLM.</p>
+<p>In other words, we are trying to answer the question: <strong>How can we build autonomous software systems?</strong></p>
+<p>What capabilities of LLMs can we leverage to build Agentic AI applications? Some of the key properties include:</p>
 <ol>
     <li>
         <p><strong>Task Decomposition:</strong> The most advanced models, often called Large Reasoning Models (LRMs), are trained to break down a complex problem into simpler, more manageable sub-problems. A common architectural pattern that implements this concept is <strong>ReAct (Reason + Action)</strong>, a loop where the agent first "reasons" about the next step (Reason) and then executes an action to achieve the goal (Act).</p>
@@ -42,22 +109,27 @@ This probabilistic nature introduces new risks, such as "vibe coding". This is a
     </li>
 </ol>
 
-<h2>Redefining Best Practices: From Intuition to "AgentOps"</h2>
+<h2>Redefining best practices</h2>
 
-Putting such complex and non-deterministic systems into production requires a shift in mindset, moving beyond intuitive "vibe-testing" to embrace a rigorous engineering approach
-. This has given rise to a new operational methodology: Agent Operations (AgentOps), which adapts the principles of DevOps and MLOPs to the unique challenges of AI agents
-.
-A robust evaluation framework, as proposed by AgentOps, must operate on multiple layers
-:
-• Component-level evaluation: Deterministic unit tests for tools and API integrations to ensure they are not the source of errors
-.
-• Trajectory evaluation: Analysis of the agent's reasoning process correctness. Did the agent choose the right tool? Did it extract the correct parameters? Was its "chain of thought" logical?
-.
-• Outcome evaluation: Verification of the semantic and factual correctness of the final response. Is it helpful, accurate, and based on verifiable data (grounded)?
-. Here, techniques like Retrieval-Augmented Generation (RAG) are fundamental to connect the model to reliable data sources and reduce hallucinations
-.
-• System-level monitoring: Once in production, it is essential to continuously monitor performance, tool failure rates, latency, and user feedback to detect behavioral drift
-.
+<p>Putting such complex and non-deterministic systems into production requires a shift in mindset, moving beyond intuitive "vibe-testing" to embrace a rigorous engineering approach.</p>
+
+<p>This has given rise to a new operational methodology: <a href="https://www.ibm.com/think/topics/agentops">Agent Operations (AgentOps)</a>, which adapts the principles of DevOps and MLOPs to the unique challenges of AI agents.</p>
+
+<p></p>A robust evaluation framework, as proposed by AgentOps, must operate on multiple layers:</p>
+<p>
+    <ul>
+        <li><p><strong>Component-level evaluation</strong>: Deterministic unit tests for tools and API integrations to ensure they are not the source of errors.</p></li>
+        <li><p><strong>Trajectory evaluation</strong>: Analysis of the agent's reasoning process correctness. Did the agent choose the right tool? Did it extract the correct parameters? Was its "chain of thought" logical?</p></li>
+        <li><p><strong>Outcome evaluation</strong>: Verification of the semantic and factual correctness of the final response. Is it helpful, accurate, and based on verifiable data (grounded)? Here, techniques like <a href="https://www.ibm.com/think/topics/retrieval-augmented-generation">Retrieval-Augmented Generation (RAG)</a> are fundamental to connect the model to reliable data sources and reduce hallucinations.</p></li>
+        <li><p><strong>System-level monitoring</strong>: Once in production, it is essential to continuously monitor performance, tool failure rates, latency, and user feedback to detect behavioral drift.</p></li>
+    </ul>
+</p>
+
 <h2>Conclusion</h2>
-<p>Software development in the GenAI era requires us to become architects of systems that orchestrate probabilistic reasoning engines. Success no longer depends solely on writing flawless code, but on our ability to govern uncertainty. This demands a mastery of agentic architectures built on task decomposition, tool invocation, and self-correction. Above all, it requires adopting disciplined engineering practices like AgentOps to ensure reliability, security, and control. As Shalini Kurapati, CEO of Clearbox AI, stated, "we need more developers in the AI era, not less," but their skills will need to evolve to include new professional roles like the Context Engineer, who specializes in providing the right context for models to operate effectively</p>
+
+<p>Software development in the GenAI era requires us to become architects of systems that orchestrate probabilistic reasoning engines. Success no longer depends solely on writing flawless code, but on our ability to govern uncertainty. This demands a mastery of agentic architectures built on task decomposition, tool invocation, and self-correction.</p>
+<p>Above all, it requires adopting disciplined engineering practices like AgentOps to ensure reliability, security, and control.</p>
+<p><blockquote>We need more developers in the AI era, not less.<br /> <cite>Shalini Kurapati PhD, CEO of <a href="https://www.clearbox.ai/">Clearbox AI</a></cite></blockquote></p>
+<p>I agree with <a href="https://www.linkedin.com/in/shalini-kurapati-phd-06516324">Shalini Kurapati</a>: we'll need more developers in the future but their skill sets will evolve to include new professional roles, such as the <a href="https://www.philschmid.de/context-engineering">Context Engineer</a>, someone who specializes in providing the right context for models to operate effectively.</p>
+
 
