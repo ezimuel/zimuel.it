@@ -25,7 +25,7 @@ We can indicate the probability as a function with the letter P, as follows:
 <li>P(roll = 3) = 1/6</li>
 <li>P(roll is even) = P(roll = {2, 4, 6}) = 3/6 = 1/2</li>
 </ul>
-<p>From this example, we can define the probability as the number of possible events over the number of total events.</p>
+<p>From this example, we can define the probability as the number of favorable outcomes over the number of total possible outcomes.</p>
 <p>The probability can be also expressed using percentage, for example P(roll is even) = 50% that means we expect half of the rolls to be even (in a long running).</p>
 
 <p>
@@ -58,7 +58,7 @@ We can indicate the probability as a function with the letter P, as follows:
 </ul>
 </p>
 <p>The most probable token is “eating”, but the model can also generate “playing” or “sleeping” with lower probabilities. Typically, LLMs use the top-p sampling algorithm, which selects tokens from the smallest set whose cumulative probability is at least p.
-In our example, if p = 0.9, the smallest set of tokens is { “eating”, “playing”, “sleeping” }, since their combined probability reaches 0.9. This means the model may choose any of these three tokens.
+In our example, if p = 0.9, the smallest set of tokens is { “eating”: 0.65, “playing”: 0.15, “sleeping”: 0.1 }, since their combined probability reaches 0.9. This means the model may choose any of these three tokens.
 </p>
 <p>To generate a complete output, the algorithm repeatedly takes the generated text as input and continues producing tokens until it reaches a predefined length or meets a stopping criterion.</p>
 
